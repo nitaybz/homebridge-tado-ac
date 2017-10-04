@@ -872,7 +872,7 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                                 || (accessory.lastMode.last.setting.mode == "COOL" && accessory.coolMode.swings)
                                 || (accessory.lastMode.last.setting.mode == "AUTO" && accessory.autoMode.swings)){
                                     accessory.log("setFunctions: " + JSON.stringify(accessory.setFunctions[i]))
-                                    accessory.log:("state: " + accessory.setFunctions[i].state)
+                                    accessory.log("state: " + accessory.setFunctions[i].state)
                                     accessory.lastMode.last.setting.swing = accessory.setFunctions[i].state
                                 }
                                 break;
@@ -881,7 +881,7 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                                 || (accessory.lastMode.last.setting.mode == "COOL" && accessory.coolMode.fanSpeeds && checkIfModeExists(accessory.coolMode.fanSpeeds, state))
                                 || (accessory.lastMode.last.setting.mode == "AUTO" && accessory.autoMode.fanSpeeds && checkIfModeExists(accessory.autoMode.fanSpeeds, state))){
                                     accessory.log("setFunctions: " + JSON.stringify(accessory.setFunctions[i]))
-                                    accessory.log:("state: " + accessory.setFunctions[i].state)
+                                    accessory.log("state: " + accessory.setFunctions[i].state)
                                     accessory.lastMode.last.setting.fanSpeed = accessory.setFunctions[i].state
                                 }
                                 break;
