@@ -805,9 +805,9 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
     var overlayReady = {}
     var turnOff = false;
     //accessory.log("Setting new overlay");
-    var checkIfModeExists = function(fanSpeedsArray){
+    var checkIfModeExists = function(fanSpeedsArray, speed){
         for(i=0;i<fanSpeedsArray.length;i++){
-            if (fanSpeedsArray[i] == state){
+            if (fanSpeedsArray[i] == speed){
                 return true
             }
         } return false
@@ -871,13 +871,17 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                                 if ((accessory.lastMode.last.setting.mode == "HEAT" && accessory.heatMode.swings)
                                 || (accessory.lastMode.last.setting.mode == "COOL" && accessory.coolMode.swings)
                                 || (accessory.lastMode.last.setting.mode == "AUTO" && accessory.autoMode.swings)){
+                                    accessory.log("setFunctions: " + JSON.stringify(accessory.setFunctions[i]))
+                                    accessory.log:("state: " + accessory.setFunctions[i].state)
                                     accessory.lastMode.last.setting.swing = accessory.setFunctions[i].state
                                 }
                                 break;
                             case "rotationSpeed":
-                                if ((accessory.lastMode.last.setting.mode == "HEAT" && accessory.heatMode.fanSpeeds && checkIfModeExists(accessory.heatMode.fanSpeeds))
-                                || (accessory.lastMode.last.setting.mode == "COOL" && accessory.coolMode.fanSpeeds && checkIfModeExists(accessory.heatMode.fanSpeeds))
-                                || (accessory.lastMode.last.setting.mode == "AUTO" && accessory.autoMode.fanSpeeds && checkIfModeExists(accessory.heatMode.fanSpeeds))){
+                                if ((accessory.lastMode.last.setting.mode == "HEAT" && accessory.heatMode.fanSpeeds && checkIfModeExists(accessory.heatMode.fanSpeeds, state))
+                                || (accessory.lastMode.last.setting.mode == "COOL" && accessory.coolMode.fanSpeeds && checkIfModeExists(accessory.coolMode.fanSpeeds, state))
+                                || (accessory.lastMode.last.setting.mode == "AUTO" && accessory.autoMode.fanSpeeds && checkIfModeExists(accessory.autoMode.fanSpeeds, state))){
+                                    accessory.log("setFunctions: " + JSON.stringify(accessory.setFunctions[i]))
+                                    accessory.log:("state: " + accessory.setFunctions[i].state)
                                     accessory.lastMode.last.setting.fanSpeed = accessory.setFunctions[i].state
                                 }
                                 break;
@@ -1136,8 +1140,8 @@ TadoAccessory.prototype.setRotationSpeed = function(speed, callback) {
     }
 
     if ((this.lastMode.last.setting.mode == "HEAT" && this.heatMode.fanSpeeds && checkIfModeExists(this.heatMode.fanSpeeds))
-    || (this.lastMode.last.setting.mode == "COOL" && this.coolMode.fanSpeeds && checkIfModeExists(this.heatMode.fanSpeeds))
-    || (this.lastMode.last.setting.mode == "AUTO" && this.autoMode.fanSpeeds && checkIfModeExists(this.heatMode.fanSpeeds))){
+    || (this.lastMode.last.setting.mode == "COOL" && this.coolMode.fanSpeeds && checkIfModeExists(this.coolMode.fanSpeeds))
+    || (this.lastMode.last.setting.mode == "AUTO" && this.autoMode.fanSpeeds && checkIfModeExists(this.autoMode.fanSpeeds))){
         this.lastMode.last.setting.fanSpeed = state
         this.log("Setting " + this.zoneName + " AC Rotation Speed to " + state)
         this._setOverlay(this.lastMode.last, "rotationSpeed", state)
