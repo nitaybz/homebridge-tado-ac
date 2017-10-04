@@ -1,7 +1,6 @@
 var Service, Characteristic;
 var async = require("async"),
-    https = require('https'),
-    assign = require('object-assign');
+    https = require('https');
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
