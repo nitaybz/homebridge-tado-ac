@@ -1,0 +1,32 @@
+{
+  "name": "homebridge-tado-ac",
+  "version": "2.0.0",
+  "description": "Tado Smart AC Control plugin for homebridge: https://github.com/nfarina/homebridge",
+  "license": "MIT",
+  "keywords": [
+    "homebridge-plugin",
+    "tado"
+  ],
+  "engines": {
+    "node": ">=0.12.0",
+    "homebridge": ">=0.2.0"
+  },
+  "author": "nitaybz",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nitaybz/homebridge-tado-ac.git"
+  },
+  "dependencies": {
+    "object-assign": "^4.0.1",
+    "node-persist": "0.0.8",
+    "async": "*"
+  },
+  "bugs": {
+    "url": "https://github.com/nitaybz/homebridge-tado-ac/issues"
+  },
+  "homepage": "https://github.com/nitaybz/homebridge-tado-ac#readme",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
