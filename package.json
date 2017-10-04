@@ -17,7 +17,6 @@
     "url": "git://github.com/nitaybz/homebridge-tado-ac.git"
   },
   "dependencies": {
-    "object-assign": "^4.0.1",
     "node-persist": "0.0.8",
     "async": "*"
   },
