@@ -24,7 +24,7 @@ This version is a whole new build that brings a lot more options to controling y
     - Temperature Unit
     - Swing
     - Rotation Speeds
-7. Humidity sensor as a different accessory since 
+7. Humidity sensor as a seperated accessory 
 8. Much faster status update - makes the accessories load much faster in Home app
 9. Easy config - Only username and password are required now to enjoy all features.
 
