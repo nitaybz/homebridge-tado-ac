@@ -5,7 +5,7 @@ Homebridge Plugin for Tado Smart AC Control.
 
 Complies with ```Service.HeaterCooler```
 
-Compatible with **iOS 11 and above** -  iOS 10 Home app does not support this service.
+Compatible with ***iOS 11 and above*** -  iOS 10 Home app does not support this service.
 
 ### Whats New in Version 2 ??
 
@@ -14,16 +14,16 @@ This version is a whole new build that brings a lot more options to controling y
 1. Homebridge plugin turned into platform to support 1 eco-system.
 2. Device auto detection - the plugin automatically detects and add any Tado AC device.
 3. HomeKit Air Conditiner Support.
-4. Support for *Swing* and *Rotation Speed* of the air conditioner
+4. Support for ***Swing*** and ***Rotation Speed*** of the air conditioner
 5. Fan Support - as different accessory. 
 6. Auto configuration - The plugin detects the capabilities of your AC (set by Tado) and set them up accordingly in Homekit: 
-  - Zone Id
-  - Home Id 
-  - Min/Max Temperature
-  - Modes (AUTO/COOL/HEAT/FAN)
-  - Temperature Unit
-  - Swing
-  - Rotation Speeds
+    - Zone Id
+    - Home Id 
+    - Min/Max Temperature
+    - Modes (AUTO/COOL/HEAT/FAN)
+    - Temperature Unit
+    - Swing
+    - Rotation Speeds
 7. Humidity sensor as a different accessory since 
 8. Much faster status update - makes the accessories load much faster in Home app
 9. Easy config - Only username and password are required now to enjoy all features.
