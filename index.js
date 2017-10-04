@@ -431,16 +431,14 @@ TadoAccessory.prototype.getServices = function() {
     
     if (this.useFanSpeed){
         if (this.autoFanExists){
-            this.minimumValue = 0;
             this.steps = 100 / (this.maxSpeed - 1)
         } else {
             this.steps = 100 / (this.maxSpeed)
-            this.minimumValue = 0;
         }
-
+        this.steps = this.steps.toFixed(2)
         this.HeaterCoolerService.getCharacteristic(Characteristic.RotationSpeed)
             .setProps({
-                    minValue: this.minimumValue,
+                    minValue: 0,
                     maxValue: 100,
                     minStep: this.steps
                 })
@@ -489,6 +487,7 @@ TadoAccessory.prototype.getServices = function() {
                 } else {
                     this.fanSteps = 100 / (this.fanMode.fanSpeeds.length)
                 }
+                this.fanSteps = this.fanSteps.toFixed(2)
                 
                 this.FanService.getCharacteristic(Characteristic.RotationSpeed)
                     .setProps({
@@ -703,13 +702,13 @@ TadoAccessory.prototype.getRotationSpeed = function(callback) {
     var returnfanSpeedValue = function(speedsArray, fanSpeed){
         switch (fanSpeed){
             case "AUTO":
-                return accessory.steps*2;
+                return (accessory.steps*2);
                 break;
             case "HIGH":
                 return 100;
                 break;
             case "MIDDLE":
-                return accessory.steps*2;
+                return (accessory.steps*2);
                 break;
             case "LOW":
                 return accessory.steps;
@@ -766,13 +765,13 @@ TadoAccessory.prototype.getFanRotationSpeed = function(callback) {
     var returnfanSpeedValue = function(speedsArray, fanSpeed){
         switch (fanSpeed){
             case "AUTO":
-                return accessory.fanSteps*2;
+                return (accessory.fanSteps*2);
                 break;
             case "HIGH":
                 return 100;
                 break;
             case "MIDDLE":
-                return accessory.fanSteps*2;
+                return (accessory.fanSteps*2);
                 break;
             case "LOW":
                 return accessory.fanSteps;
@@ -782,7 +781,7 @@ TadoAccessory.prototype.getFanRotationSpeed = function(callback) {
 
     accessory._getCurrentStateResponse(function(err, data) {
         if (data.setting.power == "ON" && data.setting.mode == "FAN" && accessory.fanMode.fanSpeeds){
-                callback(null, returnfanSpeedValue(accessory.fanMode.fanSpeeds, data.setting.fanSpeed))
+            callback(null, returnfanSpeedValue(accessory.fanMode.fanSpeeds, data.setting.fanSpeed))
         } else callback(null, null)
     })
 }
@@ -806,8 +805,8 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
     var turnOff = false;
     //accessory.log("Setting new overlay");
     var checkIfModeExists = function(fanSpeedsArray, speed){
-        for(i=0;i<fanSpeedsArray.length;i++){
-            if (fanSpeedsArray[i] == speed){
+        for(l=0;l<fanSpeedsArray.length;l++){
+            if (fanSpeedsArray[l] == speed){
                 return true
             }
         } return false
@@ -815,7 +814,7 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
 
     accessory.setFunctions.push({"overlay": overlay, "name": functionName, "state": state})
     if (!accessory.setProcessing) {
-        //self.log("Setting status from " + self.zoneName)
+        //self.log("Getting status from " + self.zoneName)
         accessory.setProcessing = true;
         setTimeout(function(){
             if (accessory.setFunctions.length == 1){
@@ -827,16 +826,16 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                     
                 } else turnOff = true
             } else {
-                for (i=0;i<accessory.setFunctions.length;i++){
-                    if (accessory.setFunctions[i].overlay !== null){
-                        switch (accessory.setFunctions[i].name){
+                for (j=0;j<accessory.setFunctions.length;j++){
+                    if (accessory.setFunctions[j].overlay !== null){
+                        switch (accessory.setFunctions[j].name){
                             case "active":
-                                if (accessory.setFunctions[i].overlay.setting.power == "OFF"){
+                                if (accessory.setFunctions[j].overlay.setting.power == "OFF"){
                                     turnOff = true
                                 }
                                 break;
                             case "mode":
-                            accessory.lastMode.last = accessory.setFunctions[i].overlay
+                            accessory.lastMode.last = accessory.setFunctions[j].overlay
                                 
                                 break;
                         }
@@ -1010,7 +1009,7 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
 
             
 
-        }, 1000)
+        }, 500)
     }
 
     
@@ -1115,14 +1114,14 @@ TadoAccessory.prototype.setSwing = function(state, callback) {
 
 TadoAccessory.prototype.setRotationSpeed = function(speed, callback) { 
     var state;
-    switch (speed){
+    switch (Math.round(speed)){
         case 100:
             state = "HIGH";
             break;
-        case (this.steps*2):
+        case Math.round(this.steps*2):
             state = "MIDDLE";
             break;
-        case this.steps:
+        case Math.round(this.steps):
             state = "LOW";
             break;
     }
@@ -1235,7 +1234,7 @@ TadoAccessory.prototype._setFanOverlay = function(overlay, functionName, state) 
             https.request(options, null).end(overlayReady);  
             accessory.setFanProcessing = false;
             accessory.setFanFunctions = []
-        }, 1000)
+        }, 500)
     }
 
     
@@ -1265,14 +1264,14 @@ TadoAccessory.prototype.setFanSwing = function(state, callback) {
 
 TadoAccessory.prototype.setFanRotationSpeed = function(speed, callback) {
     var state;
-    switch (speed){
+    switch (Math.round(speed)){
         case 100:
             state = "HIGH";
             break;
-        case (this.fanSteps*2):
+        case Math.round(this.fanSteps*2):
             state = "MIDDLE";
             break;
-        case this.fanSteps:
+        case Math.round(this.fanSteps):
             state = "LOW";
             break;
     }
