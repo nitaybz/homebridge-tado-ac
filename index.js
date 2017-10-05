@@ -842,24 +842,28 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                         switch (accessory.setFunctions[i].name){
                             case "coolTemp":
                                 if (accessory.lastMode.last.setting.mode == "COOL"){
-                                    if (accessory.useFahrenheit){
-                                        accessory.lastMode.cool.setting.temperature.fahrenheit = accessory.setFunctions[i].state
-                                        accessory.lastMode.last.setting.temperature.fahrenheit = accessory.setFunctions[i].state
-                                    } else {
-                                        accessory.lastMode.cool.setting.temperature.celsius = accessory.setFunctions[i].state
-                                        accessory.lastMode.last.setting.temperature.celsius = accessory.setFunctions[i].state
-                                    }
+                                    accessory.lastMode.cool.setting.temperature.celsius = accessory.setFunctions[i].state
+                                    accessory.lastMode.last.setting.temperature.celsius = accessory.setFunctions[i].state
+                                    // if (accessory.useFahrenheit){
+                                    //     accessory.lastMode.cool.setting.temperature.fahrenheit = accessory.setFunctions[i].state
+                                    //     accessory.lastMode.last.setting.temperature.fahrenheit = accessory.setFunctions[i].state
+                                    // } else {
+                                    //     accessory.lastMode.cool.setting.temperature.celsius = accessory.setFunctions[i].state
+                                    //     accessory.lastMode.last.setting.temperature.celsius = accessory.setFunctions[i].state
+                                    // }
                                 }
                                 break;
                             case "heatTemp":
                                 if (accessory.lastMode.last.setting.mode == "HEAT"){
-                                    if (accessory.useFahrenheit){
-                                        accessory.lastMode.heat.setting.temperature.fahrenheit = accessory.setFunctions[i].state
-                                        accessory.lastMode.last.setting.temperature.fahrenheit = accessory.setFunctions[i].state
-                                    } else {
-                                        accessory.lastMode.heat.setting.temperature.celsius = accessory.setFunctions[i].state
-                                        accessory.lastMode.last.setting.temperature.celsius = accessory.setFunctions[i].state
-                                    }
+                                    accessory.lastMode.heat.setting.temperature.celsius = accessory.setFunctions[i].state
+                                    accessory.lastMode.last.setting.temperature.celsius = accessory.setFunctions[i].state
+                                    // if (accessory.useFahrenheit){
+                                    //     accessory.lastMode.heat.setting.temperature.fahrenheit = accessory.setFunctions[i].state
+                                    //     accessory.lastMode.last.setting.temperature.fahrenheit = accessory.setFunctions[i].state
+                                    // } else {
+                                    //     accessory.lastMode.heat.setting.temperature.celsius = accessory.setFunctions[i].state
+                                    //     accessory.lastMode.last.setting.temperature.celsius = accessory.setFunctions[i].state
+                                    // }
                                 }
                                 break;
                             case "swing":
