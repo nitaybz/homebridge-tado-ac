@@ -66,8 +66,9 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
 
 ## Troubleshooting
 
+- Auto mode in the home app will show average temperature according to your maximum and minimum temperature, but because Tado app does not suport temperature for Auto mode, changing the temperature will not change anything in Tado.
+
+- Rotation speed support every speed but not Auto speed since there is no option for that in homekit - therefor when rotation speed is set to Auto through Tado app it will just show middle-high speed in home app.
+
 I tried my best to make this version flawless, but expect some issues since each user has his own different setup.
 Once a new issue is noticed, please submit to [Issues](https://github.com/nitaybz/homebridge-tado-ac/issues)
-
-There might be an issue with Farenheit Temperature Unit - Let me know if it needs to be fixed
-
