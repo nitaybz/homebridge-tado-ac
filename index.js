@@ -299,7 +299,8 @@ function TadoAccessory(log, config) {
             "temperature": {}
         }
     };
-    lastCoolOverlay.setting.temperature.celsius = this.coolMidValue
+    if (this.useFahrenheit) { lastCoolOverlay.setting.temperature.fahrenheit = Math.round(this.coolMidValue * 1.8 + 32);
+    } else { lastCoolOverlay.setting.temperature.celsius = this.coolMidValue }
     if (this.coolMode.fanSpeeds) { lastCoolOverlay.setting.fanSpeed = this.coolMode.fanSpeeds[1] }
     if (this.coolMode.swings) { lastCoolOverlay.setting.swing = "OFF" }
 
@@ -315,7 +316,8 @@ function TadoAccessory(log, config) {
             "temperature": {}
         }
     };
-    lastHeatOverlay.setting.temperature.celsius = this.heatMidValue
+    if (this.useFahrenheit) { lastHeatOverlay.setting.temperature.fahrenheit = Math.round(this.heatMidValue * 1.8 + 32);
+    } else { lastHeatOverlay.setting.temperature.celsius = this.heatMidValue }
     if (this.heatMode.fanSpeeds) { lastHeatOverlay.setting.fanSpeed = this.heatMode.fanSpeeds[1] }
     if (this.heatMode.swings) { lastHeatOverlay.setting.swing = "OFF" }
 
@@ -842,28 +844,24 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                         switch (accessory.setFunctions[i].name){
                             case "coolTemp":
                                 if (accessory.lastMode.last.setting.mode == "COOL"){
-                                    accessory.lastMode.cool.setting.temperature.celsius = accessory.setFunctions[i].state
-                                    accessory.lastMode.last.setting.temperature.celsius = accessory.setFunctions[i].state
-                                    // if (accessory.useFahrenheit){
-                                    //     accessory.lastMode.cool.setting.temperature.fahrenheit = accessory.setFunctions[i].state
-                                    //     accessory.lastMode.last.setting.temperature.fahrenheit = accessory.setFunctions[i].state
-                                    // } else {
-                                    //     accessory.lastMode.cool.setting.temperature.celsius = accessory.setFunctions[i].state
-                                    //     accessory.lastMode.last.setting.temperature.celsius = accessory.setFunctions[i].state
-                                    // }
+                                    if (accessory.useFahrenheit){
+                                        accessory.lastMode.cool.setting.temperature.fahrenheit = Math.round(accessory.setFunctions[i].state*9/5+32)
+                                        accessory.lastMode.last.setting.temperature.fahrenheit = Math.round(accessory.setFunctions[i].state*9/5+32)
+                                    } else {
+                                        accessory.lastMode.cool.setting.temperature.celsius = accessory.setFunctions[i].state
+                                        accessory.lastMode.last.setting.temperature.celsius = accessory.setFunctions[i].state
+                                    }
                                 }
                                 break;
                             case "heatTemp":
                                 if (accessory.lastMode.last.setting.mode == "HEAT"){
-                                    accessory.lastMode.heat.setting.temperature.celsius = accessory.setFunctions[i].state
-                                    accessory.lastMode.last.setting.temperature.celsius = accessory.setFunctions[i].state
-                                    // if (accessory.useFahrenheit){
-                                    //     accessory.lastMode.heat.setting.temperature.fahrenheit = accessory.setFunctions[i].state
-                                    //     accessory.lastMode.last.setting.temperature.fahrenheit = accessory.setFunctions[i].state
-                                    // } else {
-                                    //     accessory.lastMode.heat.setting.temperature.celsius = accessory.setFunctions[i].state
-                                    //     accessory.lastMode.last.setting.temperature.celsius = accessory.setFunctions[i].state
-                                    // }
+                                    if (accessory.useFahrenheit){
+                                        accessory.lastMode.heat.setting.temperature.fahrenheit = Math.round(accessory.setFunctions[i].state*9/5+32)
+                                        accessory.lastMode.last.setting.temperature.fahrenheit = Math.round(accessory.setFunctions[i].state*9/5+32)
+                                    } else {
+                                        accessory.lastMode.heat.setting.temperature.celsius = accessory.setFunctions[i].state
+                                        accessory.lastMode.last.setting.temperature.celsius = accessory.setFunctions[i].state
+                                    }
                                 }
                                 break;
                             case "swing":
@@ -902,7 +900,11 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                         accessory.lastMode.cool = accessory.lastMode.last
                         accessory.HeaterCoolerService.getCharacteristic(Characteristic.TargetHeaterCoolerState).updateValue(Characteristic.TargetHeaterCoolerState.COOL);
                         accessory.HeaterCoolerService.getCharacteristic(Characteristic.CurrentHeaterCoolerState).updateValue(Characteristic.CurrentHeaterCoolerState.COOLING);
-                        accessory.HeaterCoolerService.getCharacteristic(Characteristic.CoolingThresholdTemperature).updateValue(overlayReady.setting.temperature.celsius)
+                        if (accessory.useFahrenheit){
+                            accessory.HeaterCoolerService.getCharacteristic(Characteristic.CoolingThresholdTemperature).updateValue(Math.round((overlayReady.setting.temperature.fahrenheit - 32) * 5 / 9));
+                        } else {
+                            accessory.HeaterCoolerService.getCharacteristic(Characteristic.CoolingThresholdTemperature).updateValue(overlayReady.setting.temperature.celsius);
+                        }
                         if (overlayReady.setting.swing){
                             accessory.HeaterCoolerService.getCharacteristic(Characteristic.SwingMode).updateValue(overlayReady.setting.swing == "OFF" ? Characteristic.SwingMode.SWING_DISABLED : Characteristic.SwingMode.SWING_ENABLED);
                         }
@@ -930,7 +932,11 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                         accessory.lastMode.heat = accessory.lastMode.last
                         accessory.HeaterCoolerService.getCharacteristic(Characteristic.TargetHeaterCoolerState).updateValue(Characteristic.TargetHeaterCoolerState.HEAT);
                         accessory.HeaterCoolerService.getCharacteristic(Characteristic.CurrentHeaterCoolerState).updateValue(Characteristic.CurrentHeaterCoolerState.HEATING);
-                        accessory.HeaterCoolerService.getCharacteristic(Characteristic.HeatingThresholdTemperature).updateValue(overlayReady.setting.temperature.celsius);
+                        if (accessory.useFahrenheit){
+                            accessory.HeaterCoolerService.getCharacteristic(Characteristic.HeatingThresholdTemperature).updateValue(overlayReady.setting.temperature.fahrenheit);
+                        } else {
+                            accessory.HeaterCoolerService.getCharacteristic(Characteristic.HeatingThresholdTemperature).updateValue(overlayReady.setting.temperature.celsius);
+                        }
                         if (overlayReady.setting.swing){
                             accessory.HeaterCoolerService.getCharacteristic(Characteristic.SwingMode).updateValue(overlayReady.setting.swing == "OFF" ? Characteristic.SwingMode.SWING_DISABLED : Characteristic.SwingMode.SWING_ENABLED);
                         }
@@ -993,7 +999,7 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
             }
             if (overlayReady != null) {
                 overlayReady = JSON.stringify(overlayReady);
-                // accessory.log("zone: " + accessory.zone + ",  body: " + overlayReady);
+                //accessory.log("zone: " + accessory.zone + ",  body: " + overlayReady);
             }
             https.request(options, null).end(overlayReady);  
             accessory.setProcessing = false;
@@ -1055,16 +1061,14 @@ TadoAccessory.prototype.setTargetHeaterCoolerState = function(state, callback) {
 TadoAccessory.prototype.setCoolingThresholdTemperature = function(temp, callback) {
     
     if (this.lastMode.last.setting.mode == "COOL"){
-        this.lastMode.cool.setting.temperature.celsius = temp
-        this.lastMode.last.setting.temperature.celsius = temp
         if (this.useFahrenheit){
-            this.log("Setting " + this.zoneName + " AC Target Temperature to " + parseInt(temp * 1.8 + 32))
-            // this.lastMode.cool.setting.temperature.fahrenheit = temp
-            // this.lastMode.last.setting.temperature.fahrenheit = temp
+            this.lastMode.cool.setting.temperature.fahrenheit = Math.round(temp*9/5+32)
+            this.lastMode.last.setting.temperature.fahrenheit = Math.round(temp*9/5+32)
+            this.log("Setting " + this.zoneName + " AC Target Temperature to " + Math.round(temp*9/5+32))
         } else {
+            this.lastMode.cool.setting.temperature.celsius = temp
+            this.lastMode.last.setting.temperature.celsius = temp
             this.log("Setting " + this.zoneName + " AC Target Temperature to " + temp)
-            // this.lastMode.cool.setting.temperature.celsius = temp
-            // this.lastMode.last.setting.temperature.celsius = temp
         }
         
         this._setOverlay(this.lastMode.last, "coolTemp", temp)
@@ -1078,17 +1082,16 @@ TadoAccessory.prototype.setCoolingThresholdTemperature = function(temp, callback
 TadoAccessory.prototype.setHeatingThresholdTemperature = function(temp, callback) {
     
     if (this.lastMode.last.setting.mode == "HEAT"){
-        this.lastMode.heat.setting.temperature.celsius = temp
-        this.lastMode.last.setting.temperature.celsius = temp
         if (this.useFahrenheit){
-            this.log("Setting " + this.zoneName + " AC Target Temperature to " + parseInt(temp * 1.8 + 32))
-            // this.lastMode.heat.setting.temperature.fahrenheit = temp
-            // this.lastMode.last.setting.temperature.fahrenheit = temp
+            this.lastMode.heat.setting.temperature.fahrenheit = Math.round(temp*9/5+32)
+            this.lastMode.last.setting.temperature.fahrenheit = Math.round(temp*9/5+32)
+            this.log("Setting " + this.zoneName + " AC Target Temperature to " + Math.round(temp*9/5+32))
         } else {
+            this.lastMode.heat.setting.temperature.celsius = temp
+            this.lastMode.last.setting.temperature.celsius = temp
             this.log("Setting " + this.zoneName + " AC Target Temperature to " + temp)
-            // this.lastMode.heat.setting.temperature.celsius = temp
-            // this.lastMode.last.setting.temperature.celsius = temp
         }
+        
         this._setOverlay(this.lastMode.last, "heatTemp", temp)
     } else {
         this._setOverlay(null, "heatTemp", temp)
