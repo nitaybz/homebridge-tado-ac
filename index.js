@@ -887,11 +887,12 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                 accessory.log("Turning OFF " + accessory.zoneName + " AC")
                 accessory.HeaterCoolerService.getCharacteristic(Characteristic.CurrentHeaterCoolerState).updateValue(Characteristic.CurrentHeaterCoolerState.INACTIVE);
                 accessory.HeaterCoolerService.getCharacteristic(Characteristic.Active).updateValue(Characteristic.Active.INACTIVE);
-                accessory.FanService.getCharacteristic(Characteristic.Active).updateValue(Characteristic.Active.INACTIVE);
+                if (accessory.fanMode){accessory.FanService.getCharacteristic(Characteristic.Active).updateValue(Characteristic.Active.INACTIVE)}
                 overlayReady = accessory.offOverlay;
             } else {
+                if (accessory.fanMode){accessory.FanService.getCharacteristic(Characteristic.Active).updateValue(Characteristic.Active.INACTIVE)}
                 accessory.HeaterCoolerService.getCharacteristic(Characteristic.Active).updateValue(Characteristic.Active.ACTIVE);
-                accessory.FanService.getCharacteristic(Characteristic.Active).updateValue(Characteristic.Active.INACTIVE);
+                
                 switch (overlayReady.setting.mode){
                     case "COOL":
                         accessory.lastMode.cool = accessory.lastMode.last
