@@ -15,21 +15,21 @@ This version is a whole new build that brings a lot more options to controling y
 2. Device auto detection - the plugin automatically detects and add any Tado AC device.
 3. HomeKit Air Conditiner Support.
 4. Support for ***Swing*** and ***Rotation Speed*** of the air conditioner
-5. Fan Support - as different accessory. 
-6. Auto configuration - The plugin detects the capabilities of your AC (set by Tado) and set them up accordingly in Homekit: 
+5. Fan Support - as different accessory.
+6. Auto configuration - The plugin detects the capabilities of your AC (set by Tado) and set them up accordingly in Homekit:
     - Zone Id
-    - Home Id 
+    - Home Id
     - Min/Max Temperature
     - Modes (AUTO/COOL/HEAT/FAN)
     - Temperature Unit
     - Swing
     - Rotation Speeds
-7. Humidity sensor as a seperated accessory 
+7. Humidity sensor as a seperated accessory
 8. Much faster status update - makes the accessories load much faster in Home app
 9. Easy config - Only username and password are required now to enjoy all features.
 
 This version does not support manual configuration other than the *TadoMode*.
-To use old version feel free to install from [GitHub](https://github.com/nitaybz/homebridge-tado-ac-old): 
+To use old version feel free to install from [GitHub](https://github.com/nitaybz/homebridge-tado-ac-old):
 `sudo npm install -g https://github.com/nitaybz/homebridge-tado-ac-old.git`
 
 ## Installation
@@ -47,7 +47,7 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
     {
         "platform": "TadoAC",
         "name": "Tado AC",
-        "username": user@name.com",
+        "username": "user@name.com",
         "password": "*************",
         "tadoMode": "MANUAL"
     }
