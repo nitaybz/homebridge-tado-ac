@@ -13,7 +13,7 @@ This version is a whole new build that brings a lot more options to controling y
 
 1. Homebridge plugin turned into platform to support 1 eco-system.
 2. Device auto detection - the plugin automatically detects and add any Tado AC device.
-3. HomeKit Air Conditiner Support.
+3. HomeKit Air Conditioner Support.
 4. Support for ***Swing*** and ***Rotation Speed*** of the air conditioner
 5. Fan Support - as different accessory.
 6. Auto configuration - The plugin detects the capabilities of your AC (set by Tado) and set them up accordingly in Homekit:
