@@ -11,12 +11,16 @@
     {
         "platform": "TadoAC",
         "name": "Tado AC",
-        "username": "****@****.com",
+        "username": "user@name.com",
         "password": "*************",
-        "tadoMode": "MANUAL"
+        "tadoMode": "MANUAL",
+        "weatherSensorsEnabled": true,
+        "weatherPollingInterval": 10,
+        "occupancySensorsEnabled": true,
+        "occupancyPollingInterval": 10
     }
-],
+  ],
 
-"accessories": [ 
- ]
+  "accessories": [ 
+  ]
 }

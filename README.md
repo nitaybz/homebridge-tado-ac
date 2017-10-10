@@ -1,4 +1,8 @@
-homebridge-tado-ac (V2)
+
+
+NOTE: Version 2.1 adds support for **Occupancy Sensors &  Weather Sensors** - see more details below
+______________
+homebridge-tado-ac (v2.1)
 ========================
 
 Homebridge Plugin for Tado Smart AC Control.
@@ -9,11 +13,11 @@ Compatible with ***iOS 11 and above*** -  iOS 10 Home app does not support this 
 
 ### Whats New in Version 2 ??
 
-This version is a whole new build that brings a lot more options to controling your Air Conditiner with Homekit:
+This version is a whole new build that brings a lot more options to control your air conditiner with Homekit:
 
 1. Homebridge plugin turned into platform to support 1 eco-system.
-2. Device auto detection - the plugin automatically detects and add any Tado AC device.
-3. HomeKit Air Conditioner Support.
+2. Device auto detection - the plugin automatically detects and adds any Tado AC device.
+3. HomeKit air conditioner support.
 4. Support for ***Swing*** and ***Rotation Speed*** of the air conditioner
 5. Fan Support - as different accessory.
 6. Auto configuration - The plugin detects the capabilities of your AC (set by Tado) and set them up accordingly in Homekit:
@@ -28,7 +32,14 @@ This version is a whole new build that brings a lot more options to controling y
 8. Much faster status update - makes the accessories load much faster in Home app
 9. Easy config - Only username and password are required now to enjoy all features.
 
-This version does not support manual configuration other than the *TadoMode*.
+**from version 2.1:**
+
+10. Outside Temperature support
+11. Solar Intensity support
+12. Occupancy Sensors.
+
+
+This version does not support lower version then iOS 11,
 To use old version feel free to install from [GitHub](https://github.com/nitaybz/homebridge-tado-ac-old):
 `sudo npm install -g https://github.com/nitaybz/homebridge-tado-ac-old.git`
 
@@ -42,6 +53,18 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
 
 ## Config file
 
+#### Easy config:
+```
+"platforms": [
+    {
+        "platform": "TadoAC",
+        "username": "user@name.com",
+        "password": "*************"
+    }
+]
+```
+
+#### Advanced config:
 ```
 "platforms": [
     {
@@ -49,11 +72,16 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
         "name": "Tado AC",
         "username": "user@name.com",
         "password": "*************",
-        "tadoMode": "MANUAL"
+        "tadoMode": "MANUAL",
+        "weatherSensorsEnabled": true,
+        "weatherPollingInterval": 10,
+        "occupancySensorsEnabled": true,
+        "occupancyPollingInterval": 10
     }
 ]
 ```
-## Configuration
+
+## Configurations
 
 |             Parameter            |                       Description                       | Required |  Default  |
 | -------------------------------- | ------------------------------------------------------- |:--------:|:---------:|
@@ -62,6 +90,32 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
 | `username`                       | your tado account username (something@something.com)    |     ✓    |      -    |
 | `password`                       | your tado account password                              |     ✓    |      -    |
 | `tadoMode`                       | default mode for the commands to be sent with. can be "MANUAL" for manual control until ended by the user, or "TADO_MODE" for manual control until next schedule change in tado app .          |             |  "MANUAL" |
+| `weatherSensorsEnabled`          | Enable **Outside Temperature** sensor and **Solar Intensity** light bulb.  **more details below*      |             |  false |
+| `weatherPollingInterval`         |  Time in **Minutes** to check for changes in Weather. Default is `false` for no polling.       |             |  false |
+| `occupancySensorsEnabled`        |  Enable **Occupancy Sensors**.  ***more details below*     |             |  false |
+| `occupancyPollingInterval`       |  Time in **Seconds** to check for changes in occupnacy. Default is `10` for polling every 10 seconds. *it can't be set to false!*     |             |  10 |
+
+### * Outside Temperature & Solar Intensity Sensors
+ Enabling this feature will add 2 new accessories to your home:
+
+***All data is gathered from Tado API and is related specifically to your homes.***
+
+**Outside Temperature** - Temperature sensor that will show you the temperature outside of your home area.
+
+**Solar Intensity** - Light bulb accessory that will show you the relative(%) brightness of the sun in your home area. will go off when it's dark.
+
+Those accessories are great for setting automation based on the weather condition, for example:
+- When the first person arrive, If **Outside Temperature** is lower than 18ºC, Then, Turn on the heat.
+- When **Solar Intensity** is off, Then, Turn on the Hall Lights & close Blinds.
+- When **Solar Intensity** is lower then 20%, Then, Turn on the Garden Lights.
+
+When setting automations that are based on these sensors, it's best to set a polling interval value so that the system will update Homekit for any changes in weather every X minutes. I reccomend to set it to 10 (for every 10 minutes).
+
+When there are no automations based on those sensors it's best to set it to false (or remove from config) so it would be easier on the machine. That way, the status for the sensors will be retrieved only when the app is opened
+
+### ** Occupancy Sensors
+Enabling this feature will add **Occupancy Sensors** for each user signed up to your Tado home (and enabled location services on their device).
+If not set otherwise, the system will check for the status every 10 seconds.
 
 
 ## Troubleshooting

@@ -20,13 +20,17 @@ function TadoACplatform(log, config, api) {
     this.homeID = "";
     this.temperatureUnit = ""
     this.tadoMode = config['tadoMode'] || "MANUAL";
+    this.weatherSensorsEnabled = config['weatherSensorsEnabled'] || false;
+    this.weatherPollingInterval = (config['weatherPollingInterval']*60*1000) || false;
+    this.occupancySensorsEnabled = config['occupancySensorsEnabled'] || false;
+    this.occupancyPollingInterval = (config['occupancyPollingInterval']*1000) || 10000;
     
 
 }
 
 TadoACplatform.prototype = {
     accessories: function(callback) {
-        //For each device in cfg, create an accessory!
+
         var myAccessories = []
         var self = this;
         async.waterfall([
@@ -247,6 +251,76 @@ TadoACplatform.prototype = {
                 }, function(err){
                     next()
                 })
+            },
+
+            // set Outside Temperature Sensor
+            function (next){
+                if (self.weatherSensorsEnabled){
+                    var weatherConfig = {
+                        homeID: self.homeID,
+                        username: self.username,
+                        password: self.password,
+                        temperatureUnit: self.temperatureUnit,
+                        polling: self.weatherPollingInterval
+                    }
+                    var TadoWeatherAccessory = new TadoWeather(self.log, weatherConfig)
+                    myAccessories.push(TadoWeatherAccessory);
+                }
+                next();
+            },
+
+            // set occupancy sensors
+            function (next){
+                if (self.occupancySensorsEnabled){
+                    var addUser = function(id, name, device){
+                        var occupancyConfig = {
+                            homeID: self.homeID,
+                            username: self.username,
+                            password: self.password,
+                            deviceId: id,
+                            name: name,
+                            device: device,
+                            polling: self.occupancyPollingInterval
+                        }
+                        var TadoOccupancySensor = new occupancySensor(self.log, occupancyConfig)
+                        myAccessories.push(TadoOccupancySensor);
+                    }
+
+                    var options = {
+                        host: 'my.tado.com',
+                        path: '/api/v2/homes/' + self.homeID + '/users?password=' + self.password + '&username=' + self.username,
+                        method: 'GET'
+                    };
+    
+                    https.request(options, function(response){
+                        var strData = '';
+                        response.on('data', function(chunk) {
+                            strData += chunk;
+                        });
+                        response.on('end', function() {
+                            try {
+                                var data = JSON.parse(strData);
+                                for (i=0;i<data.length;i++){
+                                    var mobileID = false;
+                                    var deviceData = {};
+                                    for (j=data[i].mobileDevices.length-1;j>=0;j--){
+                                        if (data[i].mobileDevices[j].settings.geoTrackingEnabled){
+                                            mobileID = data[i].mobileDevices[j].id;
+                                            deviceData = data[i].mobileDevices[j].deviceMetadata;
+                                        }
+                                    }
+                                    if (mobileID){
+                                        addUser(mobileID, data[i].name, deviceData)
+                                    }
+                                }
+                            }
+                            catch(e){
+                                self.log("Could not retrieve Tado Users, error:" + e);
+                            }
+                            next()
+                        });
+                    }).end();
+                } else next()
             }
 
         ],function(err, result){
@@ -254,6 +328,35 @@ TadoACplatform.prototype = {
         })
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/********************************************************************************************************************************************************/
+/********************************************************************************************************************************************************/
+/*******************************************************************      TADO AC      ******************************************************************/
+/********************************************************************************************************************************************************/
+/********************************************************************************************************************************************************/
+
+
+
+
 
 function TadoAccessory(log, config) {
     var accessory = this;
@@ -1279,4 +1382,284 @@ TadoAccessory.prototype.setFanRotationSpeed = function(speed, callback) {
     this.log("Setting " + this.zoneName + " Fan Rotation Speed to " + state)
     this._setFanOverlay(this.lastMode.fan, "fanRotationSpeed", state)
     callback()
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/********************************************************************************************************************************************************/
+/********************************************************************************************************************************************************/
+/*******************************************************************    TADO Weather   ******************************************************************/
+/********************************************************************************************************************************************************/
+/********************************************************************************************************************************************************/
+
+function TadoWeather(log, config){
+    this.log = log;
+    this.name = "Outside Temperature";
+    this.homeID = config.homeID;
+    this.username = config.username;
+    this.password = config.password;
+    this.useFahrenheit = config.temperatureUnit == "CELSIUS" ? false : true;
+    this.polling = config.polling;
+    this.options = {
+        host: 'my.tado.com',
+        path: '/api/v2/homes/' + this.homeID + '/weather?password=' + this.password + '&username=' + this.username,
+        method: 'GET'
+    };
+    this.callbacks = [];
+    this.processing = false
+
+    this.checkWeather = function(callback){
+        var self = this;
+        self.callbacks.push(callback)
+        if (!self.processing) {
+            // self.log("Getting status from " + self.name)
+            self.processing = true;
+            https.request(self.options, function(response){
+                var strData = '';
+                response.on('data', function(chunk) {
+                    strData += chunk;
+                });
+                response.on('end', function() {
+                    try {
+                        var data = JSON.parse(strData);
+                        var Solar = data.solarIntensity.percentage
+                        self.log("Solar Intensity is " + Solar + "%");
+                        
+                        
+                        if (self.useFahrenheit) {
+                            self.log("Outside Temperature is " + data.outsideTemperature.fahrenheit + "ºF");
+                            var outsideTemperature = data.outsideTemperature.fahrenheit
+                        } else {
+                            self.log("Outside Temperature is " + data.outsideTemperature.celsius + "ºC");
+                            var outsideTemperature = data.outsideTemperature.celsius
+                        }
+                        for (var i=0; i<self.callbacks.length; i++) {
+                            self.callbacks[i](null ,outsideTemperature, Solar);
+                        }
+                        self.processing = false;
+                        self.callbacks = [];
+                    }
+                    catch(e){
+                        self.log("Could not retrieve Outside Temperature, error:" + e);
+                        var error = new Error("Could not retrieve Outside Temperature, error:" + e)
+                        for (var i=0; i<self.callbacks.length; i++) {
+                            self.callbacks[i](error ,null, null);
+                        }
+                        self.processing = false;
+                        self.callbacks = [];
+                    }
+                });
+            }).end();
+        }
+    }
+
+    this.informationService = new Service.AccessoryInformation()
+        .setCharacteristic(Characteristic.Manufacturer, 'Tado GmbH')
+        .setCharacteristic(Characteristic.Model, 'Tado Weather')
+        .setCharacteristic(Characteristic.SerialNumber, 'Tado Serial Weather');
+
+    this.TemperatureSensor = new Service.TemperatureSensor(this.name);
+    
+    this.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature)
+        .on('get', this.getOutsideTemperature.bind(this));
+
+    this.SolarSensor = new Service.Lightbulb("Solar Intensity");
+
+    this.SolarSensor.getCharacteristic(Characteristic.On)
+        .on('get', this.getOn.bind(this))
+        .on('set', this.setOn.bind(this));
+
+    this.SolarSensor.getCharacteristic(Characteristic.Brightness)
+        .setProps({
+            maxValue: 100,
+            minValue: 0,
+            minStep: 0.1
+        })
+        .on('get', this.getSolar.bind(this))
+        .on('set', this.setSolar.bind(this));
+    
+
+
+    if (this.polling){
+        var self = this;
+        setInterval(function(){
+            self.checkWeather(function(err, outsideTemperature, Solar){
+                if (!err){
+                    self.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature).updateValue(outsideTemperature);
+                    self.SolarSensor.getCharacteristic(Characteristic.Brightness).updateValue(Solar);
+                    if (Solar > 0){
+                        self.SolarSensor.getCharacteristic(Characteristic.On).updateValue(true);
+                    } else {
+                        self.SolarSensor.getCharacteristic(Characteristic.On).updateValue(false);
+                    }
+                }
+            })
+        }, self.polling)
+    }
+}
+
+TadoWeather.prototype.getServices = function() {
+    return [this.TemperatureSensor, this.informationService, this.SolarSensor]
+}
+
+TadoWeather.prototype.getOutsideTemperature = function(callback) {
+    var self = this
+    this.checkWeather(function(err, outsideTemperature, Solar){
+        callback(err, outsideTemperature);
+    })
+}
+
+TadoWeather.prototype.getSolar = function(callback) {
+    var self = this
+    this.checkWeather(function(err, outsideTemperature, Solar){
+        callback(err, Solar);
+    })
+}
+
+TadoWeather.prototype.getOn = function(callback) {
+        var self = this
+        this.checkWeather(function(err, outsideTemperature, Solar){
+            if (Solar > 0){
+                callback(err, true);
+            } else {
+                callback(err, false);
+            }
+        })
+}
+
+
+TadoWeather.prototype.setSolar = function(state, callback) {
+    var self = this
+    callback();
+    this.checkWeather(function(err, outsideTemperature, Solar){
+        self.SolarSensor.getCharacteristic(Characteristic.Brightness).updateValue(Solar);
+    })
+}
+
+TadoWeather.prototype.setOn = function(state, callback) {
+        var self = this
+        callback()
+        this.checkWeather(function(err, outsideTemperature, Solar){
+            if (Solar > 0){
+                self.SolarSensor.getCharacteristic(Characteristic.On).updateValue(true);
+            } else {
+                self.SolarSensor.getCharacteristic(Characteristic.On).updateValue(false);
+            }
+        })
+}
+
+
+
+
+
+
+
+
+
+
+/********************************************************************************************************************************************************/
+/********************************************************************************************************************************************************/
+/*******************************************************************   TADO Occupancy  ******************************************************************/
+/********************************************************************************************************************************************************/
+/********************************************************************************************************************************************************/
+
+function occupancySensor(log, config){
+    this.log = log;
+    this.name = config.name;
+    this.deviceId = config.deviceId
+    this.homeID = config.homeID;
+    this.username = config.username;
+    this.password = config.password;
+    this.polling = config.polling;
+    this.device = config.device
+    this.occupied = 0;
+    this.options = {
+        host: 'my.tado.com',
+        path: '/api/v2/homes/' + this.homeID + '/mobileDevices?password=' + this.password + '&username=' + this.username,
+        method: 'GET'
+    };
+
+    this.checkOccupancy = function(){
+        var self = this;
+        https.request(self.options, function(response){
+            var strData = '';
+            response.on('data', function(chunk) {
+                strData += chunk;
+            });
+            response.on('end', function() {
+                try {
+                    var data = JSON.parse(strData);
+                    for (i=0;i<data.length;i++){
+                        if (data[i].id == self.deviceId){
+                            if (data[i].location.atHome){
+                                if (self.occupied == 0){
+                                    self.occupied = 1;
+                                    self.log(self.name + " is at Home!");
+                                    self.OccupancySensor.getCharacteristic(Characteristic.OccupancyDetected).updateValue(self.occupied);
+                                }
+                            } else {
+                                if (self.occupied == 1){
+                                    self.occupied = 0;
+                                    self.log(self.name + " is Out!");
+                                    self.OccupancySensor.getCharacteristic(Characteristic.OccupancyDetected).updateValue(self.occupied);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch(e){
+                    self.log("Could not retrieve " + self.name +  " Occupancy Status, error:" + e);
+                    var error = new Error("Could not retrieve " + self.name +  " Occupancy Status, error:" + e);
+                    callback(error , null, null);
+                }
+            });
+        }).end();
+    }
+
+    this.informationService = new Service.AccessoryInformation()
+        .setCharacteristic(Characteristic.Manufacturer, 'Tado Occupancy')
+        .setCharacteristic(Characteristic.Model, this.device.model)
+        .setCharacteristic(Characteristic.SerialNumber, this.device.platform + " " + this.device.osVersion);
+
+    this.OccupancySensor = new Service.OccupancySensor(this.name);
+    
+    this.OccupancySensor.getCharacteristic(Characteristic.OccupancyDetected)
+        .on('get', this.getStatus.bind(this));
+
+    this.checkOccupancy();
+    var self = this;
+    setInterval(function(){
+        self.checkOccupancy();
+    }, self.polling)
+}
+
+occupancySensor.prototype.getServices = function() {
+    return [this.informationService, this.OccupancySensor]
+}
+
+occupancySensor.prototype.getStatus = function(callback) {
+    if (this.occupied == 1) {
+        this.log(this.name + " is at Home!")
+    } else {
+        this.log(this.name + " is Out!")
+    }
+    callback(null, this.occupied);
 }
