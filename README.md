@@ -94,6 +94,7 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
 | `weatherPollingInterval`         |  Time in **Minutes** to check for changes in Weather. Default is `false` for no polling.       |             |  false |
 | `occupancySensorsEnabled`        |  Enable **Occupancy Sensors**.  ***more details below*     |             |  false |
 | `occupancyPollingInterval`       |  Time in **Seconds** to check for changes in occupnacy. Default is `10` for polling every 10 seconds. *it can't be set to false!*     |             |  10 |
+| `anyoneSensor`       |  Adds 1 **Occupancy Sensor** named "Anyone" to represent the state of someone at home     |             |  true |
 
 ### * Outside Temperature & Solar Intensity Sensors
  Enabling this feature will add 2 new accessories to your home:
@@ -116,6 +117,8 @@ When there are no automations based on those sensors it's best to set it to fals
 ### ** Occupancy Sensors
 Enabling this feature will add **Occupancy Sensors** for each user signed up to your Tado home (and enabled location services on their device).
 If not set otherwise, the system will check for the status every 10 seconds.
+
+**"Anyone"** Sensor will be added automatically to easily automate actions when the first person arrives home or the last person leaves. this is a better alternative to Home App Arrive/Leave automations since this will not require approval for triggering automation. to remove this accessory, set `anyoneSensor` to false
 
 
 ## Troubleshooting

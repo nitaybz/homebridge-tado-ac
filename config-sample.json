@@ -17,7 +17,8 @@
         "weatherSensorsEnabled": true,
         "weatherPollingInterval": 10,
         "occupancySensorsEnabled": true,
-        "occupancyPollingInterval": 10
+        "occupancyPollingInterval": 10,
+        "anyoneSensor": true
     }
   ],
 

@@ -24,8 +24,7 @@ function TadoACplatform(log, config, api) {
     this.weatherPollingInterval = (config['weatherPollingInterval']*60*1000) || false;
     this.occupancySensorsEnabled = config['occupancySensorsEnabled'] || false;
     this.occupancyPollingInterval = (config['occupancyPollingInterval']*1000) || 10000;
-    
-
+    this.anyoneSensor = (config['anyoneSensor']) || true;
 }
 
 TadoACplatform.prototype = {
@@ -272,6 +271,7 @@ TadoACplatform.prototype = {
             // set occupancy sensors
             function (next){
                 if (self.occupancySensorsEnabled){
+                    self.occupancySensors = [];
                     var addUser = function(id, name, device){
                         var occupancyConfig = {
                             homeID: self.homeID,
@@ -282,8 +282,9 @@ TadoACplatform.prototype = {
                             device: device,
                             polling: self.occupancyPollingInterval
                         }
-                        var TadoOccupancySensor = new occupancySensor(self.log, occupancyConfig)
+                        var TadoOccupancySensor = new occupancySensor(self.log, occupancyConfig, self)
                         myAccessories.push(TadoOccupancySensor);
+                        if (name !== "Anyone") self.occupancySensors.push(TadoOccupancySensor);
                     }
 
                     var options = {
@@ -312,6 +313,9 @@ TadoACplatform.prototype = {
                                     if (mobileID){
                                         addUser(mobileID, data[i].name, deviceData)
                                     }
+                                }
+                                if (self.occupancySensors.length > 0 && self.anyoneSensor){
+                                    addUser(11111, "Anyone", {platform: "anyone", osVersion: "1.1.1", model: "Tado"})
                                 }
                             }
                             catch(e){
@@ -1581,8 +1585,9 @@ TadoWeather.prototype.setOn = function(state, callback) {
 /********************************************************************************************************************************************************/
 /********************************************************************************************************************************************************/
 
-function occupancySensor(log, config){
+function occupancySensor(log, config, platform){
     this.log = log;
+    this.platform = platform;
     this.name = config.name;
     this.deviceId = config.deviceId
     this.homeID = config.homeID;
@@ -1634,6 +1639,22 @@ function occupancySensor(log, config){
         }).end();
     }
 
+    this.checkAnyone = function(){
+        var self = this;
+        for(var i = 0; i < self.platform.occupancySensors.length; i++){
+            var occupancySensor = self.platform.occupancySensors[i];
+            var isOccupied = occupancySensor.occupied;
+            if(isOccupied) {
+                self.occupied = 1;
+                self.OccupancySensor.getCharacteristic(Characteristic.OccupancyDetected).updateValue(self.occupied);
+                return;
+            }
+        }
+        self.occupied = 0;
+        self.OccupancySensor.getCharacteristic(Characteristic.OccupancyDetected).updateValue(self.occupied);
+        return;
+    }
+
     this.informationService = new Service.AccessoryInformation()
         .setCharacteristic(Characteristic.Manufacturer, 'Tado Occupancy')
         .setCharacteristic(Characteristic.Model, this.device.model)
@@ -1644,11 +1665,24 @@ function occupancySensor(log, config){
     this.OccupancySensor.getCharacteristic(Characteristic.OccupancyDetected)
         .on('get', this.getStatus.bind(this));
 
-    this.checkOccupancy();
-    var self = this;
-    setInterval(function(){
-        self.checkOccupancy();
-    }, self.polling)
+
+    if (this.name == "Anyone"){
+        var self = this;
+        setTimeout(function(){
+            self.checkAnyone();
+            setInterval(function(){
+                self.checkAnyone();
+            }, self.polling)
+        }, 300)
+        
+    } else {
+        this.checkOccupancy();
+        var self = this;
+        setInterval(function(){
+            self.checkOccupancy();
+        }, self.polling)
+    }
+    
 }
 
 occupancySensor.prototype.getServices = function() {
@@ -1656,10 +1690,23 @@ occupancySensor.prototype.getServices = function() {
 }
 
 occupancySensor.prototype.getStatus = function(callback) {
-    if (this.occupied == 1) {
-        this.log(this.name + " is at Home!")
+    if (this.name == "Anyone"){
+        if (this.occupied == 1) {
+            this.log("Someone is Home!")
+        } else {
+            this.log("No One is Home!")
+        }
     } else {
-        this.log(this.name + " is Out!")
+        if (this.occupied == 1) {
+            this.log(this.name + " is at Home!")
+        } else {
+            this.log(this.name + " is Out!")
+        }
     }
+    
     callback(null, this.occupied);
 }
+
+
+
+
