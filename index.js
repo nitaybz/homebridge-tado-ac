@@ -1614,7 +1614,7 @@ function occupancySensor(log, config, platform){
                     var data = JSON.parse(strData);
                     for (i=0;i<data.length;i++){
                         if (data[i].id == self.deviceId){
-                            if (data[i].location.atHome){
+                            if (data[i].location !== null && data[i].location.atHome){
                                 if (self.occupied == 0){
                                     self.occupied = 1;
                                     self.log(self.name + " is at Home!");
