@@ -77,7 +77,7 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
         "weatherPollingInterval": 10,
         "occupancySensorsEnabled": true,
         "occupancyPollingInterval": 10,
-        "anyoneSensor": true,
+        "anyoneSensor": true
     }
 ]
 ```
