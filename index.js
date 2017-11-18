@@ -20,6 +20,10 @@ function TadoACplatform(log, config, api) {
     this.homeID = "";
     this.temperatureUnit = ""
     this.tadoMode = config['tadoMode'] || "MANUAL";
+    this.durationInMinutes =  config['durationInMinutes'] || 90;
+    this.autoOnly = config['autoOnly'] || false;
+    this.maunalControl = config['maunalControl'] || false;
+    this.extraTemperatureSensor = config['extraTemperatureSensor'] || false;
     this.weatherSensorsEnabled = config['weatherSensorsEnabled'] || false;
     this.weatherPollingInterval = (config['weatherPollingInterval']*60*1000) || false;
     this.occupancySensorsEnabled = config['occupancySensorsEnabled'] || false;
@@ -57,7 +61,10 @@ TadoACplatform.prototype = {
                         }
                         next()
                     });
-                }).end();
+                }).on('error', (e) => {
+                    console.error(e);
+                    next(e)
+                  }).end();
             },
 
             // get temperatureUnit
@@ -84,7 +91,10 @@ TadoACplatform.prototype = {
                         }
                         next()
                     });
-                }).end();
+                }).on('error', (e) => {
+                    console.error(e);
+                    next(e)
+                  }).end();
             },
 
             // get Zones
@@ -113,7 +123,11 @@ TadoACplatform.prototype = {
                                         username: self.username,
                                         password: self.password,
                                         temperatureUnit: self.temperatureUnit,
-                                        tadoMode: self.tadoMode
+                                        tadoMode: self.tadoMode,
+                                        durationInMinutes: self.durationInMinutes,
+                                        autoOnly: self.autoOnly,
+                                        maunalControl: self.maunalControl,
+                                        extraTemperatureSensor: self.extraTemperatureSensor
                                     }
                                     self.log("Found new Zone: "+ tadoConfig.name + " (" + tadoConfig.id + ") ...")
                                     zonesArray.push(tadoConfig);
@@ -126,7 +140,10 @@ TadoACplatform.prototype = {
                         }
                         next(null, zonesArray)
                     });
-                }).end();
+                }).on('error', (e) => {
+                    console.error(e);
+                    next(e)
+                  }).end();
             },
 
             //get Capabilities
@@ -246,9 +263,13 @@ TadoACplatform.prototype = {
 
                             step()
                         });
-                    }).end();
+                    }).on('error', (e) => {
+                        console.error(e);
+                        step(e)
+                      }).end();
                 }, function(err){
-                    next()
+                    if (err) next(err)
+                    else next()
                 })
             },
 
@@ -328,7 +349,8 @@ TadoACplatform.prototype = {
             }
 
         ],function(err, result){
-            callback(myAccessories);
+            if (err) callback(err)
+            else callback(myAccessories);
         })
     }
 }
@@ -372,6 +394,7 @@ function TadoAccessory(log, config) {
     this.username = config.username;
     this.password = config.password;
     this.tadoMode = config.tadoMode;
+    this.durationInMinutes = config.durationInMinutes
     this.zone = config.id;
     this.useFahrenheit = config.temperatureUnit == "CELSIUS" ? false : true;
     this.autoMode = config.autoMode;
@@ -379,6 +402,9 @@ function TadoAccessory(log, config) {
     this.heatMode = config.heatMode;
     this.fanMode = config.fanMode;
     
+    this.autoOnly = config.autoOnly
+    this.maunalControl = config.maunalControl
+    this.extraTemperatureSensor = config.extraTemperatureSensor
     this.autoFanExists = config.autoFanExists
     this.maxSpeed = config.maxSpeed;
     this.useSwing = config.useSwing;
@@ -409,8 +435,10 @@ function TadoAccessory(log, config) {
             }
         }
     };
-    if (this.coolMode.fanSpeeds) { lastCoolOverlay.setting.fanSpeed = this.coolMode.fanSpeeds[1] }
+    if (this.coolMode.fanSpeeds && this.autoOnly) { lastCoolOverlay.setting.fanSpeed = "AUTO" }
+    else if (this.coolMode.fanSpeeds) { lastCoolOverlay.setting.fanSpeed = this.coolMode.fanSpeeds[1] }
     if (this.coolMode.swings) { lastCoolOverlay.setting.swing = "OFF" }
+    if (this.tadoMode == "TIMER") { lastCoolOverlay.termination.durationInSeconds = this.durationInMinutes*60 }
 
     this.heatMidValue = this.heatMode.maxValue - (this.heatMode.maxValue-this.heatMode.minValue)/2;
     var lastHeatOverlay = {
@@ -427,9 +455,11 @@ function TadoAccessory(log, config) {
             }
         }
     };
-    if (this.heatMode.fanSpeeds) { lastHeatOverlay.setting.fanSpeed = this.heatMode.fanSpeeds[1] }
+    
+    if (this.heatMode.fanSpeeds && this.autoOnly) { lastHeatOverlay.setting.fanSpeed = "AUTO" }
+    else if (this.heatMode.fanSpeeds) { lastHeatOverlay.setting.fanSpeed = this.heatMode.fanSpeeds[1] }
     if (this.heatMode.swings) { lastHeatOverlay.setting.swing = "OFF" }
-
+    if (this.tadoMode == "TIMER") { lastHeatOverlay.termination.durationInSeconds = this.durationInMinutes*60 }
 
     var lastAutoOverlay = {
         "termination": {
@@ -441,8 +471,10 @@ function TadoAccessory(log, config) {
             "mode": "AUTO",
         }
     };
-    if (this.autoMode.fanSpeeds) { lastAutoOverlay.setting.fanSpeed = this.autoMode.fanSpeeds[1] }
+    if (this.autoMode.fanSpeeds && this.autoOnly) { lastAutoOverlay.setting.fanSpeed = "AUTO" }
+    else if (this.autoMode.fanSpeeds) { lastAutoOverlay.setting.fanSpeed = this.autoMode.fanSpeeds[1] }
     if (this.autoMode.swings) { lastAutoOverlay.setting.swing = "OFF" }
+    if (this.tadoMode == "TIMER") { lastAutoOverlay.termination.durationInSeconds = this.durationInMinutes*60 }
 
     var lastFanOverlay = {
         "termination": {
@@ -454,8 +486,19 @@ function TadoAccessory(log, config) {
             "mode": "FAN",
         }
     };
-    if (this.fanMode.fanSpeeds) { lastFanOverlay.setting.fanSpeed = this.fanMode.fanSpeeds[1] }
+
+    var fanAutoFanExists = false
+    if (this.fanMode.fanSpeeds){
+        for (i=0;i<this.fanMode.fanSpeeds.length;i++){
+            if (this.fanMode.fanSpeeds[i] == "AUTO"){
+                fanAutoFanExists = true
+            }
+        }
+    }
+    if (this.fanMode.fanSpeeds && this.autoOnly && fanAutoFanExists) { lastFanOverlay.setting.fanSpeed = "AUTO" }
+    else if (this.fanMode.fanSpeeds) { lastFanOverlay.setting.fanSpeed = this.fanMode.fanSpeeds[1] }
     if (this.fanMode.swings) { lastFanOverlay.setting.swing = "OFF" }
+    if (this.tadoMode == "TIMER") { lastFanOverlay.termination.durationInSeconds = this.durationInMinutes*60 }
 
     this.lastMode = {
         cool: lastCoolOverlay,
@@ -480,6 +523,7 @@ function TadoAccessory(log, config) {
             "type": "AIR_CONDITIONING"
         }
     }
+    if (this.tadoMode == "TIMER") { this.offOverlay.termination.durationInSeconds = this.durationInMinutes*60 }
 }
 
 TadoAccessory.prototype.getServices = function() {
@@ -537,7 +581,7 @@ TadoAccessory.prototype.getServices = function() {
             .on('set', this.setSwing.bind(this));
     }
     
-    if (this.useFanSpeed){
+    if (this.useFanSpeed && !this.autoOnly){
         if (this.autoFanExists){
             this.steps = 100 / (this.maxSpeed - 1)
         } else {
@@ -582,15 +626,16 @@ TadoAccessory.prototype.getServices = function() {
             }
 
             
-
+            this.fanAutoFan = false
             if (this.fanMode.fanSpeeds){
-                var autoFan = false
                 for (i=0;i<this.fanMode.fanSpeeds.length;i++){
                     if (this.fanMode.fanSpeeds[i] == "AUTO"){
-                        autoFan = true
+                        this.fanAutoFan = true
                     }
                 }
-                if (autoFan){
+            }
+            if (this.fanMode.fanSpeeds && !this.autoOnly){
+                if (this.fanAutoFan){
                     this.fanSteps = 100 / (this.fanMode.fanSpeeds.length- 1)
                 } else {
                     this.fanSteps = 100 / (this.fanMode.fanSpeeds.length)
@@ -608,6 +653,30 @@ TadoAccessory.prototype.getServices = function() {
             }
         
         services.push(this.FanService);
+    }
+
+    if (this.maunalControl){
+        this.ManualSwitch = new Service.Switch(this.zoneName + " Manual");
+        
+        this.ManualSwitch.getCharacteristic(Characteristic.On)
+            .on('get', this.getManualSwitch.bind(this))
+            .on('set', this.setManualSwitch.bind(this));
+
+        services.push(this.ManualSwitch);
+    }
+
+    if (this.extraTemperatureSensor){
+        this.extraTemperatureSensor = new Service.TemperatureSensor(this.zoneName + " Temperature");
+        
+        this.extraTemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature)
+            .setProps({
+                minValue: 0,
+                maxValue: 100,
+                minStep: 0.01
+            })
+            .on('get', this.getCurrentTemperature.bind(this));
+
+        services.push(this.extraTemperatureSensor);
     }
     
 
@@ -641,23 +710,27 @@ TadoAccessory.prototype._getCurrentStateResponse = function(callback) {
                     var data = JSON.parse(strData);
                     self.processing = false;
                     if (data.setting.power !== "OFF") {
+                        self.lastMode.last.setting = data.setting
+                        if (self.lastMode.last.setting.fanSpeed && self.autoOnly) self.lastMode.last.setting.fanSpeed = "AUTO"
                         switch (data.setting.mode){
                             case "COOL":
-                            self.lastMode.last.setting = data.setting
                             self.lastMode.cool.setting = self.lastMode.last.setting;
+                            if (self.lastMode.cool.setting.fanSpeed && self.autoOnly) self.lastMode.cool.setting.fanSpeed = "AUTO"
                                 break;
                             case "HEAT":
-                            self.lastMode.last.setting = data.setting
                             self.lastMode.heat.setting = self.lastMode.last.setting;
+                            if (self.lastMode.heat.setting.fanSpeed && self.autoOnly) self.lastMode.heat.setting.fanSpeed = "AUTO"
                                 break;
                             case "AUTO":
-                                self.lastMode.last.setting = data.setting
-                                self.lastMode.auto.setting = self.lastMode.last.setting;
+                            self.lastMode.auto.setting = self.lastMode.last.setting;
+                            if (self.lastMode.auto.setting.fanSpeed && self.autoOnly) self.lastMode.auto.setting.fanSpeed = "AUTO"
                                 break;
                             case "FAN":
                                 self.lastMode.fan.setting = data.setting;
+                                if (self.lastMode.fan.setting.fanSpeed && self.autoOnly) self.lastMode.fan.setting.fanSpeed = "AUTO"
                                 break;
                         }
+                        
                         
                         self.storage.setItem(self.name, self.lastMode);
                     }
@@ -672,17 +745,25 @@ TadoAccessory.prototype._getCurrentStateResponse = function(callback) {
                 self.callbacks = [];
 
             });
-        }).end();
+        }).on('error', (e) => {
+            console.error(e);
+            for (var i=0; i<self.callbacks.length; i++) {
+                self.callbacks[i](e);
+            }
+          }).end();
     }
 }
 
 TadoAccessory.prototype.getActive = function(callback) {
     var accessory = this;
     accessory._getCurrentStateResponse(function(err, data) {
-        if (data.setting.power == "OFF" || data.setting.mode == "FAN") {
-            callback(null, Characteristic.Active.INACTIVE);
-        } else {
-            callback(null, Characteristic.Active.ACTIVE);
+        if (err) callback (err)
+        else {
+            if (data.setting.power == "OFF" || data.setting.mode == "FAN") {
+                callback(null, Characteristic.Active.INACTIVE);
+            } else {
+                callback(null, Characteristic.Active.ACTIVE);
+            }
         }
     })
 }
@@ -691,91 +772,101 @@ TadoAccessory.prototype.getCurrentHeaterCoolerState = function(callback) {
     var accessory = this;
     //accessory.lastMode = accessory.storage.getItem(accessory.name);
     accessory._getCurrentStateResponse(function(err, data) {
-
-        //accessory.log("data = " + JSON.stringify(data));
-
-        
-        if (data.setting.power == "OFF") {
-            accessory.log(accessory.zoneName + " Mode is OFF");
-            callback(null, Characteristic.CurrentHeaterCoolerState.INACTIVE);
-        } else {
-            accessory.log(accessory.zoneName + " Mode is " + data.setting.mode);
-            if (data.setting.mode == "COOL") {
-                callback(null, Characteristic.CurrentHeaterCoolerState.COOLING);
-            } else if (data.setting.mode == "HEAT") {
-                callback(null, Characteristic.CurrentHeaterCoolerState.HEATING);
-            } else if (data.setting.mode == "FAN") {
+        if (err) callback (err)
+        else {
+            //accessory.log("data = " + JSON.stringify(data));
+            if (data.setting.power == "OFF") {
+                accessory.log(accessory.zoneName + " Mode is OFF");
                 callback(null, Characteristic.CurrentHeaterCoolerState.INACTIVE);
-            } else if (data.setting.mode == "AUTO") {
-                callback(null, Characteristic.CurrentHeaterCoolerState.IDLE);
-            }
+            } else {
+                accessory.log(accessory.zoneName + " Mode is " + data.setting.mode);
+                if (data.setting.mode == "COOL") {
+                    callback(null, Characteristic.CurrentHeaterCoolerState.COOLING);
+                } else if (data.setting.mode == "HEAT") {
+                    callback(null, Characteristic.CurrentHeaterCoolerState.HEATING);
+                } else if (data.setting.mode == "FAN") {
+                    callback(null, Characteristic.CurrentHeaterCoolerState.INACTIVE);
+                } else if (data.setting.mode == "AUTO") {
+                    callback(null, Characteristic.CurrentHeaterCoolerState.IDLE);
+                }
+            }    
         }
-
     })
 }
 
 TadoAccessory.prototype.getTargetHeaterCoolerState = function(callback) {
     var accessory = this;  
     accessory._getCurrentStateResponse(function(err, data) {
-        if (data.setting.power == "OFF") {
-            //accessory.log(accessory.zoneName + " Mode is OFF");
-            callback(null, null);
-        } else {
-            if (data.setting.mode == "COOL") {
-                callback(null, Characteristic.TargetHeaterCoolerState.COOL);
-            } else if (data.setting.mode == "HEAT") {
-                callback(null, Characteristic.TargetHeaterCoolerState.HEAT);
-            } else if (data.setting.mode == "FAN") {
+        if (err) callback (err)
+        else {
+            if (data.setting.power == "OFF") {
+                //accessory.log(accessory.zoneName + " Mode is OFF");
                 callback(null, null);
-            } else if (data.setting.mode == "AUTO") {
-                callback(null, Characteristic.TargetHeaterCoolerState.AUTO);
-            }
+            } else {
+                if (data.setting.mode == "COOL") {
+                    callback(null, Characteristic.TargetHeaterCoolerState.COOL);
+                } else if (data.setting.mode == "HEAT") {
+                    callback(null, Characteristic.TargetHeaterCoolerState.HEAT);
+                } else if (data.setting.mode == "FAN") {
+                    callback(null, null);
+                } else if (data.setting.mode == "AUTO") {
+                    callback(null, Characteristic.TargetHeaterCoolerState.AUTO);
+                }
+            }    
         }
-
     })
 }
 
 TadoAccessory.prototype.getCurrentTemperature = function(callback) {
     var accessory = this;  
     accessory._getCurrentStateResponse(function(err, data) {
-        if (accessory.useFahrenheit) {
-            accessory.log(accessory.zoneName + " Current Temperature is " + data.sensorDataPoints.insideTemperature.fahrenheit + "ºF");
-        } else {
-            accessory.log(accessory.zoneName + " Current Temperature is " + data.sensorDataPoints.insideTemperature.celsius + "ºC");
-        } 
-        callback(null, data.sensorDataPoints.insideTemperature.celsius);
+        if (err) callback (err)
+        else {
+            if (accessory.useFahrenheit) {
+                accessory.log(accessory.zoneName + " Current Temperature is " + data.sensorDataPoints.insideTemperature.fahrenheit + "ºF");
+            } else {
+                accessory.log(accessory.zoneName + " Current Temperature is " + data.sensorDataPoints.insideTemperature.celsius + "ºC");
+            } 
+            callback(null, data.sensorDataPoints.insideTemperature.celsius);    
+        }
     })
 }
 
 TadoAccessory.prototype.getCoolingThresholdTemperature = function(callback) {
     var accessory = this;  
     accessory._getCurrentStateResponse(function(err, data) {
-        if (data.setting.power == "ON" && data.setting.mode == "COOL") {
-            if (accessory.useFahrenheit) {
-                accessory.log(accessory.zoneName + " Target Temperature is " + data.setting.temperature.fahrenheit + "ºF");
-            } else {
-                accessory.log(accessory.zoneName + " Target Temperature is " + data.setting.temperature.celsius + "ºC");
-            } 
-            callback(null, data.setting.temperature.celsius);
-        } else if (data.setting.power == "ON" && data.setting.mode == "AUTO") {
-            callback(null, accessory.coolMidValue);
-        } else callback(null, null)
+        if (err) callback (err)
+        else {
+            if (data.setting.power == "ON" && data.setting.mode == "COOL") {
+                if (accessory.useFahrenheit) {
+                    accessory.log(accessory.zoneName + " Target Temperature is " + data.setting.temperature.fahrenheit + "ºF");
+                } else {
+                    accessory.log(accessory.zoneName + " Target Temperature is " + data.setting.temperature.celsius + "ºC");
+                } 
+                callback(null, data.setting.temperature.celsius);
+            } else if (data.setting.power == "ON" && data.setting.mode == "AUTO") {
+                callback(null, accessory.coolMidValue);
+            } else callback(null, null)    
+        }
     })
 }
 
 TadoAccessory.prototype.getHeatingThresholdTemperature = function(callback) {
     var accessory = this;  
     accessory._getCurrentStateResponse(function(err, data) {
-        if (data.setting.power == "ON" && data.setting.mode == "HEAT") {
-            if (accessory.useFahrenheit) {
-                accessory.log(accessory.zoneName + " Target Temperature is " + data.setting.temperature.fahrenheit + "ºF");
-            } else {
-                accessory.log(accessory.zoneName + " Target Temperature is " + data.setting.temperature.celsius + "ºC");
-            }
-            callback(null, data.setting.temperature.celsius);
-        } else if (data.setting.power == "ON" && data.setting.mode == "AUTO") {
-            callback(null, accessory.heatMidValue);
-        } else callback(null, null)
+        if (err) callback (err)
+        else {
+            if (data.setting.power == "ON" && data.setting.mode == "HEAT") {
+                if (accessory.useFahrenheit) {
+                    accessory.log(accessory.zoneName + " Target Temperature is " + data.setting.temperature.fahrenheit + "ºF");
+                } else {
+                    accessory.log(accessory.zoneName + " Target Temperature is " + data.setting.temperature.celsius + "ºC");
+                }
+                callback(null, data.setting.temperature.celsius);
+            } else if (data.setting.power == "ON" && data.setting.mode == "AUTO") {
+                callback(null, accessory.heatMidValue);
+            } else callback(null, null)    
+        }
     })
 }
 
@@ -789,15 +880,16 @@ TadoAccessory.prototype.getTemperatureDisplayUnits = function(callback) {
 TadoAccessory.prototype.getSwing = function(callback) {
     var accessory = this;  
     accessory._getCurrentStateResponse(function(err, data) {
-        if (data.setting.power == "ON" && (
-               (data.setting.mode == "HEAT" && accessory.heatMode.swings)
-            || (data.setting.mode == "COOL" && accessory.coolMode.swings)
-            || (data.setting.mode == "AUTO" && accessory.autoMode.swings)
-            
-        )) {
-            callback(null, data.setting.swing == "ON" ? Characteristic.SwingMode.SWING_ENABLED : Characteristic.SwingMode.SWING_DISABLED);
-        } else callback(null, null)
-        
+        if (err) callback (err)
+        else {
+            if (data.setting.power == "ON" && (
+                (data.setting.mode == "HEAT" && accessory.heatMode.swings)
+             || (data.setting.mode == "COOL" && accessory.coolMode.swings)
+             || (data.setting.mode == "AUTO" && accessory.autoMode.swings)    
+            )) {
+                callback(null, data.setting.swing == "ON" ? Characteristic.SwingMode.SWING_ENABLED : Characteristic.SwingMode.SWING_DISABLED);
+            } else callback(null, null)     
+        }
     })
 }
 
@@ -822,34 +914,42 @@ TadoAccessory.prototype.getRotationSpeed = function(callback) {
     }
 
     accessory._getCurrentStateResponse(function(err, data) {
-        if (data.setting.power == "ON"){
-            if (data.setting.mode == "HEAT" && accessory.heatMode.fanSpeeds){
-                callback(null, returnfanSpeedValue(accessory.heatMode.fanSpeeds, data.setting.fanSpeed))
-            } else if (data.setting.mode == "COOL" && accessory.coolMode.fanSpeeds){
-                callback(null, returnfanSpeedValue(accessory.coolMode.fanSpeeds, data.setting.fanSpeed))
-            } else if (data.setting.mode == "AUTO" && accessory.autoMode.fanSpeeds){
-                callback(null, returnfanSpeedValue(accessory.autoMode.fanSpeeds, data.setting.fanSpeed))
-            } else callback(null, null)
-        } else callback(null, null)
-        
+        if (err) callback (err)
+        else {
+            if (data.setting.power == "ON"){
+                if (data.setting.mode == "HEAT" && accessory.heatMode.fanSpeeds){
+                    callback(null, returnfanSpeedValue(accessory.heatMode.fanSpeeds, data.setting.fanSpeed))
+                } else if (data.setting.mode == "COOL" && accessory.coolMode.fanSpeeds){
+                    callback(null, returnfanSpeedValue(accessory.coolMode.fanSpeeds, data.setting.fanSpeed))
+                } else if (data.setting.mode == "AUTO" && accessory.autoMode.fanSpeeds){
+                    callback(null, returnfanSpeedValue(accessory.autoMode.fanSpeeds, data.setting.fanSpeed))
+                } else callback(null, null)
+            } else callback(null, null)   
+        }
     })
 }
 
 TadoAccessory.prototype.getCurrentRelativeHumidity = function(callback) {
     var accessory = this;  
     accessory._getCurrentStateResponse(function(err, data) {
+        if (err) callback (err)
+        else {
             accessory.log(accessory.zoneName + " Humidity is " + data.sensorDataPoints.humidity.percentage + "%");
             callback(null, data.sensorDataPoints.humidity.percentage);
+        }
     })
 }
 
 TadoAccessory.prototype.getFanActive = function(callback) {
     var accessory = this;
     accessory._getCurrentStateResponse(function(err, data) {
-        if (data.setting.power !== "OFF" && data.setting.mode == "FAN") {
-            callback(null, Characteristic.Active.ACTIVE);
-        } else {
-            callback(null, Characteristic.Active.INACTIVE);
+        if (err) callback (err)
+        else {
+            if (data.setting.power !== "OFF" && data.setting.mode == "FAN") {
+                callback(null, Characteristic.Active.ACTIVE);
+            } else {
+                callback(null, Characteristic.Active.INACTIVE);
+            }
         }
     })
 }
@@ -857,10 +957,12 @@ TadoAccessory.prototype.getFanActive = function(callback) {
 TadoAccessory.prototype.getFanSwing = function(callback) {
     var accessory = this;  
     accessory._getCurrentStateResponse(function(err, data) {
-        if (data.setting.power == "ON" && data.setting.mode == "FAN" && accessory.fanMode.swings) {
-            callback(null, data.setting.swing == "ON" ? Characteristic.SwingMode.SWING_ENABLED : Characteristic.SwingMode.SWING_DISABLED);
-        } else callback(null, null)
-        
+        if (err) callback (err)
+        else {
+            if (data.setting.power == "ON" && data.setting.mode == "FAN" && accessory.fanMode.swings) {
+                callback(null, data.setting.swing == "ON" ? Characteristic.SwingMode.SWING_ENABLED : Characteristic.SwingMode.SWING_DISABLED);
+            } else callback(null, null)    
+        }
     })
 }
 
@@ -885,9 +987,28 @@ TadoAccessory.prototype.getFanRotationSpeed = function(callback) {
     }
 
     accessory._getCurrentStateResponse(function(err, data) {
-        if (data.setting.power == "ON" && data.setting.mode == "FAN" && accessory.fanMode.fanSpeeds){
-            callback(null, returnfanSpeedValue(accessory.fanMode.fanSpeeds, data.setting.fanSpeed))
-        } else callback(null, null)
+        if (err) callback (err)
+        else {
+            if (data.setting.power == "ON" && data.setting.mode == "FAN" && accessory.fanMode.fanSpeeds){
+                callback(null, returnfanSpeedValue(accessory.fanMode.fanSpeeds, data.setting.fanSpeed))
+            } else callback(null, null)
+        }
+    })
+}
+
+TadoAccessory.prototype.getManualSwitch = function(callback) {
+    var accessory = this;  
+    
+    accessory._getCurrentStateResponse(function(err, data) {
+        if (err) callback (err)
+        else {
+            if (data.overlay == null){
+                callback(null, false)
+            } else {
+                accessory.log("Manual Control is ON!")
+                callback(null, true)
+            }
+        }
     })
 }
 
@@ -1013,7 +1134,7 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                         if (overlayReady.setting.swing){
                             accessory.HeaterCoolerService.getCharacteristic(Characteristic.SwingMode).updateValue(overlayReady.setting.swing == "OFF" ? Characteristic.SwingMode.SWING_DISABLED : Characteristic.SwingMode.SWING_ENABLED);
                         }
-                        if (overlayReady.setting.fanSpeed){
+                        if (overlayReady.setting.fanSpeed && !accessory.autoOnly){
                             var setSpeed;
                             switch (overlayReady.setting.fanSpeed){
                                 case "AUTO":
@@ -1045,7 +1166,7 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                         if (overlayReady.setting.swing){
                             accessory.HeaterCoolerService.getCharacteristic(Characteristic.SwingMode).updateValue(overlayReady.setting.swing == "OFF" ? Characteristic.SwingMode.SWING_DISABLED : Characteristic.SwingMode.SWING_ENABLED);
                         }
-                        if (overlayReady.setting.fanSpeed){
+                        if (overlayReady.setting.fanSpeed && !accessory.autoOnly){
                             var setSpeed;
                             switch (overlayReady.setting.fanSpeed){
                                 case "AUTO":
@@ -1073,7 +1194,7 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                         if (overlayReady.setting.swing){
                             accessory.HeaterCoolerService.getCharacteristic(Characteristic.SwingMode).updateValue(overlayReady.setting.swing == "OFF" ? Characteristic.SwingMode.SWING_DISABLED : Characteristic.SwingMode.SWING_ENABLED);
                         }
-                        if (overlayReady.setting.fanSpeed){
+                        if (overlayReady.setting.fanSpeed && !accessory.autoOnly){
                             var setSpeed;
                             switch (overlayReady.setting.fanSpeed){
                                 case "AUTO":
@@ -1106,10 +1227,15 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                 overlayReady = JSON.stringify(overlayReady);
                 //accessory.log("zone: " + accessory.zone + ",  body: " + overlayReady);
             }
-            https.request(options, null).end(overlayReady);  
+            https.request(options, null).on('error', (e) => {
+                console.error(e);
+                callback(e)
+              }).end(overlayReady);  
             accessory.setProcessing = false;
             accessory.setFunctions = []
-
+            if (accessory.maunalControl){
+                accessory.ManualSwitch.getCharacteristic(Characteristic.On).updateValue(true)
+            }
             
 
         }, 500)
@@ -1338,7 +1464,10 @@ TadoAccessory.prototype._setFanOverlay = function(overlay, functionName, state) 
                 overlayReady = JSON.stringify(overlayReady);
                 // accessory.log("zone: " + accessory.zone + ",  body: " + overlayReady);
             }
-            https.request(options, null).end(overlayReady);  
+            https.request(options, null).on('error', (e) => {
+                console.error(e);
+                callback(e)
+              }).end(overlayReady);  
             accessory.setFanProcessing = false;
             accessory.setFanFunctions = []
         }, 500)
@@ -1389,7 +1518,28 @@ TadoAccessory.prototype.setFanRotationSpeed = function(speed, callback) {
 }
 
 
-
+TadoAccessory.prototype.setManualSwitch = function(state, callback) {
+    var accessory = this;  
+    if (!state){
+        var options = {
+            host: 'my.tado.com',
+            path: '/api/v2/homes/' + accessory.homeID + '/zones/' + accessory.zone + '/overlay?username=' + accessory.username + '&password=' + accessory.password,
+            method: 'DELETE',
+        }
+        callback()
+        https.request(options, null).on('error', (e) => {
+            console.error(e);
+            callback(e)
+            return
+          }).end();  
+    } else {
+        callback()
+        setTimeout(function(){
+            accessory.ManualSwitch.getCharacteristic(Characteristic.On).updateValue(false);
+        },300)
+    }
+    
+}
 
 
 
@@ -1471,7 +1621,10 @@ function TadoWeather(log, config){
                         self.callbacks = [];
                     }
                 });
-            }).end();
+            }).on('error', (e) => {
+                console.error(e);
+                callback(e)
+              }).end();
         }
     }
 
@@ -1636,7 +1789,10 @@ function occupancySensor(log, config, platform){
                     callback(error , null, null);
                 }
             });
-        }).end();
+        }).on('error', (e) => {
+            console.error(e);
+            callback(e)
+          }).end();
     }
 
     this.checkAnyone = function(){
