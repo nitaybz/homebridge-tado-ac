@@ -1,8 +1,5 @@
 
-
-NOTE: Version 2.1 adds support for **Occupancy Sensors &  Weather Sensors** - see more details below
-______________
-homebridge-tado-ac (v2.1)
+homebridge-tado-ac (v2.2)
 ========================
 
 Homebridge Plugin for Tado Smart AC Control.
@@ -99,9 +96,8 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
 | `name`                           | name of the platform - for logs only                    |          |      -    |
 | `username`                       | your tado account username (something@something.com)    |     ✓    |      -    |
 | `password`                       | your tado account password                              |     ✓    |      -    |
-| `tadoMode`                       | default mode for the commands to be sent with. can be "MANUAL" for manual control until ended by the user, "TADO_MODE" for manual control until next schedule change in tado app OR "TIMER" for manual control until timer ends (duration can be set) .          |             |  "MANUAL" |
+| `tadoMode`                       | default mode for the commands to be sent with. can be "MANUAL" for manual control until ended by the user, "TADO_MODE" for manual control until next schedule change in tado app OR "TIMER" for manual control until timer ends (duration can be set) .        |             |  "MANUAL" |
 | `durationInMinutes`              |   duration in Minutes for the "TIMER" settings       |            |  90 |
-
 | `weatherSensorsEnabled`          | Enable **Outside Temperature** sensor and **Solar Intensity** light bulb.  **more details below*      |             |  false |
 | `weatherPollingInterval`         |  Time in **Minutes** to check for changes in Weather. Default is `false` for no polling.       |             |  false |
 | `occupancySensorsEnabled`        |  Enable **Occupancy Sensors**.  ***more details below*     |             |  false |
