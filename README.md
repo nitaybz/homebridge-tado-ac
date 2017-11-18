@@ -11,6 +11,14 @@ Complies with ```Service.HeaterCooler```
 
 Compatible with ***iOS 11 and above*** -  iOS 10 Home app does not support this service.
 
+**version 2.2:**
+1. Added support for "TIMER" Tado mode to set each command with a timer.
+2. Manual Control Switch - to turn off "Manual Control" if needed.
+3. Extra Temperature Sensor - for Temperature Sensor in a different accessory.
+4. Added support for "AUTO" fan speed.
+5. Solved crashing homebridge when API is down.
+
+
 ### Whats New in Version 2 ??
 
 This version is a whole new build that brings a lot more options to control your air conditiner with Homekit:
@@ -18,7 +26,7 @@ This version is a whole new build that brings a lot more options to control your
 1. Homebridge plugin turned into platform to support 1 eco-system.
 2. Device auto detection - the plugin automatically detects and adds any Tado AC device.
 3. HomeKit air conditioner support.
-4. Support for ***Swing*** and ***Rotation Speed*** of the air conditioner
+4. Support for ***Swing*** and ***Rotation Speed*** of the air conditioner.
 5. Fan Support - as different accessory.
 6. Auto configuration - The plugin detects the capabilities of your AC (set by Tado) and set them up accordingly in Homekit:
     - Zone Id
@@ -28,14 +36,11 @@ This version is a whole new build that brings a lot more options to control your
     - Temperature Unit
     - Swing
     - Rotation Speeds
-7. Humidity sensor as a seperated accessory
-8. Much faster status update - makes the accessories load much faster in Home app
+7. Humidity sensor as a seperated accessory.
+8. Much faster status update - makes the accessories load much faster in Home app.
 9. Easy config - Only username and password are required now to enjoy all features.
-
-**from version 2.1:**
-
-10. Outside Temperature support
-11. Solar Intensity support
+10. Outside Temperature support.
+11. Solar Intensity support.
 12. Occupancy Sensors.
 
 
@@ -72,12 +77,16 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
         "name": "Tado AC",
         "username": "user@name.com",
         "password": "*************",
-        "tadoMode": "MANUAL",
         "weatherSensorsEnabled": true,
         "weatherPollingInterval": 10,
         "occupancySensorsEnabled": true,
         "occupancyPollingInterval": 10,
-        "anyoneSensor": true
+        "anyoneSensor": true,
+        "tadoMode": "TIMER",
+        "durationInMinutes": 100,
+        "autoOnly": false,
+        "maunalControl": true,
+        "extraTemperatureSensor": true
     }
 ]
 ```
@@ -90,12 +99,17 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
 | `name`                           | name of the platform - for logs only                    |          |      -    |
 | `username`                       | your tado account username (something@something.com)    |     ✓    |      -    |
 | `password`                       | your tado account password                              |     ✓    |      -    |
-| `tadoMode`                       | default mode for the commands to be sent with. can be "MANUAL" for manual control until ended by the user, or "TADO_MODE" for manual control until next schedule change in tado app .          |             |  "MANUAL" |
+| `tadoMode`                       | default mode for the commands to be sent with. can be "MANUAL" for manual control until ended by the user, "TADO_MODE" for manual control until next schedule change in tado app OR "TIMER" for manual control until timer ends (duration can be set) .          |             |  "MANUAL" |
+| `durationInMinutes`              |   duration in Minutes for the "TIMER" settings       |            |  90 |
+
 | `weatherSensorsEnabled`          | Enable **Outside Temperature** sensor and **Solar Intensity** light bulb.  **more details below*      |             |  false |
 | `weatherPollingInterval`         |  Time in **Minutes** to check for changes in Weather. Default is `false` for no polling.       |             |  false |
 | `occupancySensorsEnabled`        |  Enable **Occupancy Sensors**.  ***more details below*     |             |  false |
 | `occupancyPollingInterval`       |  Time in **Seconds** to check for changes in occupnacy. Default is `10` for polling every 10 seconds. *it can't be set to false!*     |             |  10 |
 | `anyoneSensor`       |  Adds 1 **Occupancy Sensor** named "Anyone" to represent the state of someone at home     |             |  true |
+| `maunalControl`       |  Adds switch for getting Manual control status and turn OFF manual control from homekit (turn ON is done by sending any command).  |             |  false |
+| `autoOnly`       |  When set to `true`, all commands will be sent with "AUTO" fan speed if possible .   |             |  false |
+| `extraTemperatureSensor`       |  Adds a temperature sensor as a different accessory - so Siri will be able to tell you the temperature.   |             |  false |
 
 ### * Outside Temperature & Solar Intensity Sensors
  Enabling this feature will add 2 new accessories to your home:
