@@ -22,7 +22,7 @@ function TadoACplatform(log, config, api) {
     this.tadoMode = config['tadoMode'] || "MANUAL";
     this.durationInMinutes =  config['durationInMinutes'] || 90;
     this.autoOnly = config['autoOnly'] || false;
-    this.maunalControl = config['maunalControl'] || false;
+    this.manualControl = config['manualControl'] || false;
     this.extraTemperatureSensor = config['extraTemperatureSensor'] || false;
     this.weatherSensorsEnabled = config['weatherSensorsEnabled'] || false;
     this.weatherPollingInterval = (config['weatherPollingInterval']*60*1000) || false;
@@ -126,14 +126,14 @@ TadoACplatform.prototype = {
                                         tadoMode: self.tadoMode,
                                         durationInMinutes: self.durationInMinutes,
                                         autoOnly: self.autoOnly,
-                                        maunalControl: self.maunalControl,
+                                        manualControl: self.manualControl,
                                         extraTemperatureSensor: self.extraTemperatureSensor
                                     }
                                     self.log("Found new Zone: "+ tadoConfig.name + " (" + tadoConfig.id + ") ...")
                                     zonesArray.push(tadoConfig);
                                 }
                             }
-                            
+
                         }
                         catch(e){
                             self.log("Could not retrieve Zones, error:" + e);
@@ -164,7 +164,7 @@ TadoACplatform.prototype = {
                         path: '/api/v2/homes/' + zone.homeID + '/zones/' + zone.id + '/capabilities?password=' + zone.password + '&username=' + zone.username,
                         method: 'GET'
                     };
-                
+
                     https.request(options, function(response){
                         var strData = '';
                         response.on('data', function(chunk) {
@@ -313,7 +313,7 @@ TadoACplatform.prototype = {
                         path: '/api/v2/homes/' + self.homeID + '/users?password=' + self.password + '&username=' + self.username,
                         method: 'GET'
                     };
-    
+
                     https.request(options, function(response){
                         var strData = '';
                         response.on('data', function(chunk) {
@@ -401,9 +401,9 @@ function TadoAccessory(log, config) {
     this.coolMode = config.coolMode;
     this.heatMode = config.heatMode;
     this.fanMode = config.fanMode;
-    
+
     this.autoOnly = config.autoOnly
-    this.maunalControl = config.maunalControl
+    this.manualControl = config.manualControl
     this.extraTemperatureSensor = config.extraTemperatureSensor
     this.autoFanExists = config.autoFanExists
     this.maxSpeed = config.maxSpeed;
@@ -455,7 +455,7 @@ function TadoAccessory(log, config) {
             }
         }
     };
-    
+
     if (this.heatMode.fanSpeeds && this.autoOnly) { lastHeatOverlay.setting.fanSpeed = "AUTO" }
     else if (this.heatMode.fanSpeeds) { lastHeatOverlay.setting.fanSpeed = this.heatMode.fanSpeeds[1] }
     if (this.heatMode.swings) { lastHeatOverlay.setting.swing = "OFF" }
@@ -527,14 +527,14 @@ function TadoAccessory(log, config) {
 }
 
 TadoAccessory.prototype.getServices = function() {
-    
+
     var informationService = new Service.AccessoryInformation()
         .setCharacteristic(Characteristic.Manufacturer, 'Tado GmbH')
         .setCharacteristic(Characteristic.Model, 'Tado Smart AC Control')
         .setCharacteristic(Characteristic.SerialNumber, 'Tado Serial Number');
 
     this.HeaterCoolerService = new Service.HeaterCooler(this.zoneName + " AC");
-    
+
     this.HeaterCoolerService.getCharacteristic(Characteristic.Active)
         .on('get', this.getActive.bind(this))
         .on('set', this.setActive.bind(this));
@@ -554,7 +554,7 @@ TadoAccessory.prototype.getServices = function() {
         })
         .on('get', this.getCurrentTemperature.bind(this));
 
-    this.HeaterCoolerService.getCharacteristic(Characteristic.CoolingThresholdTemperature) 
+    this.HeaterCoolerService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
         .setProps({
             minValue: this.coolMode.minValue,
             maxValue: this.coolMode.maxValue,
@@ -563,7 +563,7 @@ TadoAccessory.prototype.getServices = function() {
         .on('get', this.getCoolingThresholdTemperature.bind(this))
         .on('set', this.setCoolingThresholdTemperature.bind(this));
 
-    this.HeaterCoolerService.getCharacteristic(Characteristic.HeatingThresholdTemperature) 
+    this.HeaterCoolerService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
         .setProps({
             minValue: this.heatMode.minValue,
             maxValue: this.heatMode.maxValue,
@@ -574,13 +574,13 @@ TadoAccessory.prototype.getServices = function() {
 
     this.HeaterCoolerService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
         .on('get', this.getTemperatureDisplayUnits.bind(this));
-    
+
     if (this.useSwing){
         this.HeaterCoolerService.getCharacteristic(Characteristic.SwingMode)
             .on('get', this.getSwing.bind(this))
             .on('set', this.setSwing.bind(this));
     }
-    
+
     if (this.useFanSpeed && !this.autoOnly){
         if (this.autoFanExists){
             this.steps = 100 / (this.maxSpeed - 1)
@@ -597,7 +597,7 @@ TadoAccessory.prototype.getServices = function() {
             .on('get', this.getRotationSpeed.bind(this))
             .on('set', this.setRotationSpeed.bind(this));
     }
-    
+
 
 
     this.HumiditySensor = new Service.HumiditySensor(this.zoneName + " Humidity");
@@ -611,21 +611,21 @@ TadoAccessory.prototype.getServices = function() {
         .on('get', this.getCurrentRelativeHumidity.bind(this));
 
     var services = [informationService, this.HeaterCoolerService, this.HumiditySensor];
-    
+
     if (this.fanMode){
         this.FanService = new Service.Fanv2(this.zoneName + " Fan");
-        
+
         this.FanService.getCharacteristic(Characteristic.Active)
             .on('get', this.getFanActive.bind(this))
             .on('set', this.setFanActive.bind(this));
-        
+
             if (this.fanMode.swings){
                 this.FanService.getCharacteristic(Characteristic.SwingMode)
                     .on('get', this.getFanSwing.bind(this))
                     .on('set', this.setFanSwing.bind(this));
             }
 
-            
+
             this.fanAutoFan = false
             if (this.fanMode.fanSpeeds){
                 for (i=0;i<this.fanMode.fanSpeeds.length;i++){
@@ -641,7 +641,7 @@ TadoAccessory.prototype.getServices = function() {
                     this.fanSteps = 100 / (this.fanMode.fanSpeeds.length)
                 }
                 this.fanSteps = this.fanSteps.toFixed(2)
-                
+
                 this.FanService.getCharacteristic(Characteristic.RotationSpeed)
                     .setProps({
                             minValue: 0,
@@ -651,13 +651,13 @@ TadoAccessory.prototype.getServices = function() {
                     .on('get', this.getFanRotationSpeed.bind(this))
                     .on('set', this.setFanRotationSpeed.bind(this));
             }
-        
+
         services.push(this.FanService);
     }
 
-    if (this.maunalControl){
+    if (this.manualControl){
         this.ManualSwitch = new Service.Switch(this.zoneName + " Manual");
-        
+
         this.ManualSwitch.getCharacteristic(Characteristic.On)
             .on('get', this.getManualSwitch.bind(this))
             .on('set', this.setManualSwitch.bind(this));
@@ -667,7 +667,7 @@ TadoAccessory.prototype.getServices = function() {
 
     if (this.extraTemperatureSensor){
         this.extraTemperatureSensor = new Service.TemperatureSensor(this.zoneName + " Temperature");
-        
+
         this.extraTemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature)
             .setProps({
                 minValue: 0,
@@ -678,7 +678,7 @@ TadoAccessory.prototype.getServices = function() {
 
         services.push(this.extraTemperatureSensor);
     }
-    
+
 
     return services;
 }
@@ -730,15 +730,15 @@ TadoAccessory.prototype._getCurrentStateResponse = function(callback) {
                                 if (self.lastMode.fan.setting.fanSpeed && self.autoOnly) self.lastMode.fan.setting.fanSpeed = "AUTO"
                                 break;
                         }
-                        
-                        
+
+
                         self.storage.setItem(self.name, self.lastMode);
                     }
 
                     for (var i=0; i<self.callbacks.length; i++) {
                         self.callbacks[i](null, data);
                     }
-                    
+
                 } catch(e){
                     self.log("Could not retrieve status from " + self.zoneName + "; error: " + e)
                 }
@@ -789,13 +789,13 @@ TadoAccessory.prototype.getCurrentHeaterCoolerState = function(callback) {
                 } else if (data.setting.mode == "AUTO") {
                     callback(null, Characteristic.CurrentHeaterCoolerState.IDLE);
                 }
-            }    
+            }
         }
     })
 }
 
 TadoAccessory.prototype.getTargetHeaterCoolerState = function(callback) {
-    var accessory = this;  
+    var accessory = this;
     accessory._getCurrentStateResponse(function(err, data) {
         if (err) callback (err)
         else {
@@ -812,13 +812,13 @@ TadoAccessory.prototype.getTargetHeaterCoolerState = function(callback) {
                 } else if (data.setting.mode == "AUTO") {
                     callback(null, Characteristic.TargetHeaterCoolerState.AUTO);
                 }
-            }    
+            }
         }
     })
 }
 
 TadoAccessory.prototype.getCurrentTemperature = function(callback) {
-    var accessory = this;  
+    var accessory = this;
     accessory._getCurrentStateResponse(function(err, data) {
         if (err) callback (err)
         else {
@@ -826,14 +826,14 @@ TadoAccessory.prototype.getCurrentTemperature = function(callback) {
                 accessory.log(accessory.zoneName + " Current Temperature is " + data.sensorDataPoints.insideTemperature.fahrenheit + "ºF");
             } else {
                 accessory.log(accessory.zoneName + " Current Temperature is " + data.sensorDataPoints.insideTemperature.celsius + "ºC");
-            } 
-            callback(null, data.sensorDataPoints.insideTemperature.celsius);    
+            }
+            callback(null, data.sensorDataPoints.insideTemperature.celsius);
         }
     })
 }
 
 TadoAccessory.prototype.getCoolingThresholdTemperature = function(callback) {
-    var accessory = this;  
+    var accessory = this;
     accessory._getCurrentStateResponse(function(err, data) {
         if (err) callback (err)
         else {
@@ -842,17 +842,17 @@ TadoAccessory.prototype.getCoolingThresholdTemperature = function(callback) {
                     accessory.log(accessory.zoneName + " Target Temperature is " + data.setting.temperature.fahrenheit + "ºF");
                 } else {
                     accessory.log(accessory.zoneName + " Target Temperature is " + data.setting.temperature.celsius + "ºC");
-                } 
+                }
                 callback(null, data.setting.temperature.celsius);
             } else if (data.setting.power == "ON" && data.setting.mode == "AUTO") {
                 callback(null, accessory.coolMidValue);
-            } else callback(null, null)    
+            } else callback(null, null)
         }
     })
 }
 
 TadoAccessory.prototype.getHeatingThresholdTemperature = function(callback) {
-    var accessory = this;  
+    var accessory = this;
     accessory._getCurrentStateResponse(function(err, data) {
         if (err) callback (err)
         else {
@@ -865,7 +865,7 @@ TadoAccessory.prototype.getHeatingThresholdTemperature = function(callback) {
                 callback(null, data.setting.temperature.celsius);
             } else if (data.setting.power == "ON" && data.setting.mode == "AUTO") {
                 callback(null, accessory.heatMidValue);
-            } else callback(null, null)    
+            } else callback(null, null)
         }
     })
 }
@@ -878,23 +878,23 @@ TadoAccessory.prototype.getTemperatureDisplayUnits = function(callback) {
 
 
 TadoAccessory.prototype.getSwing = function(callback) {
-    var accessory = this;  
+    var accessory = this;
     accessory._getCurrentStateResponse(function(err, data) {
         if (err) callback (err)
         else {
             if (data.setting.power == "ON" && (
                 (data.setting.mode == "HEAT" && accessory.heatMode.swings)
              || (data.setting.mode == "COOL" && accessory.coolMode.swings)
-             || (data.setting.mode == "AUTO" && accessory.autoMode.swings)    
+             || (data.setting.mode == "AUTO" && accessory.autoMode.swings)
             )) {
                 callback(null, data.setting.swing == "ON" ? Characteristic.SwingMode.SWING_ENABLED : Characteristic.SwingMode.SWING_DISABLED);
-            } else callback(null, null)     
+            } else callback(null, null)
         }
     })
 }
 
 TadoAccessory.prototype.getRotationSpeed = function(callback) {
-    var accessory = this;  
+    var accessory = this;
 
     var returnfanSpeedValue = function(speedsArray, fanSpeed){
         switch (fanSpeed){
@@ -924,13 +924,13 @@ TadoAccessory.prototype.getRotationSpeed = function(callback) {
                 } else if (data.setting.mode == "AUTO" && accessory.autoMode.fanSpeeds){
                     callback(null, returnfanSpeedValue(accessory.autoMode.fanSpeeds, data.setting.fanSpeed))
                 } else callback(null, null)
-            } else callback(null, null)   
+            } else callback(null, null)
         }
     })
 }
 
 TadoAccessory.prototype.getCurrentRelativeHumidity = function(callback) {
-    var accessory = this;  
+    var accessory = this;
     accessory._getCurrentStateResponse(function(err, data) {
         if (err) callback (err)
         else {
@@ -955,19 +955,19 @@ TadoAccessory.prototype.getFanActive = function(callback) {
 }
 
 TadoAccessory.prototype.getFanSwing = function(callback) {
-    var accessory = this;  
+    var accessory = this;
     accessory._getCurrentStateResponse(function(err, data) {
         if (err) callback (err)
         else {
             if (data.setting.power == "ON" && data.setting.mode == "FAN" && accessory.fanMode.swings) {
                 callback(null, data.setting.swing == "ON" ? Characteristic.SwingMode.SWING_ENABLED : Characteristic.SwingMode.SWING_DISABLED);
-            } else callback(null, null)    
+            } else callback(null, null)
         }
     })
 }
 
 TadoAccessory.prototype.getFanRotationSpeed = function(callback) {
-    var accessory = this;  
+    var accessory = this;
 
     var returnfanSpeedValue = function(speedsArray, fanSpeed){
         switch (fanSpeed){
@@ -997,8 +997,8 @@ TadoAccessory.prototype.getFanRotationSpeed = function(callback) {
 }
 
 TadoAccessory.prototype.getManualSwitch = function(callback) {
-    var accessory = this;  
-    
+    var accessory = this;
+
     accessory._getCurrentStateResponse(function(err, data) {
         if (err) callback (err)
         else {
@@ -1049,7 +1049,7 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                     if (accessory.setFunctions[0].name == "active"){
                         accessory.log("Activating " + accessory.zoneName + " AC")
                     }
-                    
+
                 } else turnOff = true
             } else {
                 for (j=0;j<accessory.setFunctions.length;j++){
@@ -1062,7 +1062,7 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                                 break;
                             case "mode":
                             accessory.lastMode.last = accessory.setFunctions[j].overlay
-                                
+
                                 break;
                         }
                     }
@@ -1105,7 +1105,7 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                                 break;
                         }
                     }
-                    
+
                 }
             }
             overlayReady = accessory.lastMode.last
@@ -1120,7 +1120,7 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
             } else {
                 if (accessory.fanMode){accessory.FanService.getCharacteristic(Characteristic.Active).updateValue(Characteristic.Active.INACTIVE)}
                 accessory.HeaterCoolerService.getCharacteristic(Characteristic.Active).updateValue(Characteristic.Active.ACTIVE);
-                
+
                 switch (overlayReady.setting.mode){
                     case "COOL":
                         accessory.lastMode.cool = accessory.lastMode.last
@@ -1152,7 +1152,7 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                             }
                             accessory.HeaterCoolerService.getCharacteristic(Characteristic.RotationSpeed).updateValue(setSpeed);
                         }
-                        
+
                         break;
                     case "HEAT":
                         accessory.lastMode.heat = accessory.lastMode.last
@@ -1212,9 +1212,9 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                             }
                             accessory.HeaterCoolerService.getCharacteristic(Characteristic.RotationSpeed).updateValue(setSpeed);
                         }
-                        
+
                         break;
-                        
+
                 }
             }
 
@@ -1230,18 +1230,18 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
             https.request(options, null).on('error', (e) => {
                 console.error(e);
                 callback(e)
-              }).end(overlayReady);  
+              }).end(overlayReady);
             accessory.setProcessing = false;
             accessory.setFunctions = []
-            if (accessory.maunalControl){
+            if (accessory.manualControl){
                 accessory.ManualSwitch.getCharacteristic(Characteristic.On).updateValue(true)
             }
-            
+
 
         }, 500)
     }
 
-    
+
 }
 
 TadoAccessory.prototype.setActive = function(state, callback) {
@@ -1255,12 +1255,12 @@ TadoAccessory.prototype.setActive = function(state, callback) {
         }
     }
     accessory._setOverlay(activeFunction(state), "active", state)
-    
+
     callback()
 }
 
 TadoAccessory.prototype.setTargetHeaterCoolerState = function(state, callback) {
-    var accessory = this; 
+    var accessory = this;
 
     var modeFunction = function(state){
         switch (state){
@@ -1285,12 +1285,12 @@ TadoAccessory.prototype.setTargetHeaterCoolerState = function(state, callback) {
         }
     }
     accessory._setOverlay(modeFunction(state), "mode", state)
-    
+
     callback()
 }
 
 TadoAccessory.prototype.setCoolingThresholdTemperature = function(temp, callback) {
-    
+
     if (this.lastMode.last.setting.mode == "COOL"){
         this.lastMode.cool.setting.temperature.fahrenheit = Math.round(temp*9/5+32)
         this.lastMode.last.setting.temperature.fahrenheit = Math.round(temp*9/5+32)
@@ -1301,17 +1301,17 @@ TadoAccessory.prototype.setCoolingThresholdTemperature = function(temp, callback
         } else {
             this.log("Setting " + this.zoneName + " AC Target Temperature to " + temp)
         }
-        
+
         this._setOverlay(this.lastMode.last, "coolTemp", temp)
     } else {
         this._setOverlay(null, "coolTemp", temp)
     }
-    
+
     callback()
 }
 
 TadoAccessory.prototype.setHeatingThresholdTemperature = function(temp, callback) {
-    
+
     if (this.lastMode.last.setting.mode == "HEAT"){
         this.lastMode.heat.setting.temperature.fahrenheit = Math.round(temp*9/5+32)
         this.lastMode.last.setting.temperature.fahrenheit = Math.round(temp*9/5+32)
@@ -1322,12 +1322,12 @@ TadoAccessory.prototype.setHeatingThresholdTemperature = function(temp, callback
         } else {
             this.log("Setting " + this.zoneName + " AC Target Temperature to " + temp)
         }
-        
+
         this._setOverlay(this.lastMode.last, "heatTemp", temp)
     } else {
         this._setOverlay(null, "heatTemp", temp)
     }
-    
+
     callback()
 }
 
@@ -1345,7 +1345,7 @@ TadoAccessory.prototype.setSwing = function(state, callback) {
     callback()
 }
 
-TadoAccessory.prototype.setRotationSpeed = function(speed, callback) { 
+TadoAccessory.prototype.setRotationSpeed = function(speed, callback) {
     var state;
     switch (Math.round(speed)){
         case 100:
@@ -1399,7 +1399,7 @@ TadoAccessory.prototype._setFanOverlay = function(overlay, functionName, state) 
                     if (accessory.setFanFunctions[0].name == "fanActive"){
                         accessory.log("Activating " + accessory.zoneName + " Fan")
                     }
-                    
+
                 } else turnOff = true
             } else {
                 for (i=0;i<accessory.setFanFunctions.length;i++){
@@ -1432,7 +1432,7 @@ TadoAccessory.prototype._setFanOverlay = function(overlay, functionName, state) 
                 accessory.HeaterCoolerService.getCharacteristic(Characteristic.CurrentHeaterCoolerState).updateValue(Characteristic.CurrentHeaterCoolerState.INACTIVE);
                 accessory.HeaterCoolerService.getCharacteristic(Characteristic.Active).updateValue(Characteristic.Active.INACTIVE);
                 if (overlayReady.setting.swing){
-                    
+
                     accessory.FanService.getCharacteristic(Characteristic.SwingMode).updateValue(overlayReady.setting.swing == "OFF" ? Characteristic.SwingMode.SWING_DISABLED : Characteristic.SwingMode.SWING_ENABLED);
                 }
                 if (overlayReady.setting.fanSpeed){
@@ -1467,13 +1467,13 @@ TadoAccessory.prototype._setFanOverlay = function(overlay, functionName, state) 
             https.request(options, null).on('error', (e) => {
                 console.error(e);
                 callback(e)
-              }).end(overlayReady);  
+              }).end(overlayReady);
             accessory.setFanProcessing = false;
             accessory.setFanFunctions = []
         }, 500)
     }
 
-    
+
 }
 
 
@@ -1519,7 +1519,7 @@ TadoAccessory.prototype.setFanRotationSpeed = function(speed, callback) {
 
 
 TadoAccessory.prototype.setManualSwitch = function(state, callback) {
-    var accessory = this;  
+    var accessory = this;
     if (!state){
         var options = {
             host: 'my.tado.com',
@@ -1531,14 +1531,14 @@ TadoAccessory.prototype.setManualSwitch = function(state, callback) {
             console.error(e);
             callback(e)
             return
-          }).end();  
+          }).end();
     } else {
         callback()
         setTimeout(function(){
             accessory.ManualSwitch.getCharacteristic(Characteristic.On).updateValue(false);
         },300)
     }
-    
+
 }
 
 
@@ -1596,8 +1596,8 @@ function TadoWeather(log, config){
                         var data = JSON.parse(strData);
                         var Solar = data.solarIntensity.percentage
                         self.log("Solar Intensity is " + Solar + "%");
-                        
-                        
+
+
                         if (self.useFahrenheit) {
                             self.log("Outside Temperature is " + data.outsideTemperature.fahrenheit + "ºF");
                             var outsideTemperature = data.outsideTemperature.fahrenheit
@@ -1634,7 +1634,7 @@ function TadoWeather(log, config){
         .setCharacteristic(Characteristic.SerialNumber, 'Tado Serial Weather');
 
     this.TemperatureSensor = new Service.TemperatureSensor(this.name);
-    
+
     this.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature)
         .on('get', this.getOutsideTemperature.bind(this));
 
@@ -1652,7 +1652,7 @@ function TadoWeather(log, config){
         })
         .on('get', this.getSolar.bind(this))
         .on('set', this.setSolar.bind(this));
-    
+
 
 
     if (this.polling){
@@ -1817,7 +1817,7 @@ function occupancySensor(log, config, platform){
         .setCharacteristic(Characteristic.SerialNumber, this.device.platform + " " + this.device.osVersion);
 
     this.OccupancySensor = new Service.OccupancySensor(this.name);
-    
+
     this.OccupancySensor.getCharacteristic(Characteristic.OccupancyDetected)
         .on('get', this.getStatus.bind(this));
 
@@ -1830,7 +1830,7 @@ function occupancySensor(log, config, platform){
                 self.checkAnyone();
             }, self.polling)
         }, 300)
-        
+
     } else {
         this.checkOccupancy();
         var self = this;
@@ -1838,7 +1838,7 @@ function occupancySensor(log, config, platform){
             self.checkOccupancy();
         }, self.polling)
     }
-    
+
 }
 
 occupancySensor.prototype.getServices = function() {
@@ -1859,7 +1859,7 @@ occupancySensor.prototype.getStatus = function(callback) {
             this.log(this.name + " is Out!")
         }
     }
-    
+
     callback(null, this.occupied);
 }
 

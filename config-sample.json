@@ -21,11 +21,11 @@
         "tadoMode": "TIMER",
         "durationInMinutes": 100,
         "autoOnly": false,
-        "maunalControl": true,
+        "manualControl": true,
         "extraTemperatureSensor": true
     }
   ],
 
-  "accessories": [ 
+  "accessories": [
   ]
 }
