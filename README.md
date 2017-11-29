@@ -82,7 +82,7 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
         "tadoMode": "TIMER",
         "durationInMinutes": 100,
         "autoOnly": false,
-        "maunalControl": true,
+        "manualControl": true,
         "extraTemperatureSensor": true
     }
 ]
@@ -103,7 +103,7 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
 | `occupancySensorsEnabled`        |  Enable **Occupancy Sensors**.  ***more details below*     |             |  false |
 | `occupancyPollingInterval`       |  Time in **Seconds** to check for changes in occupnacy. Default is `10` for polling every 10 seconds. *it can't be set to false!*     |             |  10 |
 | `anyoneSensor`       |  Adds 1 **Occupancy Sensor** named "Anyone" to represent the state of someone at home     |             |  true |
-| `maunalControl`       |  Adds switch for getting Manual control status and turn OFF manual control from homekit (turn ON is done by sending any command).  |             |  false |
+| `manualControl`       |  Adds switch for getting Manual control status and turn OFF manual control from homekit (turn ON is done by sending any command).  |             |  false |
 | `autoOnly`       |  When set to `true`, all commands will be sent with "AUTO" fan speed if possible .   |             |  false |
 | `extraTemperatureSensor`       |  Adds a temperature sensor as a different accessory - so Siri will be able to tell you the temperature.   |             |  false |
 
