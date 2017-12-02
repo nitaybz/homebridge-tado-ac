@@ -46,6 +46,7 @@ TadoACplatform.prototype = {
             // get homeID
             function(next){
                 self.getHomeID = function(next){
+                    console.log("getting home id")
                     var options = {
                         host: 'my.tado.com',
                         path: '/api/v2/me?password=' + self.password + '&username=' + self.username,
@@ -86,8 +87,9 @@ TadoACplatform.prototype = {
                 if (!self.homeID || self.homeID == "" || self.homeID == undefined) {
                     console.log("storage: " + self.storage.getItem("TadoHomeID"))
                     if (self.storage.getItem("TadoHomeID") !== null || self.storage.getItem("TadoHomeID") !== undefined){
-                        self.homeID == self.storage.getItem("TadoHomeID")
+                        self.homeID = self.storage.getItem("TadoHomeID")
                     } else {
+                        console.log("gettin home id before")
                         self.getHomeID(next)
                     }
                 }
