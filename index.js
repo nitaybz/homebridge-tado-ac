@@ -82,9 +82,9 @@ TadoACplatform.prototype = {
                     }).end();
                 }
 
-                console.log(self.homeID)
-                if (!self.homeID || self.homeID == "" ){
-                    console.log(self.storage.getItem("TadoHomeID"))
+                console.log("self.homeID: " + self.homeID)
+                if (!self.homeID || self.homeID == "" || self.homeID == undefined) {
+                    console.log("storage: " + self.storage.getItem("TadoHomeID"))
                     if (self.storage.getItem("TadoHomeID") !== null){
                         self.homeID == self.storage.getItem("TadoHomeID")
                     } else {
