@@ -74,6 +74,7 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
         "name": "Tado AC",
         "username": "user@name.com",
         "password": "*************",
+        "homeID": 12345,
         "weatherSensorsEnabled": true,
         "weatherPollingInterval": 10,
         "occupancySensorsEnabled": true,
@@ -96,6 +97,7 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
 | `name`                           | name of the platform - for logs only                    |          |      -    |
 | `username`                       | your tado account username (something@something.com)    |     ✓    |      -    |
 | `password`                       | your tado account password                              |     ✓    |      -    |
+| `homeID`                       | if not used, the plugin will automatically search for your home ID and store it locally |       |      auto Fetch    |
 | `tadoMode`                       | default mode for the commands to be sent with. can be "MANUAL" for manual control until ended by the user, "TADO_MODE" for manual control until next schedule change in tado app OR "TIMER" for manual control until timer ends (duration can be set) .        |             |  "MANUAL" |
 | `durationInMinutes`              |   duration in Minutes for the "TIMER" settings       |            |  90 |
 | `weatherSensorsEnabled`          | Enable **Outside Temperature** sensor and **Solar Intensity** light bulb.  **more details below*      |             |  false |

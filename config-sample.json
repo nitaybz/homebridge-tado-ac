@@ -13,6 +13,7 @@
         "name": "Tado AC",
         "username": "user@name.com",
         "password": "*************",
+        "homeID": 12345,
         "weatherSensorsEnabled": true,
         "weatherPollingInterval": 10,
         "occupancySensorsEnabled": true,
@@ -23,6 +24,7 @@
         "autoOnly": false,
         "manualControl": true,
         "extraTemperatureSensor": true
+        
     }
   ],
 

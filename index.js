@@ -17,7 +17,7 @@ function TadoACplatform(log, config, api) {
     this.username = config['username'];
     this.password = encodeURIComponent(config['password']);
     this.token = "";
-    this.homeID = "";
+    this.homeID = config['tadoMode'] || "";
     this.temperatureUnit = ""
     this.tadoMode = config['tadoMode'] || "MANUAL";
     this.durationInMinutes =  config['durationInMinutes'] || 90;
@@ -29,6 +29,12 @@ function TadoACplatform(log, config, api) {
     this.occupancySensorsEnabled = config['occupancySensorsEnabled'] || false;
     this.occupancyPollingInterval = (config['occupancyPollingInterval']*1000) || 10000;
     this.anyoneSensor = (config['anyoneSensor']) || true;
+
+
+    this.storage = require('node-persist');
+    this.storage.initSync({
+        dir: HomebridgeAPI.user.persistPath()
+    });
 }
 
 TadoACplatform.prototype = {
@@ -39,32 +45,50 @@ TadoACplatform.prototype = {
         async.waterfall([
             // get homeID
             function(next){
-                var options = {
-                    host: 'my.tado.com',
-                    path: '/api/v2/me?password=' + self.password + '&username=' + self.username,
-                    method: 'GET'
-                };
+                self.getHomeID = function(next){
+                    var options = {
+                        host: 'my.tado.com',
+                        path: '/api/v2/me?password=' + self.password + '&username=' + self.username,
+                        method: 'GET'
+                    };
 
-                https.request(options, function(response){
-                    var strData = '';
-                    response.on('data', function(chunk) {
-                        strData += chunk;
-                    });
-                    response.on('end', function() {
-                        try {
-                            var data = JSON.parse(strData);
-                            self.homeID = data.homes[0].id;
-                            //self.log("Home ID is: " + self.homeID)
-                        }
-                        catch(e){
-                            self.log("Could not retrieve Home ID, error:" + e);
-                        }
-                        next()
-                    });
-                }).on('error', (e) => {
-                    console.error(e);
-                    next(e)
-                  }).end();
+                    https.request(options, function(response){
+                        var strData = '';
+                        response.on('data', function(chunk) {
+                            strData += chunk;
+                        });
+                        response.on('end', function() {
+                            try {
+                                var data = JSON.parse(strData);
+                                self.homeID = data.homes[0].id;
+                                self.storage.setItem("TadoHomeID", self.homeID);
+                                //self.log("Home ID is: " + self.homeID)
+                            }
+                            catch(e){
+                                self.log("Could not retrieve Home ID, error:" + e);
+                                self.log("Fetching home ID failed - Trying again...");
+                                setTimeout(function(){
+                                    self.getHomeID(next)
+                                }, 10000)
+                            }
+                            next()
+                        });
+                    }).on('error', (e) => {
+                        console.error(e);
+                        console.log("Fetching home ID failed - Trying again...");
+                        setTimeout(function(){
+                            self.getHomeID(next)
+                        }, 10000)
+                    }).end();
+                }
+
+                if (!self.homeID || self.homeID == "" ){
+                    if (self.storage.getItem("TadoHomeID") !== null){
+                        self.homeID == self.storage.getItem("TadoHomeID")
+                    } else {
+                        self.getHomeID(next)
+                    }
+                }
             },
 
             // get temperatureUnit
@@ -88,12 +112,19 @@ TadoACplatform.prototype = {
                         }
                         catch(e){
                             self.log("Could not retrieve Temperature Unit, error:" + e);
+                            self.log("Fetching Capabilities failed - Trying again...");
+                            setTimeout(function(){
+                                TadoACplatform.accessories(callback)
+                            }, 10000)
                         }
                         next()
                     });
                 }).on('error', (e) => {
                     console.error(e);
-                    next(e)
+                    console.log("Fetching Capabilities failed - Trying again...");
+                    setTimeout(function(){
+                        TadoACplatform.accessories(callback)
+                    }, 10000)
                   }).end();
             },
 
@@ -137,12 +168,19 @@ TadoACplatform.prototype = {
                         }
                         catch(e){
                             self.log("Could not retrieve Zones, error:" + e);
+                            self.log("Fetching Capabilities failed - Trying again...");
+                            setTimeout(function(){
+                                TadoACplatform.accessories(callback)
+                            }, 10000)
                         }
                         next(null, zonesArray)
                     });
                 }).on('error', (e) => {
                     console.error(e);
-                    next(e)
+                    console.log("Fetching Capabilities failed - Trying again...");
+                    setTimeout(function(){
+                        TadoACplatform.accessories(callback)
+                    }, 10000)
                   }).end();
             },
 
@@ -257,6 +295,10 @@ TadoACplatform.prototype = {
                             }
                             catch(e){
                                 self.log("Could not retrieve Zone Capabilities, error:" + e);
+                                self.log("Fetching Capabilities failed - Trying again...");
+                                setTimeout(function(){
+                                    TadoACplatform.accessories(callback)
+                                }, 10000)
                             }
                             var tadoAccessory = new TadoAccessory(self.log, zone)
                             myAccessories.push(tadoAccessory);
@@ -265,7 +307,10 @@ TadoACplatform.prototype = {
                         });
                     }).on('error', (e) => {
                         console.error(e);
-                        step(e)
+                        console.log("Fetching Capabilities failed - Trying again...");
+                        setTimeout(function(){
+                            TadoACplatform.accessories(callback)
+                        }, 10000)
                       }).end();
                 }, function(err){
                     if (err) next(err)
@@ -341,6 +386,10 @@ TadoACplatform.prototype = {
                             }
                             catch(e){
                                 self.log("Could not retrieve Tado Users, error:" + e);
+                                self.log("Fetching Capabilities failed - Trying again...");
+                                setTimeout(function(){
+                                    TadoACplatform.accessories(callback)
+                                }, 10000)
                             }
                             next()
                         });
