@@ -92,6 +92,7 @@ TadoACplatform.prototype = {
                     } else {
                         self.log("Home ID found in storage")
                         self.homeID = self.storage.getItem("TadoHomeID")
+                        next()
                     }
                 }
             },
