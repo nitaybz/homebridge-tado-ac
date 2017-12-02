@@ -63,7 +63,7 @@ TadoACplatform.prototype = {
                                 var data = JSON.parse(strData);
                                 self.homeID = data.homes[0].id;
                                 self.storage.setItem("TadoHomeID", self.homeID);
-                                self.log("Home ID is: " + self.homeID)
+                                // self.log("Home ID is: " + self.homeID)
                             }
                             catch(e){
                                 self.log("Could not retrieve Home ID, error:" + e);
@@ -83,16 +83,14 @@ TadoACplatform.prototype = {
                     }).end();
                 }
 
-                console.log("self.homeID: " + self.homeID)
                 if (!self.homeID || self.homeID == "" || self.homeID == undefined) {
                     
                     var getIDStorage = self.storage.getItem("TadoHomeID");
-                    console.log("storage: " + getIDStorage)
                     if (getIDStorage == null || getIDStorage == undefined){
-                        console.log("gettin home id before")
+                        self.log("Getting Home ID")
                         self.getHomeID(next)
                     } else {
-                        console.log("have home ID")
+                        self.log("Home ID found in storage")
                         self.homeID = self.storage.getItem("TadoHomeID")
                     }
                 }
