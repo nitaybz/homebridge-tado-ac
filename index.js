@@ -17,7 +17,7 @@ function TadoACplatform(log, config, api) {
     this.username = config['username'];
     this.password = encodeURIComponent(config['password']);
     this.token = "";
-    this.homeID = config['tadoMode'] || "";
+    this.homeID = config['homeID'] || "";
     this.temperatureUnit = ""
     this.tadoMode = config['tadoMode'] || "MANUAL";
     this.durationInMinutes =  config['durationInMinutes'] || 90;
