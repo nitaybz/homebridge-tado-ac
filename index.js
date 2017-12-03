@@ -94,7 +94,7 @@ TadoACplatform.prototype = {
                         self.homeID = self.storage.getItem("TadoHomeID")
                         next()
                     }
-                }
+                } else next()
             },
 
             // get temperatureUnit
