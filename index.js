@@ -104,34 +104,37 @@ TadoACplatform.prototype = {
                     path: '/api/v2/homes/' + self.homeID + '?password=' + self.password + '&username=' + self.username,
                     method: 'GET'
                 };
-
-                https.request(options, function(response){
-                    var strData = '';
-                    response.on('data', function(chunk) {
-                        strData += chunk;
-                    });
-                    response.on('end', function() {
-                        try {
-                            var data = JSON.parse(strData);
-                            self.temperatureUnit = data.temperatureUnit;
-                            //self.log("Temperature Unit is: " + self.temperatureUnit)
-                        }
-                        catch(e){
-                            self.log("Could not retrieve Temperature Unit, error:" + e);
-                            self.log("Fetching Capabilities failed - Trying again...");
-                            setTimeout(function(){
-                                TadoACplatform.accessories(callback)
-                            }, 10000)
-                        }
-                        next()
-                    });
-                }).on('error', (e) => {
-                    console.error(e);
-                    console.log("Fetching Capabilities failed - Trying again...");
-                    setTimeout(function(){
-                        TadoACplatform.accessories(callback)
-                    }, 10000)
-                  }).end();
+                function fetchTemperatureUnit(next){
+                    https.request(options, function(response){
+                        var strData = '';
+                        response.on('data', function(chunk) {
+                            strData += chunk;
+                        });
+                        response.on('end', function() {
+                            try {
+                                var data = JSON.parse(strData);
+                                self.temperatureUnit = data.temperatureUnit;
+                                //self.log("Temperature Unit is: " + self.temperatureUnit)
+                            }
+                            catch(e){
+                                self.log("Could not retrieve Temperature Unit, error:" + e);
+                                self.log("Fetching Temperature Unit failed - Trying again...");
+                                setTimeout(function(){
+                                    fetchTemperatureUnit(next)
+                                }, 10000)
+                            }
+                            next()
+                        });
+                    }).on('error', (e) => {
+                        console.error(e);
+                        console.log("Fetching Temperature Unit failed - Trying again...");
+                        setTimeout(function(){
+                            fetchTemperatureUnit(next)
+                        }, 10000)
+                      }).end();
+                }
+                fetchTemperatureUnit(next)
+                
             },
 
             // get Zones
@@ -141,59 +144,62 @@ TadoACplatform.prototype = {
                     path: '/api/v2/homes/' + self.homeID + '/zones?password=' + self.password + '&username=' + self.username,
                     method: 'GET'
                 };
-
-                https.request(options, function(response){
-                    var strData = '';
-                    response.on('data', function(chunk) {
-                        strData += chunk;
-                    });
-                    response.on('end', function() {
-                        try {
-                            var zones = JSON.parse(strData);
-                            var zonesArray = []
-                            for (i=0;i<zones.length;i++){
-                                if (zones[i].type == "AIR_CONDITIONING"){
-                                    var tadoConfig = {
-                                        id: zones[i].id,
-                                        name: zones[i].name,
-                                        homeID: self.homeID,
-                                        username: self.username,
-                                        password: self.password,
-                                        temperatureUnit: self.temperatureUnit,
-                                        tadoMode: self.tadoMode,
-                                        durationInMinutes: self.durationInMinutes,
-                                        autoOnly: self.autoOnly,
-                                        manualControl: self.manualControl,
-                                        extraTemperatureSensor: self.extraTemperatureSensor
+                function fetchZones(next){
+                    https.request(options, function(response){
+                        var strData = '';
+                        response.on('data', function(chunk) {
+                            strData += chunk;
+                        });
+                        response.on('end', function() {
+                            try {
+                                var zones = JSON.parse(strData);
+                                var zonesArray = []
+                                for (i=0;i<zones.length;i++){
+                                    if (zones[i].type == "AIR_CONDITIONING"){
+                                        var tadoConfig = {
+                                            id: zones[i].id,
+                                            name: zones[i].name,
+                                            homeID: self.homeID,
+                                            username: self.username,
+                                            password: self.password,
+                                            temperatureUnit: self.temperatureUnit,
+                                            tadoMode: self.tadoMode,
+                                            durationInMinutes: self.durationInMinutes,
+                                            autoOnly: self.autoOnly,
+                                            manualControl: self.manualControl,
+                                            extraTemperatureSensor: self.extraTemperatureSensor
+                                        }
+                                        self.log("Found new Zone: "+ tadoConfig.name + " (" + tadoConfig.id + ") ...")
+                                        zonesArray.push(tadoConfig);
                                     }
-                                    self.log("Found new Zone: "+ tadoConfig.name + " (" + tadoConfig.id + ") ...")
-                                    zonesArray.push(tadoConfig);
                                 }
+    
                             }
-
-                        }
-                        catch(e){
-                            self.log("Could not retrieve Zones, error:" + e);
-                            self.log("Fetching Capabilities failed - Trying again...");
-                            setTimeout(function(){
-                                TadoACplatform.accessories(callback)
-                            }, 10000)
-                        }
-                        next(null, zonesArray)
-                    });
-                }).on('error', (e) => {
-                    console.error(e);
-                    console.log("Fetching Capabilities failed - Trying again...");
-                    setTimeout(function(){
-                        TadoACplatform.accessories(callback)
-                    }, 10000)
-                  }).end();
+                            catch(e){
+                                self.log("Could not retrieve Zones, error:" + e);
+                                self.log("Fetching Zones failed - Trying again...");
+                                setTimeout(function(){
+                                    fetchZones(next)
+                                }, 10000)
+                            }
+                            next(null, zonesArray)
+                        });
+                    }).on('error', (e) => {
+                        console.error(e);
+                        console.log("Fetching Zones failed - Trying again...");
+                        setTimeout(function(){
+                            fetchZones(next)
+                        }, 10000)
+                      }).end();
+                }
+                fetchZones(next)
+                
             },
 
             //get Capabilities
             function(zonesArray, next){
                 async.forEachOf(zonesArray, function (zone, key, step) {
-
+                    
                     zone.autoMode = false;
                     zone.coolMode = false;
                     zone.heatMode = false;
@@ -209,115 +215,118 @@ TadoACplatform.prototype = {
                         method: 'GET'
                     };
 
-                    https.request(options, function(response){
-                        var strData = '';
-                        response.on('data', function(chunk) {
-                            strData += chunk;
-                        });
-                        response.on('end', function() {
-                            try {
-                                var capabilities = JSON.parse(strData);
-                                //self.log(JSON.stringify(capabilities))
-                                if (capabilities['AUTO']){
-                                    zone.autoMode = {};
-                                    if (capabilities['AUTO']['fanSpeeds']){
-                                        zone.useFanSpeed = true;
-                                        zone.autoMode.fanSpeeds = capabilities['AUTO']['fanSpeeds']
-                                        for (i=0;i<zone.autoMode.fanSpeeds.length;i++){
-                                            if (zone.autoMode.fanSpeeds[i] == "AUTO"){
-                                                zone.autoFanExists = true
+                    function fetchZoneCapabilities(step){
+                        https.request(options, function(response){
+                            var strData = '';
+                            response.on('data', function(chunk) {
+                                strData += chunk;
+                            });
+                            response.on('end', function() {
+                                try {
+                                    var capabilities = JSON.parse(strData);
+                                    //self.log(JSON.stringify(capabilities))
+                                    if (capabilities['AUTO']){
+                                        zone.autoMode = {};
+                                        if (capabilities['AUTO']['fanSpeeds']){
+                                            zone.useFanSpeed = true;
+                                            zone.autoMode.fanSpeeds = capabilities['AUTO']['fanSpeeds']
+                                            for (i=0;i<zone.autoMode.fanSpeeds.length;i++){
+                                                if (zone.autoMode.fanSpeeds[i] == "AUTO"){
+                                                    zone.autoFanExists = true
+                                                }
+                                            }
+                                            if (capabilities['AUTO']['fanSpeeds'].length > zone.maxSpeed){
+                                                zone.maxSpeed = capabilities['AUTO']['fanSpeeds'].length;
                                             }
                                         }
-                                        if (capabilities['AUTO']['fanSpeeds'].length > zone.maxSpeed){
-                                            zone.maxSpeed = capabilities['AUTO']['fanSpeeds'].length;
+                                        if (capabilities['AUTO']['swings']){
+                                            zone.autoMode.swings = true;
+                                            zone.useSwing = true;
                                         }
                                     }
-                                    if (capabilities['AUTO']['swings']){
-                                        zone.autoMode.swings = true;
-                                        zone.useSwing = true;
-                                    }
-                                }
-                                if (capabilities['FAN']){
-                                    zone.fanMode = {};
-                                    if (capabilities['FAN']['fanSpeeds']){
-                                        zone.useFanSpeed = true;
-                                        zone.fanMode.fanSpeeds = capabilities['FAN']['fanSpeeds']
-                                        for (i=0;i<zone.fanMode.fanSpeeds.length;i++){
-                                            if (zone.fanMode.fanSpeeds[i] == "AUTO"){
-                                                zone.autoFanExists = true
+                                    if (capabilities['FAN']){
+                                        zone.fanMode = {};
+                                        if (capabilities['FAN']['fanSpeeds']){
+                                            zone.useFanSpeed = true;
+                                            zone.fanMode.fanSpeeds = capabilities['FAN']['fanSpeeds']
+                                            for (i=0;i<zone.fanMode.fanSpeeds.length;i++){
+                                                if (zone.fanMode.fanSpeeds[i] == "AUTO"){
+                                                    zone.autoFanExists = true
+                                                }
+                                            }
+                                            if (capabilities['FAN']['fanSpeeds'].length > zone.maxSpeed){
+                                                zone.maxSpeed = capabilities['FAN']['fanSpeeds'].length;
                                             }
                                         }
-                                        if (capabilities['FAN']['fanSpeeds'].length > zone.maxSpeed){
-                                            zone.maxSpeed = capabilities['FAN']['fanSpeeds'].length;
+                                        if (capabilities['FAN']['swings']){
+                                            zone.fanMode.swings = true;
+                                            zone.useSwing = true;
                                         }
                                     }
-                                    if (capabilities['FAN']['swings']){
-                                        zone.fanMode.swings = true;
-                                        zone.useSwing = true;
-                                    }
-                                }
-                                if (capabilities['HEAT']){
-                                    zone.heatMode = {};
-                                    zone.heatMode.minValue = capabilities['HEAT']['temperatures']['celsius']['min'];
-                                    zone.heatMode.maxValue = capabilities['HEAT']['temperatures']['celsius']['max'];
-                                    if (capabilities['HEAT']['fanSpeeds']){
-                                        zone.useFanSpeed = true;
-                                        zone.heatMode.fanSpeeds = capabilities['HEAT']['fanSpeeds']
-                                        for (i=0;i<zone.heatMode.fanSpeeds.length;i++){
-                                            if (zone.heatMode.fanSpeeds[i] == "AUTO"){
-                                                zone.autoFanExists = true
+                                    if (capabilities['HEAT']){
+                                        zone.heatMode = {};
+                                        zone.heatMode.minValue = capabilities['HEAT']['temperatures']['celsius']['min'];
+                                        zone.heatMode.maxValue = capabilities['HEAT']['temperatures']['celsius']['max'];
+                                        if (capabilities['HEAT']['fanSpeeds']){
+                                            zone.useFanSpeed = true;
+                                            zone.heatMode.fanSpeeds = capabilities['HEAT']['fanSpeeds']
+                                            for (i=0;i<zone.heatMode.fanSpeeds.length;i++){
+                                                if (zone.heatMode.fanSpeeds[i] == "AUTO"){
+                                                    zone.autoFanExists = true
+                                                }
+                                            }
+                                            if (capabilities['HEAT']['fanSpeeds'].length > zone.maxSpeed){
+                                                zone.maxSpeed = capabilities['HEAT']['fanSpeeds'].length;
                                             }
                                         }
-                                        if (capabilities['HEAT']['fanSpeeds'].length > zone.maxSpeed){
-                                            zone.maxSpeed = capabilities['HEAT']['fanSpeeds'].length;
+                                        if (capabilities['HEAT']['swings']){
+                                            zone.heatMode.swings = true;
+                                            zone.useSwing = true;
                                         }
                                     }
-                                    if (capabilities['HEAT']['swings']){
-                                        zone.heatMode.swings = true;
-                                        zone.useSwing = true;
-                                    }
-                                }
-                                if (capabilities['COOL']){
-                                    zone.coolMode = {};
-                                    zone.coolMode.minValue = capabilities['COOL']['temperatures']['celsius']['min'];
-                                    zone.coolMode.maxValue = capabilities['COOL']['temperatures']['celsius']['max'];
-                                    if (capabilities['COOL']['fanSpeeds']){
-                                        zone.useFanSpeed = true;
-                                        zone.coolMode.fanSpeeds = capabilities['COOL']['fanSpeeds']
-                                        for (i=0;i<zone.coolMode.fanSpeeds.length;i++){
-                                            if (zone.coolMode.fanSpeeds[i] == "AUTO"){
-                                                zone.autoFanExists = true
+                                    if (capabilities['COOL']){
+                                        zone.coolMode = {};
+                                        zone.coolMode.minValue = capabilities['COOL']['temperatures']['celsius']['min'];
+                                        zone.coolMode.maxValue = capabilities['COOL']['temperatures']['celsius']['max'];
+                                        if (capabilities['COOL']['fanSpeeds']){
+                                            zone.useFanSpeed = true;
+                                            zone.coolMode.fanSpeeds = capabilities['COOL']['fanSpeeds']
+                                            for (i=0;i<zone.coolMode.fanSpeeds.length;i++){
+                                                if (zone.coolMode.fanSpeeds[i] == "AUTO"){
+                                                    zone.autoFanExists = true
+                                                }
+                                            }
+                                            if (capabilities['COOL']['fanSpeeds'].length > zone.maxSpeed){
+                                                zone.maxSpeed = capabilities['COOL']['fanSpeeds'].length;
                                             }
                                         }
-                                        if (capabilities['COOL']['fanSpeeds'].length > zone.maxSpeed){
-                                            zone.maxSpeed = capabilities['COOL']['fanSpeeds'].length;
+                                        if (capabilities['COOL']['swings']){
+                                            zone.coolMode.swings = true;
+                                            zone.useSwing = true;
                                         }
                                     }
-                                    if (capabilities['COOL']['swings']){
-                                        zone.coolMode.swings = true;
-                                        zone.useSwing = true;
-                                    }
                                 }
-                            }
-                            catch(e){
-                                self.log("Could not retrieve Zone Capabilities, error:" + e);
-                                self.log("Fetching Capabilities failed - Trying again...");
-                                setTimeout(function(){
-                                    TadoACplatform.accessories(callback)
-                                }, 10000)
-                            }
-                            var tadoAccessory = new TadoAccessory(self.log, zone)
-                            myAccessories.push(tadoAccessory);
-
-                            step()
-                        });
-                    }).on('error', (e) => {
-                        console.error(e);
-                        console.log("Fetching Capabilities failed - Trying again...");
-                        setTimeout(function(){
-                            TadoACplatform.accessories(callback)
-                        }, 10000)
-                      }).end();
+                                catch(e){
+                                    self.log("Could not retrieve Zone Capabilities, error:" + e);
+                                    self.log("Fetching Zone Capabilities failed - Trying again...");
+                                    setTimeout(function(){
+                                        fetchZoneCapabilities(step)
+                                    }, 10000)
+                                }
+                                var tadoAccessory = new TadoAccessory(self.log, zone)
+                                myAccessories.push(tadoAccessory);
+                                step()
+                            });
+                        }).on('error', (e) => {
+                            console.error(e);
+                            console.log("Fetching Zone Capabilities failed - Trying again...");
+                            setTimeout(function(){
+                                fetchZoneCapabilities(step)
+                            }, 10000)
+                          }).end();    
+                    }
+                    fetchZoneCapabilities(step)
+                    
                 }, function(err){
                     if (err) next(err)
                     else next()
@@ -365,41 +374,50 @@ TadoACplatform.prototype = {
                         method: 'GET'
                     };
 
-                    https.request(options, function(response){
-                        var strData = '';
-                        response.on('data', function(chunk) {
-                            strData += chunk;
-                        });
-                        response.on('end', function() {
-                            try {
-                                var data = JSON.parse(strData);
-                                for (i=0;i<data.length;i++){
-                                    var mobileID = false;
-                                    var deviceData = {};
-                                    for (j=data[i].mobileDevices.length-1;j>=0;j--){
-                                        if (data[i].mobileDevices[j].settings.geoTrackingEnabled){
-                                            mobileID = data[i].mobileDevices[j].id;
-                                            deviceData = data[i].mobileDevices[j].deviceMetadata;
+                    function fetchOccupancySensor(next){
+                        https.request(options, function(response){
+                            var strData = '';
+                            response.on('data', function(chunk) {
+                                strData += chunk;
+                            });
+                            response.on('end', function() {
+                                try {
+                                    var data = JSON.parse(strData);
+                                    for (i=0;i<data.length;i++){
+                                        var mobileID = false;
+                                        var deviceData = {};
+                                        for (j=data[i].mobileDevices.length-1;j>=0;j--){
+                                            if (data[i].mobileDevices[j].settings.geoTrackingEnabled){
+                                                mobileID = data[i].mobileDevices[j].id;
+                                                deviceData = data[i].mobileDevices[j].deviceMetadata;
+                                            }
+                                        }
+                                        if (mobileID){
+                                            addUser(mobileID, data[i].name, deviceData)
                                         }
                                     }
-                                    if (mobileID){
-                                        addUser(mobileID, data[i].name, deviceData)
+                                    if (self.occupancySensors.length > 0 && self.anyoneSensor){
+                                        addUser(11111, "Anyone", {platform: "anyone", osVersion: "1.1.1", model: "Tado"})
                                     }
                                 }
-                                if (self.occupancySensors.length > 0 && self.anyoneSensor){
-                                    addUser(11111, "Anyone", {platform: "anyone", osVersion: "1.1.1", model: "Tado"})
+                                catch(e){
+                                    self.log("Could not retrieve Tado Users, error:" + e);
+                                    self.log("Fetching Tado Users failed - Trying again...");
+                                    setTimeout(function(){
+                                        fetchOccupancySensor(next)
+                                    }, 10000)
                                 }
-                            }
-                            catch(e){
-                                self.log("Could not retrieve Tado Users, error:" + e);
-                                self.log("Fetching Capabilities failed - Trying again...");
-                                setTimeout(function(){
-                                    TadoACplatform.accessories(callback)
-                                }, 10000)
-                            }
-                            next()
-                        });
-                    }).end();
+                                next()
+                            });
+                        }).on('error', (e) => {
+                            self.log("Could not retrieve Tado Users, error:" + e);
+                            self.log("Fetching Tado Users failed - Trying again...");
+                            setTimeout(function(){
+                                fetchOccupancySensor(next)
+                            }, 10000)
+                          }).end(); 
+                    }
+                    
                 } else next()
             }
 
