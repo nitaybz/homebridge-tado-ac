@@ -1284,7 +1284,7 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
             }
             https.request(options, null).on('error', (e) => {
                 console.error(e);
-                callback(e)
+                return;
               }).end(overlayReady);
             accessory.setProcessing = false;
             accessory.setFunctions = []
@@ -1521,7 +1521,7 @@ TadoAccessory.prototype._setFanOverlay = function(overlay, functionName, state) 
             }
             https.request(options, null).on('error', (e) => {
                 console.error(e);
-                callback(e)
+                return;
               }).end(overlayReady);
             accessory.setFanProcessing = false;
             accessory.setFanFunctions = []
@@ -1678,7 +1678,7 @@ function TadoWeather(log, config){
                 });
             }).on('error', (e) => {
                 console.error(e);
-                callback(e)
+                return;
               }).end();
         }
     }
@@ -1841,12 +1841,12 @@ function occupancySensor(log, config, platform){
                 catch(e){
                     self.log("Could not retrieve " + self.name +  " Occupancy Status, error:" + e);
                     var error = new Error("Could not retrieve " + self.name +  " Occupancy Status, error:" + e);
-                    callback(error , null, null);
+                    return;
                 }
             });
         }).on('error', (e) => {
             console.error(e);
-            callback(e)
+            return;
           }).end();
     }
 
@@ -1917,7 +1917,3 @@ occupancySensor.prototype.getStatus = function(callback) {
 
     callback(null, this.occupied);
 }
-
-
-
-
