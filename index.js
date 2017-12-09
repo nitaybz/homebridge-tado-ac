@@ -417,7 +417,7 @@ TadoACplatform.prototype = {
                             }, 10000)
                           }).end(); 
                     }
-                    
+                    fetchOccupancySensor(next)
                 } else next()
             }
 
@@ -427,13 +427,6 @@ TadoACplatform.prototype = {
         })
     }
 }
-
-
-
-
-
-
-
 
 
 
