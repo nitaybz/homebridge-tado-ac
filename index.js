@@ -571,7 +571,7 @@ function TadoAccessory(log, config) {
         heat: lastHeatOverlay,
         auto: lastAutoOverlay,
         fan: lastFanOverlay,
-        last: lastCoolOverlay
+        last: {}
     }
 
     if (this.storage.getItem(this.name) == null){
@@ -777,6 +777,16 @@ TadoAccessory.prototype._getCurrentStateResponse = function(callback) {
                     self.processing = false;
                     if (data.setting.power !== "OFF") {
                         self.lastMode.last.setting = data.setting
+                        if (self.tadoMode == "TIMER") { 
+                            self.lastMode.last.termination = {
+                                "type": self.tadoMode,
+                                "durationInSeconds": self.durationInMinutes*60 
+                            }
+                        } else {
+                            self.lastMode.last.termination = {
+                                "type": self.tadoMode
+                            }
+                        }
                         if (self.lastMode.last.setting.fanSpeed && self.autoOnly) self.lastMode.last.setting.fanSpeed = "AUTO"
                         switch (data.setting.mode){
                             case "COOL":
