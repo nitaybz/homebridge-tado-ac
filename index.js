@@ -485,7 +485,7 @@ function TadoAccessory(log, config) {
     this.storage.initSync({
         dir: HomebridgeAPI.user.persistPath()
     });
-
+    
     this.coolMidValue = this.coolMode.maxValue - (this.coolMode.maxValue-this.coolMode.minValue)/2;
     var lastCoolOverlay = {
         "termination": {
@@ -505,6 +505,25 @@ function TadoAccessory(log, config) {
     else if (this.coolMode.fanSpeeds) { lastCoolOverlay.setting.fanSpeed = this.coolMode.fanSpeeds[1] }
     if (this.coolMode.swings) { lastCoolOverlay.setting.swing = "OFF" }
     if (this.tadoMode == "TIMER") { lastCoolOverlay.termination.durationInSeconds = this.durationInMinutes*60 }
+    
+    var lastLastOverlay = {
+        "termination": {
+            "type": this.tadoMode
+        },
+        "setting": {
+            "power": "ON",
+            "type": "AIR_CONDITIONING",
+            "mode": "COOL",
+            "temperature": {
+                "fahrenheit": Math.round(this.coolMidValue * 1.8 + 32),
+                "celsius": this.coolMidValue
+            }
+        }
+    };
+    if (this.coolMode.fanSpeeds && this.autoOnly) { lastLastOverlay.setting.fanSpeed = "AUTO" }
+    else if (this.coolMode.fanSpeeds) { lastLastOverlay.setting.fanSpeed = this.coolMode.fanSpeeds[1] }
+    if (this.coolMode.swings) { lastLastOverlay.setting.swing = "OFF" }
+    if (this.tadoMode == "TIMER") { lastLastOverlay.termination.durationInSeconds = this.durationInMinutes*60 }
 
     this.heatMidValue = this.heatMode.maxValue - (this.heatMode.maxValue-this.heatMode.minValue)/2;
     var lastHeatOverlay = {
@@ -571,7 +590,7 @@ function TadoAccessory(log, config) {
         heat: lastHeatOverlay,
         auto: lastAutoOverlay,
         fan: lastFanOverlay,
-        last: {}
+        last: lastLastOverlay
     }
 
     if (this.storage.getItem(this.name) == null){
