@@ -1122,6 +1122,16 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
             if (accessory.setFunctions.length == 1){
                 if (accessory.setFunctions[0].overlay !== null && accessory.setFunctions[0].overlay.setting.power !== "OFF"){
                     accessory.lastMode.last = accessory.setFunctions[0].overlay
+                    if (accessory.tadoMode == "TIMER") { 
+                        accessory.lastMode.last.termination = {
+                            "type": accessory.tadoMode,
+                            "durationInSeconds": accessory.durationInMinutes*60 
+                        }
+                    } else {
+                        accessory.lastMode.last.termination = {
+                            "type": accessory.tadoMode
+                        }
+                    }
                     if (accessory.setFunctions[0].name == "active"){
                         accessory.log("Activating " + accessory.zoneName + " AC")
                     }
@@ -1137,8 +1147,17 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                                 }
                                 break;
                             case "mode":
-                            accessory.lastMode.last = accessory.setFunctions[j].overlay
-
+                                accessory.lastMode.last = accessory.setFunctions[j].overlay
+                                if (accessory.tadoMode == "TIMER") { 
+                                    accessory.lastMode.last.termination = {
+                                        "type": accessory.tadoMode,
+                                        "durationInSeconds": accessory.durationInMinutes*60 
+                                    }
+                                } else {
+                                    accessory.lastMode.last.termination = {
+                                        "type": accessory.tadoMode
+                                    }
+                                }
                                 break;
                         }
                     }
