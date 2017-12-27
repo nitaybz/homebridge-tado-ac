@@ -1,4 +1,5 @@
 
+
 homebridge-tado-ac (v2.2)
 ========================
 
@@ -8,10 +9,20 @@ Complies with ```Service.HeaterCooler```
 
 Compatible with ***iOS 11 and above*** -  iOS 10 Home app does not support this service.
 
+_________________________________________
+#### Creating and maintaining Homebridge plugins consume a lot of time and effort, if you would like to share your appreciation, feel free to "Star" or donate. 
+[![PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=LESALXG6HR9WJ&lc=IL&item_name=NitayBZ&currency_code=ILS&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest) [![Bitcoin](https://img.shields.io/badge/Donate-Bitcoin-green.svg)](https://blockchain.info/payment_request?address=18uuUZ5GaMFoRH5TrQFJATQgqrpXCtqZRQ)
+
+[Click here](https://github.com/nitaybz?utf8=%E2%9C%93&tab=repositories&q=homebridge) to review more of my plugins.
+_________________________________________
+
+
+## Updates
+
 **version 2.2:**
 1. Added support for "TIMER" Tado mode to set each command with a timer.
 2. Manual Control Switch - to turn off "Manual Control" if needed.
-3. Extra Temperature Sensor - for Temperature Sensor in a different accessory.
+3. *Extra Temperature Sensor - for Temperature Sensor in a different accessory. (deprecated)*
 4. Added support for "AUTO" fan speed.
 5. Solved crashing homebridge when API is down.
 
@@ -83,8 +94,7 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
         "tadoMode": "TIMER",
         "durationInMinutes": 100,
         "autoOnly": false,
-        "manualControl": true,
-        "extraTemperatureSensor": true
+        "manualControl": true
     }
 ]
 ```
@@ -107,7 +117,6 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
 | `anyoneSensor`       |  Adds 1 **Occupancy Sensor** named "Anyone" to represent the state of someone at home     |             |  true |
 | `manualControl`       |  Adds switch for getting Manual control status and turn OFF manual control from homekit (turn ON is done by sending any command).  |             |  false |
 | `autoOnly`       |  When set to `true`, all commands will be sent with "AUTO" fan speed if possible .   |             |  false |
-| `extraTemperatureSensor`       |  Adds a temperature sensor as a different accessory - so Siri will be able to tell you the temperature.   |             |  false |
 
 ### * Outside Temperature & Solar Intensity Sensors
  Enabling this feature will add 2 new accessories to your home:
