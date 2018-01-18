@@ -1,6 +1,6 @@
 var Service, Characteristic;
 var async = require("async"),
-    https = require('https');
+    https = require('https'); 
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
@@ -795,15 +795,17 @@ TadoAccessory.prototype._getCurrentStateResponse = function(callback) {
                     var data = JSON.parse(strData);
                     self.processing = false;
                     if (data.setting.power !== "OFF") {
-                        self.lastMode.last.setting = data.setting
-                        if (self.tadoMode == "TIMER") { 
-                            self.lastMode.last.termination = {
-                                "type": self.tadoMode,
-                                "durationInSeconds": self.durationInMinutes*60 
-                            }
-                        } else {
-                            self.lastMode.last.termination = {
-                                "type": self.tadoMode
+                        if (data.setting.mode !== "FAN") {
+                            self.lastMode.last.setting = data.setting
+                            if (self.tadoMode == "TIMER") { 
+                                self.lastMode.last.termination = {
+                                    "type": self.tadoMode,
+                                    "durationInSeconds": self.durationInMinutes*60 
+                                }
+                            } else {
+                                self.lastMode.last.termination = {
+                                    "type": self.tadoMode
+                                }
                             }
                         }
                         if (self.lastMode.last.setting.fanSpeed && self.autoOnly) self.lastMode.last.setting.fanSpeed = "AUTO"
@@ -1339,7 +1341,7 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
             }
             if (overlayReady != null) {
                 overlayReady = JSON.stringify(overlayReady);
-                //accessory.log("zone: " + accessory.zone + ",  body: " + overlayReady);
+//                 accessory.log("zone: " + accessory.zone + ",  body: " + overlayReady);
             }
             https.request(options, null).on('error', (e) => {
                 console.error(e);
@@ -1532,6 +1534,16 @@ TadoAccessory.prototype._setFanOverlay = function(overlay, functionName, state) 
                     }
                 }
             }
+            if (accessory.tadoMode == "TIMER") { 
+                accessory.lastMode.fan.termination = {
+                    "type": accessory.tadoMode,
+                    "durationInSeconds": accessory.durationInMinutes*60 
+                }
+            } else {
+                accessory.lastMode.fan.termination = {
+                    "type": accessory.tadoMode
+                }
+            }
             overlayReady = accessory.lastMode.fan
             accessory.storage.setItem(accessory.name, accessory.lastMode)
 
@@ -1576,7 +1588,7 @@ TadoAccessory.prototype._setFanOverlay = function(overlay, functionName, state) 
             }
             if (overlayReady != null) {
                 overlayReady = JSON.stringify(overlayReady);
-                // accessory.log("zone: " + accessory.zone + ",  body: " + overlayReady);
+//                 accessory.log("zone: " + accessory.zone + ",  body: " + overlayReady);
             }
             https.request(options, null).on('error', (e) => {
                 console.error(e);
