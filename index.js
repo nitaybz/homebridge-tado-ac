@@ -1762,6 +1762,11 @@ function TadoWeather(log, config){
     this.TemperatureSensor = new Service.TemperatureSensor(this.name);
 
     this.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature)
+        .setProps({
+           maxValue: 100,
+           minValue: -100,
+           minStep: 1
+        })
         .on('get', this.getOutsideTemperature.bind(this));
 
     this.SolarSensor = new Service.Lightbulb("Solar Intensity");
