@@ -633,7 +633,7 @@ TadoAccessory.prototype.getServices = function() {
 
     this.HeaterCoolerService.getCharacteristic(Characteristic.CurrentTemperature)
         .setProps({
-            minValue: 0,
+            minValue: -100,
             maxValue: 100,
             minStep: 0.01
         })
@@ -691,7 +691,7 @@ TadoAccessory.prototype.getServices = function() {
         .setProps({
             minValue: 0,
             maxValue: 100,
-            minStep: 0.01
+            minStep: 1
         })
         .on('get', this.getCurrentRelativeHumidity.bind(this));
 
@@ -755,7 +755,7 @@ TadoAccessory.prototype.getServices = function() {
 
         this.extraTemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature)
             .setProps({
-                minValue: 0,
+                minValue: -100,
                 maxValue: 100,
                 minStep: 0.01
             })
@@ -1779,7 +1779,7 @@ function TadoWeather(log, config){
         .setProps({
             maxValue: 100,
             minValue: 0,
-            minStep: 0.1
+            minStep: 1
         })
         .on('get', this.getSolar.bind(this))
         .on('set', this.setSolar.bind(this));
