@@ -1,6 +1,6 @@
 
 
-homebridge-tado-ac (v2.2)
+homebridge-tado-ac (v2.3)
 ========================
 
 Homebridge Plugin for Tado Smart AC Control.
