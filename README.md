@@ -21,6 +21,11 @@ _________________________________________
 
 ## Updates
 
+**version 2.3:**
+1. Added option to disable the humidity sensors (if you're tracking the humidity with another device).
+2. Added option to disable the fans (if you're using other fans)
+
+
 **version 2.2:**
 1. Added support for "TIMER" Tado mode to set each command with a timer.
 2. Manual Control Switch - to turn off "Manual Control" if needed.
@@ -96,7 +101,9 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
         "tadoMode": "TIMER",
         "durationInMinutes": 100,
         "autoOnly": false,
-        "manualControl": true
+        "manualControl": true,
+        "disableHumiditySensor": false,
+        "disableFan": false
     }
 ]
 ```
@@ -119,6 +126,9 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
 | `anyoneSensor`       |  Adds 1 **Occupancy Sensor** named "Anyone" to represent the state of someone at home     |             |  true |
 | `manualControl`       |  Adds switch for getting Manual control status and turn OFF manual control from homekit (turn ON is done by sending any command).  |             |  false |
 | `autoOnly`       |  When set to `true`, all commands will be sent with "AUTO" fan speed if possible .   |             |  false |
+| `disableHumiditySensor`       |  When set to `true`, it will disable humidity sensors   |             |  false |
+| `disableFan`       |  When set to `true`, it will disable the fans   |             |  false |
+
 
 ### * Outside Temperature & Solar Intensity Sensors
  Enabling this feature will add 2 new accessories to your home:
