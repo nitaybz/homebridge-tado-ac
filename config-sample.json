@@ -23,8 +23,8 @@
         "durationInMinutes": 100,
         "autoOnly": false,
         "manualControl": true,
-        "extraTemperatureSensor": true
-        
+        "disableHumiditySensor": false,
+        "disableFan": false
     }
   ],
 
