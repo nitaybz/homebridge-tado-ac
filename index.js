@@ -23,18 +23,71 @@ function TadoACplatform(log, config, api) {
     this.durationInMinutes =  config['durationInMinutes'] || 90;
     this.autoOnly = config['autoOnly'] || false;
     this.manualControl = config['manualControl'] || false;
-    this.extraTemperatureSensor = config['extraTemperatureSensor'] || false;
     this.weatherSensorsEnabled = config['weatherSensorsEnabled'] || false;
     this.weatherPollingInterval = (config['weatherPollingInterval']*60*1000) || false;
     this.occupancySensorsEnabled = config['occupancySensorsEnabled'] || false;
     this.occupancyPollingInterval = (config['occupancyPollingInterval']*1000) || 10000;
     this.anyoneSensor = (config['anyoneSensor']) || true;
+    this.disableHumiditySensor = config['disableHumiditySensor'] || false;
+    this.disableFan = config['disableFan'] || false;
 
 
     this.storage = require('node-persist');
     this.storage.initSync({
         dir: HomebridgeAPI.user.persistPath()
     });
+
+    //Get Token
+    var tokenOptions = {
+        host: 'auth.tado.com',
+        path: '/oauth/token?client_id=tado-web-app&client_secret=wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc&grant_type=password&password=' + this.password + '&scope=home.user&username=' + this.username,
+        method: 'POST'
+    };
+    var self = this
+    self.log("Getting Token...")
+    https.request(tokenOptions, function(response){
+        var strData = '';
+        response.on('data', function(chunk) {
+            strData += chunk;
+        });
+        response.on('end', function() {
+            //self.log("strData:" + strData);
+            try {
+                var tokenObj = JSON.parse(strData);
+            }
+            catch(e){
+                self.log("couldn't retrieve new Token, error:" + e);
+            }
+            var lastToken = self.storage.getItem('Tado_Token');
+            // self.log("tokenObj: " + JSON.stringify(tokenObj));
+            // self.log("lastToken: " + lastToken);
+            if (lastToken !== tokenObj.access_token && tokenObj.access_token !== undefined) {
+                self.storage.setItem('Tado_Token', tokenObj.access_token);
+            }
+        });
+        setInterval(function(response){
+            // self.log("Getting Token...")
+            https.request(tokenOptions, function(response){
+                var strData = '';
+                response.on('data', function(chunk) {
+                    strData += chunk;
+                });
+                response.on('end', function() {
+                    try {
+                        var tokenObj = JSON.parse(strData);
+                    }
+                    catch(e){
+                        self.log("couldn't retrieve new Token, error:" + e);
+                    }
+                    var lastToken = self.storage.getItem('Tado_Token');
+                    if (lastToken !== tokenObj.access_token && tokenObj.access_token !== undefined) {
+                        self.storage.setItem('Tado_Token', tokenObj.access_token);
+                    }
+                });
+            }).end();
+        }, 500000)
+    }).end();
+
 }
 
 TadoACplatform.prototype = {
@@ -43,6 +96,10 @@ TadoACplatform.prototype = {
         var myAccessories = []
         var self = this;
         async.waterfall([
+
+
+
+
             // get homeID
             function(next){
                 self.getHomeID = function(next){
@@ -167,7 +224,9 @@ TadoACplatform.prototype = {
                                             durationInMinutes: self.durationInMinutes,
                                             autoOnly: self.autoOnly,
                                             manualControl: self.manualControl,
-                                            extraTemperatureSensor: self.extraTemperatureSensor
+                                            extraTemperatureSensor: self.extraTemperatureSensor,
+                                            disableHumiditySensor: self.disableHumiditySensor,
+                                            disableFan: self.disableFan
                                         }
                                         self.log("Found new Zone: "+ tadoConfig.name + " (" + tadoConfig.id + ") ...")
                                         zonesArray.push(tadoConfig);
@@ -466,11 +525,11 @@ function TadoAccessory(log, config) {
     this.autoMode = config.autoMode;
     this.coolMode = config.coolMode;
     this.heatMode = config.heatMode;
+    this.disableHumiditySensor = config.disableHumiditySensor;
+    this.disableFan = config.disableFan;
     this.fanMode = config.fanMode;
-
     this.autoOnly = config.autoOnly
     this.manualControl = config.manualControl
-    this.extraTemperatureSensor = config.extraTemperatureSensor
     this.autoFanExists = config.autoFanExists
     this.maxSpeed = config.maxSpeed;
     this.useSwing = config.useSwing;
@@ -573,16 +632,16 @@ function TadoAccessory(log, config) {
     };
 
     var fanAutoFanExists = false
-    if (this.fanMode.fanSpeeds){
+    if (this.fanMode && this.fanMode.fanSpeeds){
         for (i=0;i<this.fanMode.fanSpeeds.length;i++){
             if (this.fanMode.fanSpeeds[i] == "AUTO"){
                 fanAutoFanExists = true
             }
         }
     }
-    if (this.fanMode.fanSpeeds && this.autoOnly && fanAutoFanExists) { lastFanOverlay.setting.fanSpeed = "AUTO" }
-    else if (this.fanMode.fanSpeeds) { lastFanOverlay.setting.fanSpeed = this.fanMode.fanSpeeds[1] }
-    if (this.fanMode.swings) { lastFanOverlay.setting.swing = "OFF" }
+    if (this.fanMode && this.fanMode.fanSpeeds && this.autoOnly && fanAutoFanExists) { lastFanOverlay.setting.fanSpeed = "AUTO" }
+    else if (this.fanMode && this.fanMode.fanSpeeds) { lastFanOverlay.setting.fanSpeed = this.fanMode.fanSpeeds[1] }
+    if (this.fanMode && this.fanMode.swings) { lastFanOverlay.setting.swing = "OFF" }
     if (this.tadoMode == "TIMER") { lastFanOverlay.termination.durationInSeconds = this.durationInMinutes*60 }
 
     this.lastMode = {
@@ -683,21 +742,25 @@ TadoAccessory.prototype.getServices = function() {
             .on('set', this.setRotationSpeed.bind(this));
     }
 
+    var services = [informationService, this.HeaterCoolerService];
 
+    if (!this.disableHumiditySensor){
+        this.HumiditySensor = new Service.HumiditySensor(this.zoneName + " Humidity");
 
-    this.HumiditySensor = new Service.HumiditySensor(this.zoneName + " Humidity");
+        this.HumiditySensor.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+            .setProps({
+                minValue: 0,
+                maxValue: 100,
+                minStep: 1
+            })
+            .on('get', this.getCurrentRelativeHumidity.bind(this));
+            
+            services.push(this.HumiditySensor);
+    }
 
-    this.HumiditySensor.getCharacteristic(Characteristic.CurrentRelativeHumidity)
-        .setProps({
-            minValue: 0,
-            maxValue: 100,
-            minStep: 1
-        })
-        .on('get', this.getCurrentRelativeHumidity.bind(this));
+  
 
-    var services = [informationService, this.HeaterCoolerService, this.HumiditySensor];
-
-    if (this.fanMode){
+    if (this.fanMode && !this.disableFan){
         this.FanService = new Service.Fanv2(this.zoneName + " Fan");
 
         this.FanService.getCharacteristic(Characteristic.Active)
@@ -1329,24 +1392,46 @@ TadoAccessory.prototype._setOverlay = function(overlay, functionName, state) {
                             accessory.HeaterCoolerService.getCharacteristic(Characteristic.RotationSpeed).updateValue(setSpeed);
                         }
 
-                        break;
+                        break;  
 
                 }
             }
+            var lastToken = accessory.storage.getItem('Tado_Token');
 
             var options = {
                 host: 'my.tado.com',
                 path: '/api/v2/homes/' + accessory.homeID + '/zones/' + accessory.zone + '/overlay?username=' + accessory.username + '&password=' + accessory.password,
                 method: overlayReady == null ? 'DELETE' : 'PUT',
+                headers: {
+                    'authorization': 'Bearer ' + lastToken,
+                    'data-binary':       overlayReady,
+                    'Content-Type':     'application/json;charset=UTF-8'
+                },
             }
+
             if (overlayReady != null) {
                 overlayReady = JSON.stringify(overlayReady);
-//                 accessory.log("zone: " + accessory.zone + ",  body: " + overlayReady);
+                // accessory.log("zone: " + accessory.zone + ",  body: " + overlayReady);
             }
-            https.request(options, null).on('error', (e) => {
+            https.request(options, function(response){
+                // accessory.log("response:")
+                // accessory.log(response)
+                // var strData = '';
+                // response.on('data', function(chunk) {
+                //     accessory.log("data")
+                //     strData += chunk;
+                // });
+                // response.on('end', function() {
+                //     try{
+                //         var data = JSON.parse(strData);
+                //     } catch (e) {accessory.log(e)}
+                //     accessory.log("end:")
+                //     accessory.log(data)
+                // })
+            }).on('error', (e) => {
                 console.error(e);
                 return;
-              }).end(overlayReady);
+            }).end(overlayReady);
             accessory.setProcessing = false;
             accessory.setFunctions = []
             if (accessory.manualControl){
@@ -1580,11 +1665,17 @@ TadoAccessory.prototype._setFanOverlay = function(overlay, functionName, state) 
                     accessory.FanService.getCharacteristic(Characteristic.RotationSpeed).updateValue(setSpeed);
                 }
             }
+            var lastToken = accessory.storage.getItem('Tado_Token');
 
             var options = {
                 host: 'my.tado.com',
                 path: '/api/v2/homes/' + accessory.homeID + '/zones/' + accessory.zone + '/overlay?username=' + accessory.username + '&password=' + accessory.password,
                 method: overlayReady == null ? 'DELETE' : 'PUT',
+                headers: {
+                    'authorization': 'Bearer ' + lastToken,
+                    'data-binary':       overlayReady,
+                    'Content-Type':     'application/json;charset=UTF-8'
+                },
             }
             if (overlayReady != null) {
                 overlayReady = JSON.stringify(overlayReady);
