@@ -24,6 +24,7 @@ _________________________________________
 **version 2.3:**
 1. Added option to disable the humidity sensors (if you're tracking the humidity with another device).
 2. Added option to disable the fans (if you're using other fans)
+3. Fixed API issues (using token)
 
 
 **version 2.2:**
