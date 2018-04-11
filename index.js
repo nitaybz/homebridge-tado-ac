@@ -39,7 +39,7 @@ function TadoACplatform(log, config, api) {
 
     //Get Token
     var self = this
-    function getToken() {
+    self.getToken = function(self) {
         var tokenOptions = {
             host: 'auth.tado.com',
             path: '/oauth/token?client_id=tado-web-app&client_secret=wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc&grant_type=password&password=' + this.password + '&scope=home.user&username=' + this.username,
@@ -75,9 +75,9 @@ function TadoACplatform(log, config, api) {
         }).end();
     }
     
-    getToken()
-    setInterval(function (response) {
-        getToken()
+    self.getToken(self)
+    setInterval(function () {
+        self.getToken(self)
     }, 500000)
 
 }
