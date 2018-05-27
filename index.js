@@ -45,7 +45,7 @@ function TadoACplatform(log, config, api) {
             path: '/oauth/token?client_id=tado-web-app&client_secret=wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc&grant_type=password&password=' + this.password + '&scope=home.user&username=' + this.username,
             method: 'POST'
         };
-        self.log("Getting Token...")
+        // self.log("Getting Token...")
         https.request(tokenOptions, function (response) {
             var strData = '';
             response.on('data', function (chunk) {
@@ -58,6 +58,10 @@ function TadoACplatform(log, config, api) {
                 }
                 catch (e) {
                     self.log("couldn't retrieve new Token, error:" + e);
+                    console.log("Fetching Token failed - Trying again...");
+                    setTimeout(function () {
+                        self.getToken()
+                    }, 10000)
                 }
                 var lastToken = self.storage.getItem('Tado_Token');
                 // self.log("tokenObj: " + JSON.stringify(tokenObj));
@@ -70,7 +74,7 @@ function TadoACplatform(log, config, api) {
             console.error(e);
             console.log("Fetching Token failed - Trying again...");
             setTimeout(function () {
-                getToken()
+                self.getToken()
             }, 10000)
         }).end();
     }
