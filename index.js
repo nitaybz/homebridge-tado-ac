@@ -74,7 +74,7 @@ function TadoACplatform(log, config, api) {
             console.error(e);
             console.log("Fetching Token failed - Trying again...");
             setTimeout(function () {
-                self.getToken()
+                self.getToken(self)
             }, 10000)
         }).end();
     }
