@@ -531,7 +531,6 @@ TadoACplatform.prototype = {
 
             if (!this.disableHumiditySensor) {
                 if (this.debug) this.log('Setting Humidity Sensor for', this.zoneName)
-                this.HeaterCoolerService = new Service.HumiditySensor(this.zoneName + " Humidity")
     
                 this.HeaterCoolerService.getCharacteristic(Characteristic.CurrentRelativeHumidity)
                     .setProps({
