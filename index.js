@@ -529,22 +529,21 @@ TadoACplatform.prototype = {
             }
 
 
-            services.push(this.HeaterCoolerService)
-
             if (!this.disableHumiditySensor) {
                 if (this.debug) this.log('Setting Humidity Sensor for', this.zoneName)
-                this.HumiditySensor = new Service.HumiditySensor(this.zoneName + " Humidity")
+                this.HeaterCoolerService = new Service.HumiditySensor(this.zoneName + " Humidity")
     
-                this.HumiditySensor.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+                this.HeaterCoolerService.getCharacteristic(Characteristic.CurrentRelativeHumidity)
                     .setProps({
                         minValue: 0,
                         maxValue: 100,
                         minStep: 1
                     })
                     .on('get', this.getCurrentRelativeHumidity.bind(this))
-    
-                services.push(this.HumiditySensor)
             }
+            
+            services.push(this.HeaterCoolerService)
+
 
         }
 
