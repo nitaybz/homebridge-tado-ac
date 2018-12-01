@@ -370,7 +370,7 @@ TadoACplatform.prototype = {
         this.updateAccessoryState = tadoHelpers.updateAccessoryState.bind(this)
         this.setNewState = tadoHelpers.setNewState.bind(this)
 
-        if (!this.lastOverlay) {
+        if (!this.lastOverlay || !this.lastOverlay['COOL']) {
             this.lastOverlay = tadoHelpers.buildFirstOverlay(this.capabilities, this.tadoMode, this.autoFanOnly, this.durationInMinutes)
             if (this.debug) this.log('Storing First Overlay for', this.zoneName, ':')
             if (this.debug) this.log(JSON.stringify(this.lastOverlay, null, 4))
