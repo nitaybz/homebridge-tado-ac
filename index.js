@@ -33,6 +33,7 @@ function TadoACplatform(log, config, api) {
     // special settings for zones
     this.manualControlSwitch = config['manualControl'] || config['manualControlSwitch'] || false
     this.disableHumiditySensor = config['disableHumiditySensor'] || false
+    this.extraHumiditySensor = config['extraHumiditySensor'] || false
     this.autoFanOnly = config['autoOnly'] || config['autoFanOnly'] || false
     this.disableFan = config['disableFan'] || false
     this.forceThermostat = config['forceThermostat'] || false //new
@@ -124,6 +125,8 @@ TadoACplatform.prototype = {
                                 else zoneManualControl = false
                                 if (this.disableHumiditySensor) zoneDisableHumiditySensor = (this.disableHumiditySensor === true || this.disableHumiditySensor.includes(zone.name) || this.disableHumiditySensor.includes(zone.id))
                                 else zoneDisableHumiditySensor = false
+                                if (this.extraHumiditySensor) zoneExtraHumiditySensor = (this.extraHumiditySensor === true || this.extraHumiditySensor.includes(zone.name) || this.extraHumiditySensor.includes(zone.id))
+                                else zoneExtraHumiditySensor = false
                                 if (this.disableFan) zoneDisableFan = (this.disableFan === true || this.disableFan.includes(zone.name) || this.disableFan.includes(zone.id))
                                 else zoneDisableFan = false
                                 if (this.forceThermostat) zoneForceThermostat = (this.forceThermostat === true || this.forceThermostat.includes(zone.name) || this.forceThermostat.includes(zone.id))
@@ -142,6 +145,7 @@ TadoACplatform.prototype = {
                                     autoFanOnly: zoneAutoFan,
                                     manualControl: zoneManualControl,
                                     disableHumiditySensor: zoneDisableHumiditySensor,
+                                    extraHumiditySensor: zoneExtraHumiditySensor,
                                     disableFan: zoneDisableFan,
                                     forceThermostat: zoneForceThermostat,
                                     debug: this.debug
@@ -340,6 +344,7 @@ TadoACplatform.prototype = {
         this.capabilities = config.capabilities
         this.statePollingInterval = config.statePollingInterval
         this.disableHumiditySensor = config.disableHumiditySensor
+        this.extraHumiditySensor = config.extraHumiditySensor
         this.disableFan = config.disableFan
         this.autoFanOnly = config.autoFanOnly
         this.manualControlSwitch = config.manualControl
@@ -444,14 +449,16 @@ TadoACplatform.prototype = {
             this.thermostatService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
                 .on('get', this.getTemperatureDisplayUnits.bind(this))
 
-            this.thermostatService.getCharacteristic(Characteristic.CurrentRelativeHumidity)
-                .setProps({
-                    minValue: 0,
-                    maxValue: 100,
-                    minStep: 1
-                })
-                .on('get', this.getCurrentRelativeHumidity.bind(this))
 
+            if (!this.disableHumiditySensor) {
+                this.thermostatService.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+                    .setProps({
+                        minValue: 0,
+                        maxValue: 100,
+                        minStep: 1
+                    })
+                    .on('get', this.getCurrentRelativeHumidity.bind(this))
+            }
 
             services.push(this.thermostatService)
 
@@ -545,6 +552,23 @@ TadoACplatform.prototype = {
 
 
         }
+
+
+        if (this.extraHumiditySensor) {
+            if (this.debug) this.log('Setting Humidity Sensor for', this.zoneName)
+
+            this.HumiditySensorService = new Service.HumiditySensor(this.zoneName + " Humidity");
+            this.HumiditySensorService.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+                .setProps({
+                    minValue: 0,
+                    maxValue: 100,
+                    minStep: 1
+                })
+                .on('get', this.getCurrentRelativeHumidity.bind(this))
+            
+            services.push(this.HumiditySensorService)
+        }
+        
 
         if (this.capabilities.FAN && !this.disableFan) {
             if (this.debug) this.log('Setting Fanv2 Service for', this.zoneName)
@@ -878,7 +902,7 @@ TadoACplatform.prototype = {
 
     // For HeaterCooler + Thermostat
     TadoAccessory.prototype.setActive = function(state, callback) {
-        state = state === Characteristic.Active.ACTIVE ? "ON" : "OFF"
+        state = state == 1 ? "ON" : "OFF"
         if (this.debug) this.log(this.zoneName + " -> Setting state Active:", 'power', state)
         this.setNewState('power', state)
         callback()

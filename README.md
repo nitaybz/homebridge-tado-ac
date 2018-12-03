@@ -18,6 +18,11 @@ _________________________________________
 [Click here](https://github.com/nitaybz?utf8=%E2%9C%93&tab=repositories&q=homebridge) to review more of my plugins.
 _________________________________________
 
+COMMENTS:
+
+error:
+Initializing platform accessory 'Living Room Tado'...
+HAP Warning: Characteristic 00000025-0000-1000-8000-0026BB765291 not in required or optional characteristics for service 0000004A-0000-1000-8000-0026BB765291. Adding anyway.
 
 
 
