@@ -11,7 +11,7 @@
   ],
   "engines": {
     "node": ">=6.4.0",
-    "homebridge": ">=0.4.38"
+    "homebridge": ">=0.4.0"
   },
   "author": "nitaybz",
   "repository": {
