@@ -451,9 +451,9 @@ TadoAccessory.prototype.getServices = function () {
             })
             .on('get', this.getCurrentTemperature.bind(this))
 
-        if (this.capabilities.HEAT) const maxVal = this.capabilities.HEAT.temperatures.celsius.max
+        if (this.capabilities.HEAT) maxVal = this.capabilities.HEAT.temperatures.celsius.max
         else const maxVal = this.capabilities.COOL.temperatures.celsius.max
-        if (this.capabilities.COOL) const minVal = this.capabilities.COOL.temperatures.celsius.max
+        if (this.capabilities.COOL) minVal = this.capabilities.COOL.temperatures.celsius.max
         else const minVal = this.capabilities.HEAT.temperatures.celsius.max
 
         this.thermostatService.getCharacteristic(Characteristic.TargetTemperature)
@@ -492,7 +492,15 @@ TadoAccessory.prototype.getServices = function () {
         this.HeaterCoolerService.getCharacteristic(Characteristic.CurrentHeaterCoolerState)
             .on('get', this.getCurrentHeaterCoolerState.bind(this))
 
+
+        const props = []
+
+        if (this.capabilities.COOL) props.push(Characteristic.TargetHeaterCoolerState.COOL)
+        if (this.capabilities.HEAT) props.push(Characteristic.TargetHeaterCoolerState.HEAT)
+        if (this.capabilities.AUTO) props.push(Characteristic.TargetHeaterCoolerState.AUTO)
+
         this.HeaterCoolerService.getCharacteristic(Characteristic.TargetHeaterCoolerState)
+            .setProps({validValues: props})
             .on('get', this.getTargetHeaterCoolerState.bind(this))
             .on('set', this.setTargetHeaterCoolerState.bind(this))
 
