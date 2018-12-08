@@ -21,9 +21,10 @@
         "anyoneSensor": true,
         "tadoMode": "TIMER",
         "durationInMinutes": 100,
-        "autoOnly": false,
-        "manualControl": true,
+        "autoFanOnly": false,
+        "manualControlSwitch": true,
         "disableHumiditySensor": false,
+        "extraHumiditySensor": ["Living Room", 3],
         "disableFan": false
     }
   ],
