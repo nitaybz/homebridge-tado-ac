@@ -430,9 +430,18 @@ TadoAccessory.prototype.getServices = function () {
         this.thermostatService.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
             .on('get', this.getCurrentHeatingCoolingState.bind(this))
 
+        const props = [Characteristic.TargetHeatingCoolingState.OFF]
+
+        if (this.capabilities.COOL) props.push(Characteristic.TargetHeatingCoolingState.COOL)
+        if (this.capabilities.HEAT) props.push(Characteristic.TargetHeatingCoolingState.HEAT)
+        if (this.capabilities.AUTO) props.push(Characteristic.TargetHeatingCoolingState.AUTO)
+        
+
         this.thermostatService.getCharacteristic(Characteristic.TargetHeatingCoolingState)
+            .setProps({validValues: props})
             .on('get', this.getTargetHeatingCoolingState.bind(this))
             .on('set', this.setTargetHeatingCoolingState.bind(this))
+            
 
         this.thermostatService.getCharacteristic(Characteristic.CurrentTemperature)
             .setProps({
@@ -442,10 +451,15 @@ TadoAccessory.prototype.getServices = function () {
             })
             .on('get', this.getCurrentTemperature.bind(this))
 
+        if (this.capabilities.HEAT) const maxVal = this.capabilities.HEAT.temperatures.celsius.max
+        else const maxVal = this.capabilities.COOL.temperatures.celsius.max
+        if (this.capabilities.COOL) const minVal = this.capabilities.COOL.temperatures.celsius.max
+        else const minVal = this.capabilities.HEAT.temperatures.celsius.max
+
         this.thermostatService.getCharacteristic(Characteristic.TargetTemperature)
             .setProps({
-                minValue: this.capabilities.COOL.temperatures.celsius.min,
-                maxValue: this.capabilities.HEAT.temperatures.celsius.max,
+                minValue: minVal,
+                maxValue: maxVal,
                 minStep: 1
             })
             .on('get', this.getTargetTemperature.bind(this))
@@ -490,23 +504,28 @@ TadoAccessory.prototype.getServices = function () {
             })
             .on('get', this.getCurrentTemperature.bind(this))
 
-        this.HeaterCoolerService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
-            .setProps({
-                minValue: this.capabilities.COOL.temperatures.celsius.min,
-                maxValue: this.capabilities.COOL.temperatures.celsius.max,
-                minStep: 1
-            })
-            .on('get', this.getCoolingThresholdTemperature.bind(this))
-            .on('set', this.setTargetTemperature.bind(this))
+        if (this.capabilities.COOL) {
+            this.HeaterCoolerService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
+                .setProps({
+                    minValue: this.capabilities.COOL.temperatures.celsius.min,
+                    maxValue: this.capabilities.COOL.temperatures.celsius.max,
+                    minStep: 1
+                })
+                .on('get', this.getCoolingThresholdTemperature.bind(this))
+                .on('set', this.setTargetTemperature.bind(this))
+        }
 
-        this.HeaterCoolerService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
-            .setProps({
-                minValue: this.capabilities.HEAT.temperatures.celsius.min,
-                maxValue: this.capabilities.HEAT.temperatures.celsius.max,
-                minStep: 1
-            })
-            .on('get', this.getHeatingThresholdTemperature.bind(this))
-            .on('set', this.setTargetTemperature.bind(this))
+        if (this.capabilities.HEAT) {
+            this.HeaterCoolerService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
+                .setProps({
+                    minValue: this.capabilities.HEAT.temperatures.celsius.min,
+                    maxValue: this.capabilities.HEAT.temperatures.celsius.max,
+                    minStep: 1
+                })
+                .on('get', this.getHeatingThresholdTemperature.bind(this))
+                .on('set', this.setTargetTemperature.bind(this))
+
+        }
 
         this.HeaterCoolerService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
             .on('get', this.getTemperatureDisplayUnits.bind(this))
