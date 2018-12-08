@@ -119,24 +119,26 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
 
 ## Configurations
 
-|             Parameter            |                       Description                       | Required |  Default  |
-| -------------------------------- | ------------------------------------------------------- |:--------:|:---------:|
-| `platform`                       | always "TadoAC"                                         |     ✓    |      -    |
-| `name`                           | name of the platform - for logs only                    |          |      -    |
-| `username`                       | your tado account username (something@something.com)    |     ✓    |      -    |
-| `password`                       | your tado account password                              |     ✓    |      -    |
-| `homeID`                       | if not used, the plugin will automatically search for your home ID and store it locally |       |      auto Fetch    |
-| `tadoMode`                       | default mode for the commands to be sent with. can be "MANUAL" for manual control until ended by the user, "TADO_MODE" for manual control until next schedule change in tado app OR "TIMER" for manual control until timer ends (duration can be set) .        |             |  "MANUAL" |
+|             Parameter            |                       Description                       | Required |  Default  |  type  |
+| -------------------------------- | ------------------------------------------------------- |:--------:|:---------:|:---------:|
+| `platform`                       | always "TadoAC".                                         |     ✓    |      -    |  String  |
+| `name`                           | name of the platform - for logs only.                    |          |      -    |  String  |
+| `username`                       | your tado account username (something@something.com).    |     ✓    |      -    |  String  |
+| `password`                       | your tado account password.                              |     ✓    |      -    |  String  |
+| `homeID`                       | if not used, the plugin will automatically search for your home ID and store it locally |       |      auto Fetch    |  Number  |
+| `tadoMode`                       | default mode for the commands to be sent with. can be "MANUAL" for manual control until ended by the user, "TADO_MODE" for manual control until next schedule change in tado app OR "TIMER" for manual control until timer ends (duration can be set).        |             |  "MANUAL" |
 | `durationInMinutes`              |   duration in Minutes for the "TIMER" settings       |            |  90 |
-| `weatherSensorsEnabled`          | Enable **Outside Temperature** sensor and **Solar Intensity** light bulb.  **more details below*      |             |  false |
-| `weatherPollingInterval`         |  Time in **Minutes** to check for changes in Weather. Default is `false` for no polling.       |             |  false |
-| `occupancySensorsEnabled`        |  Enable **Occupancy Sensors**.  ***more details below*     |             |  false |
-| `occupancyPollingInterval`       |  Time in **Seconds** to check for changes in occupnacy. Default is `10` for polling every 10 seconds. *it can't be set to false!*     |             |  10 |
-| `anyoneSensor`       |  Adds 1 **Occupancy Sensor** named "Anyone" to represent the state of someone at home     |             |  true |
-| `manualControl`       |  Adds switch for getting Manual control status and turn OFF manual control from homekit (turn ON is done by sending any command).  |             |  false |
-| `autoOnly`       |  When set to `true`, all commands will be sent with "AUTO" fan speed if possible .   |             |  false |
-| `disableHumiditySensor`       |  When set to `true`, it will disable humidity sensors   |             |  false |
-| `disableFan`       |  When set to `true`, it will disable the fans   |             |  false |
+| `statePollingInterval`          | Enable and set interval (in seconds) for polling state from the device  **more details below*      |             |  `false` |  `false` /  Number |
+| `weatherSensorsEnabled`          | Enable **Outside Temperature** sensor and **Solar Intensity** light bulb.  **more details below*      |             |  `false` |  Boolean  |
+| `weatherPollingInterval`         |  Time in **Minutes** to check for changes in weather. Default is `false` for no polling.       |             |  `false` |  `false` / Number  |
+| `occupancySensorsEnabled`        |  Enable **Occupancy Sensors**.  ***more details below*     |             |  `false` |  Boolean  |
+| `occupancyPollingInterval`       |  Time in **Seconds** to check for changes in occupnacy. Default is `10` for polling every 10 seconds. *it can't be set to `false`!*     |             |  10 |  Number  |
+| `anyoneSensor`       |  Adds 1 **Occupancy Sensor** named "Anyone" to represent the state of someone at home.     |             |  `true` |  Boolean  |
+| `manualControl`       |  Adds switch for getting Manual control status and turn OFF manual control from homekit (turn ON is done by sending any command).  |             |  `false` |  Boolean / Array*  |
+| `autoFanOnly`       |  When set to `true`, all commands will be sent with "AUTO" fan speed if possible .   |             |  `false` |   Boolean / Array*  |
+| `disableHumiditySensor`       |  When set to `true`, it will disable the attached humidity sensor.   |             |  `false` |   Boolean / Array*  |
+| `disableFan`       |  When set to `true`, it will disable the fan accessory   |             |  `false` |   Boolean / Array*  |
+| `extraHumiditySensor` ***new      |  When set to `true`, it will add extra separate humidity sensor.  |             |  `false` |   Boolean / Array*  |
 
 
 ### * Outside Temperature & Solar Intensity Sensors
