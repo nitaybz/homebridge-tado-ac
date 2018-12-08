@@ -46,11 +46,11 @@ function TadoACplatform(log, config, api) {
     tadoApi.getToken = tadoApi.getToken.bind(this)
 
     //Get Token
-    if (this.debug) console.log('Getting Token')
+    if (this.debug) this.log('Getting Token')
 
     tadoApi.getToken(this.username, this.password, tadoHelpers.storeToken)
     setInterval(() => {
-        if (this.debug) console.log('Getting Token')
+        if (this.debug) this.log('Getting Token')
         tadoApi.getToken(this.username, this.password, tadoHelpers.storeToken)
     }, 500000)
 }
