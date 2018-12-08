@@ -452,9 +452,9 @@ TadoAccessory.prototype.getServices = function () {
             .on('get', this.getCurrentTemperature.bind(this))
 
         if (this.capabilities.HEAT) maxVal = this.capabilities.HEAT.temperatures.celsius.max
-        else const maxVal = this.capabilities.COOL.temperatures.celsius.max
+        else maxVal = this.capabilities.COOL.temperatures.celsius.max
         if (this.capabilities.COOL) minVal = this.capabilities.COOL.temperatures.celsius.max
-        else const minVal = this.capabilities.HEAT.temperatures.celsius.max
+        else minVal = this.capabilities.HEAT.temperatures.celsius.max
 
         this.thermostatService.getCharacteristic(Characteristic.TargetTemperature)
             .setProps({
