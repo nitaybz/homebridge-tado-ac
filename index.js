@@ -380,12 +380,10 @@ function TadoAccessory(log, config) {
     this.updateAccessoryState = tadoHelpers.updateAccessoryState.bind(this)
     this.setNewState = tadoHelpers.setNewState.bind(this)
 
-    if (!this.lastOverlay || !this.lastOverlay['COOL']) {
-        this.lastOverlay = tadoHelpers.buildFirstOverlay(this.capabilities, this.tadoMode, this.autoFanOnly, this.durationInMinutes)
-        if (this.debug) this.log('Storing First Overlay for', this.zoneName, ':')
-        if (this.debug) this.log(JSON.stringify(this.lastOverlay, null, 4))
-        storage.setItem(this.name, this.lastOverlay)
-    }
+    this.lastOverlay = tadoHelpers.buildOverlay(this.capabilities, this.tadoMode, this.autoFanOnly, this.durationInMinutes, this.lastOverlay)
+    if (this.debug) this.log('Storing Overlay for', this.zoneName, ':')
+    if (this.debug) this.log(JSON.stringify(this.lastOverlay, null, 4))
+    storage.setItem(this.name, this.lastOverlay)
 
     if (this.statePollingInterval) {
         if (this.debug) this.log('Starting Get State Interval for', this.zoneName, ':', this.statePollingInterval)
@@ -1218,12 +1216,6 @@ function occupancySensor(log, config, platform) {
 
     this.OccupancySensor.getCharacteristic(Characteristic.OccupancyDetected)
         .on('get', this.getStatus.bind(this))
-
-
-    const self = this
-    const updateResults = (state) => {
-        self.OccupancySensor.getCharacteristic(Characteristic.OccupancyDetected).updateValue(state)
-    }
 
     if (this.name == "Anyone") {
         setTimeout(() => {
