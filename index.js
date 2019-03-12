@@ -544,9 +544,9 @@ TadoAccessory.prototype.getServices = function () {
 
         if ((this.capabilities.COOL.fanSpeeds || this.capabilities.HEAT.fanSpeeds) && !this.autoFanOnly) {
             const getMaxSpeed = () => {
-                if (this.capabilities.COOL.fanSpeeds)
+                if (this.capabilities.COOL && this.capabilities.COOL.fanSpeeds)
                     max = this.capabilities.COOL.fanSpeeds.filter(speed => speed !== 'AUTO').length
-                if (this.capabilities.HEAT.fanSpeeds)
+                if (this.capabilities.HEAT && this.capabilities.HEAT.fanSpeeds)
                     max = this.capabilities.HEAT.fanSpeeds.filter(speed => speed !== 'AUTO').length <= max ?
                         max : this.capabilities.HEAT.fanSpeeds.filter(speed => speed !== 'AUTO').length > max
 
