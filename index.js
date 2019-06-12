@@ -536,13 +536,13 @@ TadoAccessory.prototype.getServices = function () {
         this.HeaterCoolerService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
             .on('get', this.getTemperatureDisplayUnits.bind(this))
 
-        if (this.capabilities.COOL.swings || this.capabilities.HEAT.swings) {
+        if ((this.capabilities.COOL && this.capabilities.COOL.swings) || (this.capabilities.HEAT && this.capabilities.HEAT.swings)) {
             this.HeaterCoolerService.getCharacteristic(Characteristic.SwingMode)
                 .on('get', this.getSwing.bind(this))
                 .on('set', this.setSwing.bind(this))
         }
 
-        if ((this.capabilities.COOL.fanSpeeds || this.capabilities.HEAT.fanSpeeds) && !this.autoFanOnly) {
+        if (((this.capabilities.COOL && this.capabilities.COOL.fanSpeeds) || ((this.capabilities.HEAT && this.capabilities.HEAT.fanSpeeds)) && !this.autoFanOnly) {
             const getMaxSpeed = () => {
                 if (this.capabilities.COOL && this.capabilities.COOL.fanSpeeds)
                     max = this.capabilities.COOL.fanSpeeds.filter(speed => speed !== 'AUTO').length
