@@ -18,7 +18,7 @@ function TadoACplatform(log, config, api) {
     this.log = log
     this.config = config
     this.name = config['name'] || "Tado AC"
-    this.username = config['username']
+    this.username = encodeURIComponent(config['username'])
     this.password = encodeURIComponent(config['password'])
     this.homeId = config['homeID']
     this.tadoMode = config['tadoMode'] || "MANUAL"
