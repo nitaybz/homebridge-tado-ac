@@ -1,4 +1,4 @@
-let Service, Characteristic, tadoHelpers
+let Service, Characteristic, Accessory, tadoHelpers
 const async = require("async")
 const tadoApi = require("./lib/tadoApi.js")
 const storage = require('node-persist')
