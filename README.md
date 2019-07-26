@@ -65,7 +65,8 @@ _________________________________________
         "manualControlSwitch": true,
         "disableHumiditySensor": false,
         "extraHumiditySensor": ["Living Room", 3],
-        "disableFan": true
+        "disableFan": true,
+        "historyStorage": "fs"
     }
 ]
 ```
@@ -93,6 +94,7 @@ _________________________________________
 | `disableFan`       |  When set to `true`, it will disable the fan accessory   |             |  `false` |   Boolean / Array*  |
 | `extraHumiditySensor` ***new      |  When set to `true`, it will add extra separate humidity sensor.  |             |  `false` |   Boolean / Array*  |
 | `forceThermostat` ***new      |  When set to `true`, it will force Homebridge to create Thermostat accessory instead of the HeaterCooler(AC)  |             |  `false` |   Boolean / Array*  |
+| `historyStorage` ***new          |  When set to `fs`, the `fakegato-history` library will log every datapoint to a file  |             |  - |   String*  |
 
 
 #### * Config Array - ####
@@ -169,7 +171,8 @@ If not set otherwise, the system will check for the status every 10 seconds.
 
 **"Anyone"** Sensor will be added automatically to easily automate actions when the first person arrives home or the last person leaves. this is a better alternative to Home App Arrive/Leave automations since this will not require approval for triggering automation. to remove this accessory, set `anyoneSensor` to false
 
-
+### History
+If you install the optinal dependency `fakegato-history`, then temperature (tado and outside weather if enabled) and humidity (only tado) will be stored and made available via homekit using Elgato Eve compatible services and characteristics. In combination with the Eve App you can then access the historic values on your iOS device.
 
 
 ## Updates

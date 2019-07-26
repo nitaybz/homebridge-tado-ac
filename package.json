@@ -22,6 +22,9 @@
     "node-persist": "0.0.8",
     "async": "*"
   },
+  "optionalDependencies": {
+    "fakegato-history": "^0.5.3"
+  },
   "bugs": {
     "url": "https://github.com/nitaybz/homebridge-tado-ac/issues"
   },

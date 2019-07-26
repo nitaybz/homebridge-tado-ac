@@ -1,4 +1,4 @@
-let Service, Characteristic, Accessory, tadoHelpers
+let Service, Characteristic, Accessory, tadoHelpers, FakeGatoHistoryService
 const async = require("async")
 const tadoApi = require("./lib/tadoApi.js")
 const storage = require('node-persist')
@@ -12,6 +12,11 @@ module.exports = function (homebridge) {
     homebridge.registerPlatform('homebridge-tado-ac', 'TadoAC', TadoACplatform)
 
     tadoHelpers = require("./lib/tadoHelpers.js")(tadoApi, storage, Characteristic)
+    try {
+        FakeGatoHistoryService = require("fakegato-history")(homebridge);
+    } catch (ex) {
+        // that's okay, this is just an optional dependency
+    }
 }
 
 function TadoACplatform(log, config, api) {
@@ -198,6 +203,7 @@ TadoACplatform.prototype = {
                             nextZone(err)
                         } else {
                             zone.capabilities = capabilities
+                            zone.historyStorage = this.config.historyStorage
                             if (this.debug) this.log('Adding Zone:')
                             if (this.debug) this.log(JSON.stringify(zone, null, 4))
                             tadoAccessory = new TadoAccessory(this.log, zone)
@@ -220,7 +226,8 @@ TadoACplatform.prototype = {
                         password: this.password,
                         temperatureUnit: this.temperatureUnit,
                         polling: this.weatherPollingInterval,
-                        debug: this.debug
+                        debug: this.debug,
+                        historyStorage: this.config.historyStorage
                     }
 
                     if (this.debug) this.log('Adding Weather Sensors:')
@@ -337,6 +344,7 @@ function TadoAccessory(log, config) {
     this.log = log
     this.zoneName = config.name
     this.name = config.name + " Tado"
+    this.displayName = this.name
     this.homeId = config.homeId
     this.username = config.username
     this.password = config.password
@@ -404,6 +412,12 @@ function TadoAccessory(log, config) {
         }
     }
     if (this.tadoMode == "TIMER") { this.offOverlay.termination.durationInSeconds = this.durationInMinutes * 60 }
+
+    if(FakeGatoHistoryService) {
+        this.loggingService = new FakeGatoHistoryService('weather', this, {
+            storage: config.historyStorage
+        })
+    }
 }
 
 
@@ -415,6 +429,9 @@ TadoAccessory.prototype.getServices = function () {
         .setCharacteristic(Characteristic.SerialNumber, this.serialNo)
 
     const services = [informationService]
+    if(this.loggingService) {
+        services.push(this.loggingService)
+    }
 
     if (this.forceThermostat || this.isThermostatic) {
         if (this.debug) this.log('Setting Thermostatic Service for', this.zoneName)
@@ -1078,6 +1095,7 @@ TadoAccessory.prototype.setManualSwitch = function (state, callback) {
 function TadoWeather(log, config) {
     this.log = log
     this.name = "Outside Temperature"
+    this.displayName = this.name
     this.homeId = config.homeId
     this.username = config.username
     this.password = config.password
@@ -1127,11 +1145,20 @@ function TadoWeather(log, config) {
         setInterval(() => {
             this.getWeatherState((state) => { }, true)
         }, this.polling)
+        if(FakeGatoHistoryService) {
+            this.loggingService = new FakeGatoHistoryService('weather', this, {
+                storage: config.historyStorage
+            })
+        }
     }
 }
 
 TadoWeather.prototype.getServices = function () {
-    return [this.TemperatureSensor, this.informationService, this.SolarSensor]
+    const svcs = [this.TemperatureSensor, this.informationService, this.SolarSensor]
+    if(this.loggingService) {
+        svcs.push(this.loggingService)
+    }
+    return svcs
 }
 
 TadoWeather.prototype.getOutsideTemperature = function (callback) {
