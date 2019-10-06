@@ -165,7 +165,7 @@ TadoACplatform.prototype = {
 
             //get Setup Method (NON-THERMOSTATIC / THERMOSTATIC)
             (zones, next) => {
-                if (this.tadoSettings.zones[0].isThermostatic && this.cachedSettingsOnly){
+                if (this.tadoSettings.zones[0].serialNo && this.cachedSettingsOnly){
                     if (this.debug) this.log('Got zones installation from storage')
                     next(null, this.tadoSettings.zones)
                 } else {
@@ -229,7 +229,7 @@ TadoACplatform.prototype = {
                                 nextZone()
                             }
                         })
-                    }, function (err) {
+                    }, (err) => {
                         if (err) next(err)
                         else {
                             this.tadoSettings.zones = zones
@@ -526,7 +526,7 @@ TadoAccessory.prototype.getServices = function () {
         services.push(this.loggingService)
     }
 
-    if (!this.disableAcAccessory && !forceHeaterCooler && (this.forceThermostat || this.isThermostatic)) {
+    if (!this.disableAcAccessory && !this.forceHeaterCooler && (this.forceThermostat || this.isThermostatic)) {
         if (this.debug) this.log('Setting Thermostatic Service for', this.zoneName)
 
         this.thermostatService = new Service.Thermostat(this.zoneName + " AC")
