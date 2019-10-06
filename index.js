@@ -173,7 +173,7 @@ TadoACplatform.prototype = {
                     tadoApi.getInstallations(this.username, this.password, this.homeId, (err, installations) => {
                         if (err) {
                             this.log('XXX - Error Getting Zones Installation - XXX')
-                            if (this.tadoSettings.zones[0].isThermostatic) {
+                            if (this.tadoSettings.zones[0].serialNo) {
                                 this.log('Got zones installation from storage')
                                 next(null, this.tadoSettings.zones)
                             } else
