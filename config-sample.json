@@ -26,7 +26,10 @@
         "disableHumiditySensor": false,
         "extraHumiditySensor": ["Living Room", 3],
         "disableFan": false,
-        "disableCachedSettings": false
+        "historyStorage": "fs",
+        "cachedSettingsOnly": false,
+        "forceHeaterCooler": false,
+        "disableAcAccessory": false
     }
   ],
 

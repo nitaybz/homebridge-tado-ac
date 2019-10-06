@@ -65,7 +65,11 @@ _________________________________________
         "manualControlSwitch": true,
         "disableHumiditySensor": false,
         "extraHumiditySensor": ["Living Room", 3],
-        "disableFan": true
+        "disableFan": true,
+        "historyStorage": "fs",
+        "cachedSettingsOnly": false,
+        "forceHeaterCooler": false,
+        "disableAcAccessory": false
     }
 ]
 ```
@@ -91,8 +95,12 @@ _________________________________________
 | `autoFanOnly`       |  When set to `true`, all commands will be sent with "AUTO" fan speed if possible .   |             |  `false` |   Boolean / Array*  |
 | `disableHumiditySensor`       |  When set to `true`, it will disable the attached humidity sensor.   |             |  `false` |   Boolean / Array*  |
 | `disableFan`       |  When set to `true`, it will disable the fan accessory   |             |  `false` |   Boolean / Array*  |
-| `extraHumiditySensor` ***new      |  When set to `true`, it will add extra separate humidity sensor.  |             |  `false` |   Boolean / Array*  |
-| `forceThermostat` ***new      |  When set to `true`, it will force Homebridge to create Thermostat accessory instead of the HeaterCooler(AC)  |             |  `false` |   Boolean / Array*  |
+| `extraHumiditySensor`     |  When set to `true`, it will add extra separate humidity sensor.  |             |  `false` |   Boolean / Array*  |
+| `forceThermostat`     |  When set to `true`, it will force Homebridge to create Thermostat accessory instead of the HeaterCooler(AC)  |             |  `false` |   Boolean / Array*  |
+| `forceHeaterCooler` ***new    |  When set to `true`, it will force Homebridge to create HeaterCooler(AC) accessory instead of Thermostat  |             |  `false` |   Boolean / Array*  |
+| `disableAcAccessory` ***new    |  When set to `true`, it will ignore the main AC devices and will only show other options like occupancy sensors/extra humidity sensor/weather sensors   |             |  `false` |   Boolean / Array*  |
+| `historyStorage` ***new          |  When set to `fs`, the `fakegato-history` library will log every datapoint to a file  |             |  - |   String*  |
+| `cachedSettingsOnly` ***new          |  When set `to` true, the plugin will not try to retrieve devices settings from Tado but only used thew one save in storage - faster loading time but not updating with new settings if changed in Tado app|             |  - |   String*  |
 
 
 #### * Config Array - ####
@@ -169,7 +177,15 @@ If not set otherwise, the system will check for the status every 10 seconds.
 
 **"Anyone"** Sensor will be added automatically to easily automate actions when the first person arrives home or the last person leaves. this is a better alternative to Home App Arrive/Leave automations since this will not require approval for triggering automation. to remove this accessory, set `anyoneSensor` to false
 
+### Cached Settings
+Since version 3.2 the plugin will auto cache the settings/capabilites of your Tado device and use them later if the device fails to fetch/sync new settings when homebridge loads.
 
+Using the feature **cachedSettingsOnly** will allow you to you lock the current settings so the plugin will not even try to get new settings once he has it. this will result in faster homebridge loading time but will prevent homebridge from getting new configurations from Tado (new users, thermostatic/non-thermostatic change, change of AC capabilites).
+
+if you're using this method, make sure to change the `cachedSettingsOnly` option to `false` if you made any change in Tado app and want it to be applied in HomeKit
+
+### History
+If you install the optinal dependency `fakegato-history`, then temperature (tado and outside weather if enabled) and humidity (only tado) will be stored and made available via homekit using Elgato Eve compatible services and characteristics. In combination with the Eve App you can then access the historic values on your iOS device.
 
 
 ## Updates
@@ -239,6 +255,8 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
 - There might be an issue with Fahrenheit degrees on the thermostat accessory cause I haven't tested it yet... if it does, please let me know
 
 - Rotation speed support every speed but not Auto speed since there is no option for that in HomeKit - therefor when rotation speed is set to Auto through Tado app it will just show low speed in home app.
+
+- If the plugin can't detect your AC installation properly (**Thermostatic/Non-Thermostatic**), that is probably because the Tado API is not updated with your recent change. you can force it to be the type oif device you want by using `forceHeaterCooler` or `forceThermostat`.
 
 - You might see errors like 
 ```Initializing platform accessory 'Living Room Tado'... HAP Warning: Characteristic 00000025-0000-1000-8000-0026BB765291 not in required or optional characteristics for service 0000004A-0000-1000-8000-0026BB765291. Adding anyway...```

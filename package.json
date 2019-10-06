@@ -1,13 +1,14 @@
 {
   "name": "homebridge-tado-ac",
-  "version": "3.1.3",
+  "version": "3.2.0",
   "description": "Tado Smart AC Control plugin for homebridge: https://github.com/nfarina/homebridge",
   "license": "MIT",
   "keywords": [
     "homebridge-plugin",
     "tado",
     "air conditioner",
-    "tado ac"
+    "tado ac",
+    "smart ac"
   ],
   "engines": {
     "node": ">=6.4.0",
@@ -21,6 +22,9 @@
   "dependencies": {
     "node-persist": "0.0.8",
     "async": "*"
+  },
+  "optionalDependencies": {
+    "fakegato-history": "^0.5.3"
   },
   "bugs": {
     "url": "https://github.com/nitaybz/homebridge-tado-ac/issues"
