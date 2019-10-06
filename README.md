@@ -100,7 +100,7 @@ _________________________________________
 | `forceHeaterCooler` ***new    |  When set to `true`, it will force Homebridge to create HeaterCooler(AC) accessory instead of Thermostat  |             |  `false` |   Boolean / Array*  |
 | `disableAcAccessory` ***new    |  When set to `true`, it will ignore the main AC devices and will only show other options like occupancy sensors/extra humidity sensor/weather sensors   |             |  `false` |   Boolean / Array*  |
 | `historyStorage` ***new          |  When set to `fs`, the `fakegato-history` library will log every datapoint to a file  |             |  - |   String*  |
-| `cachedSettingsOnly` ***new          |  When set `to` true, the plugin will not try to retrieve devices settings from Tado but only used thew one save in storage - faster loading time but not updating with new settings if changed in Tado app|             |  - |   String*  |
+| `cachedSettingsOnly` ***new          |  When set `to` true, the plugin will not try to retrieve devices settings from Tado but only used thew one save in storage - faster loading time but not updating with new settings if changed in Tado app|             |  `false` |   String*  |
 
 
 #### * Config Array - ####
