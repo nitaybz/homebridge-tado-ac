@@ -25,7 +25,8 @@
         "manualControlSwitch": true,
         "disableHumiditySensor": false,
         "extraHumiditySensor": ["Living Room", 3],
-        "disableFan": false
+        "disableFan": false,
+        "disableCachedSettings": false
     }
   ],
 

@@ -36,6 +36,7 @@ function TadoACplatform(log, config, api) {
     this.extraHumiditySensor = config['extraHumiditySensor'] || false
     this.autoFanOnly = config['autoOnly'] || config['autoFanOnly'] || false
     this.disableFan = config['disableFan'] || false
+    this.disableCachedSettings = config['disableCachedSettings'] || false
     this.forceThermostat = config['forceThermostat'] || false //new
 
     storage.initSync({
@@ -44,6 +45,10 @@ function TadoACplatform(log, config, api) {
 
     tadoHelpers.storeToken = tadoHelpers.storeToken.bind(this)
     tadoApi.getToken = tadoApi.getToken.bind(this)
+
+    this.tadoSettings = null
+
+    if (!disableCachedSettings) this.tadoSettings = storage.getItem("tadoCachedSettings")
 
     //Get Token
     if (this.debug) this.log('Getting Token')
@@ -63,11 +68,10 @@ TadoACplatform.prototype = {
 
             // Get homeId
             (next) => {
-                const localHomeId = storage.getItem("TadoHomeId")
                 if (!this.homeId) {
-                    if (localHomeId) {
+                    if (this.tadoSettings) {
 
-                        this.homeId = localHomeId
+                        this.homeId = this.tadoSettings.homeId
                         if (this.debug) this.log("Home ID found in storage", this.homeId)
                         next()
                     } else {
@@ -77,138 +81,191 @@ TadoACplatform.prototype = {
                                 this.log('XXX - Error Getting Home ID - XXX')
                                 next(err)
                             } else {
-                                this.homeId = homeId
                                 if (this.debug) this.log('Got Home ID:', homeId)
-                                storage.setItem("TadoHomeId", homeId)
+                                this.homeId = homeId
+                                if (!this.disableCachedSettings){
+                                    this.tadoSettings = {homeId: homeId}
+                                    storage.setItem("tadoCachedSettings", this.tadoSettings)
+                                }
                                 next()
                             }
                         })
                     }
                 } else {
-                    if (this.homeId || localHomeId) {
-                        if (this.debug) this.log('Home ID exists:', this.homeId || localHomeId)
-                        storage.setItem("TadoHomeId", this.homeId)
-                        next()
+                    if (this.debug) this.log('Home ID exists in Config:', this.homeId)
+                    if (!this.disableCachedSettings){
+                        this.tadoSettings = {homeId: this.homeId}
+                        storage.setItem("tadoCachedSettings", this.tadoSettings)
                     }
+                    next()
                 }
             },
 
             // Get Temperature Unit
             (next) => {
-                if (this.debug) this.log('Getting Temperature Unit...')
-                tadoApi.getTemperatureUnit(this.username, this.password, this.homeId, (err, temperatureUnit) => {
-                    if (err) {
-                        this.log('XXX - Error Getting Temperature Unit - XXX')
-                        next(err)
-                    } else {
-                        this.temperatureUnit = temperatureUnit
-                        if (this.debug) this.log('Got temperature unit:', this.temperatureUnit)
-                        next()
-                    }
-                })
+                if (this.tadoSettings && this.tadoSettings.temperatureUnit){
+                    this.temperatureUnit = this.tadoSettings.temperatureUnit
+                    if (this.debug) this.log('Got temperature unit from storage:', this.temperatureUnit)
+                    next()
+                } else {
+                    if (this.debug) this.log('Getting Temperature Unit...')
+                    tadoApi.getTemperatureUnit(this.username, this.password, this.homeId, (err, temperatureUnit) => {
+                        if (err) {
+                            this.log('XXX - Error Getting Temperature Unit - XXX')
+                            next(err)
+                        } else {
+                            this.temperatureUnit = temperatureUnit
+                            if (this.debug) this.log('Got temperature unit:', this.temperatureUnit)
+                            if (!this.disableCachedSettings){
+                                this.tadoSettings.temperatureUnit = this.temperatureUnit
+                                storage.setItem("tadoCachedSettings", this.tadoSettings)
+                            }
+                            next()
+                        }
+                    })
+                }
+
             },
 
             // Get Zones
             (next) => {
-                if (this.debug) this.log('Getting Zones...')
-                tadoApi.getZones(this.username, this.password, this.homeId, (err, zones) => {
-                    if (err) {
-                        this.log('XXX - Error Getting Zones - XXX')
-                        next(err)
-                    } else {
-                        zones = zones.filter(zone => zone.type === "AIR_CONDITIONING")
-                            .map(zone => {
-                                this.log("Found new Zone: " + zone.name + " (" + zone.id + ") ...")
-                                if (this.autoFanOnly) zoneAutoFan = (this.autoFanOnly === true || this.autoFanOnly.includes(zone.name) || this.autoFanOnly.includes(zone.id))
-                                else zoneAutoFan = false
-                                if (this.manualControlSwitch) zoneManualControl = (this.manualControlSwitch === true || this.manualControlSwitch.includes(zone.name) || this.manualControlSwitch.includes(zone.id))
-                                else zoneManualControl = false
-                                if (this.disableHumiditySensor) zoneDisableHumiditySensor = (this.disableHumiditySensor === true || this.disableHumiditySensor.includes(zone.name) || this.disableHumiditySensor.includes(zone.id))
-                                else zoneDisableHumiditySensor = false
-                                if (this.extraHumiditySensor) zoneExtraHumiditySensor = (this.extraHumiditySensor === true || this.extraHumiditySensor.includes(zone.name) || this.extraHumiditySensor.includes(zone.id))
-                                else zoneExtraHumiditySensor = false
-                                if (this.disableFan) zoneDisableFan = (this.disableFan === true || this.disableFan.includes(zone.name) || this.disableFan.includes(zone.id))
-                                else zoneDisableFan = false
-                                if (this.forceThermostat) zoneForceThermostat = (this.forceThermostat === true || this.forceThermostat.includes(zone.name) || this.forceThermostat.includes(zone.id))
-                                else zoneForceThermostat = false
+                if (this.tadoSettings && this.tadoSettings.zones){
+                    if (this.debug) this.log('Got zones from storage')
+                    next(null, this.tadoSettings.zones)
+                } else {
+                    if (this.debug) this.log('Getting Zones...')
+                    tadoApi.getZones(this.username, this.password, this.homeId, (err, zones) => {
+                        if (err) {
+                            this.log('XXX - Error Getting Zones - XXX')
+                            next(err)
+                        } else {
+                            zones = zones.filter(zone => zone.type === "AIR_CONDITIONING")
+                                .map(zone => {
+                                    this.log("Found new Zone: " + zone.name + " (" + zone.id + ") ...")
+                                    if (this.autoFanOnly) zoneAutoFan = (this.autoFanOnly === true || this.autoFanOnly.includes(zone.name) || this.autoFanOnly.includes(zone.id))
+                                    else zoneAutoFan = false
+                                    if (this.manualControlSwitch) zoneManualControl = (this.manualControlSwitch === true || this.manualControlSwitch.includes(zone.name) || this.manualControlSwitch.includes(zone.id))
+                                    else zoneManualControl = false
+                                    if (this.disableHumiditySensor) zoneDisableHumiditySensor = (this.disableHumiditySensor === true || this.disableHumiditySensor.includes(zone.name) || this.disableHumiditySensor.includes(zone.id))
+                                    else zoneDisableHumiditySensor = false
+                                    if (this.extraHumiditySensor) zoneExtraHumiditySensor = (this.extraHumiditySensor === true || this.extraHumiditySensor.includes(zone.name) || this.extraHumiditySensor.includes(zone.id))
+                                    else zoneExtraHumiditySensor = false
+                                    if (this.disableFan) zoneDisableFan = (this.disableFan === true || this.disableFan.includes(zone.name) || this.disableFan.includes(zone.id))
+                                    else zoneDisableFan = false
+                                    if (this.forceThermostat) zoneForceThermostat = (this.forceThermostat === true || this.forceThermostat.includes(zone.name) || this.forceThermostat.includes(zone.id))
+                                    else zoneForceThermostat = false
 
-                                return {
-                                    id: zone.id,
-                                    name: zone.name,
-                                    homeId: this.homeId,
-                                    username: this.username,
-                                    password: this.password,
-                                    temperatureUnit: this.temperatureUnit,
-                                    tadoMode: this.tadoMode,
-                                    durationInMinutes: this.durationInMinutes,
-                                    statePollingInterval: this.statePollingInterval,
-                                    autoFanOnly: zoneAutoFan,
-                                    manualControl: zoneManualControl,
-                                    disableHumiditySensor: zoneDisableHumiditySensor,
-                                    extraHumiditySensor: zoneExtraHumiditySensor,
-                                    disableFan: zoneDisableFan,
-                                    forceThermostat: zoneForceThermostat,
-                                    debug: this.debug
-                                }
-                            })
-                        if (this.debug) this.log('Zones:', JSON.stringify(zones, null, 4))
-                        next(null, zones)
-                    }
-                })
+                                    return {
+                                        id: zone.id,
+                                        name: zone.name,
+                                        homeId: this.homeId,
+                                        username: this.username,
+                                        password: this.password,
+                                        temperatureUnit: this.temperatureUnit,
+                                        tadoMode: this.tadoMode,
+                                        durationInMinutes: this.durationInMinutes,
+                                        statePollingInterval: this.statePollingInterval,
+                                        autoFanOnly: zoneAutoFan,
+                                        manualControl: zoneManualControl,
+                                        disableHumiditySensor: zoneDisableHumiditySensor,
+                                        extraHumiditySensor: zoneExtraHumiditySensor,
+                                        disableFan: zoneDisableFan,
+                                        forceThermostat: zoneForceThermostat,
+                                        debug: this.debug
+                                    }
+                                })
+                            if (this.debug) this.log('Zones:', JSON.stringify(zones, null, 4))
+                            if (!this.disableCachedSettings){
+                                this.tadoSettings.zones = zones
+                                storage.setItem("tadoCachedSettings", this.tadoSettings)
+                            }
+                            next(null, zones)
+                        }
+                    })
+                }
             },
 
             //get Setup Method (NON-THERMOSTATIC / THERMOSTATIC)
             (zones, next) => {
-                if (this.debug) this.log('Getting Installations...')
-                tadoApi.getInstallations(this.username, this.password, this.homeId, (err, installations) => {
-                    if (err) {
-                        this.log('XXX - Error Getting Zones Installation - XXX')
-                        next(err)
-                    } else {
-                        if (this.debug) this.log('Got Installations:', JSON.stringify(installations, null, 4))
-                        zones = zones.map(zone => {
-                            const thatZone = installations.find(device => {
-                                if (device.acInstallationInformation)
-                                    return device.acInstallationInformation.createdZone.id == zone.id
-                                else
-                                    return false
+                if (this.tadoSettings && this.tadoSettings.zones && this.tadoSettings.zones[0].isThermostatic){
+                    if (this.debug) this.log('Got zones installation from storage')
+                    next(null, zones)
+                } else {
+                    if (this.debug) this.log('Getting Installations...')
+                    tadoApi.getInstallations(this.username, this.password, this.homeId, (err, installations) => {
+                        if (err) {
+                            this.log('XXX - Error Getting Zones Installation - XXX')
+                            next(err)
+                        } else {
+                            if (this.debug) this.log('Got Installations:', JSON.stringify(installations, null, 4))
+                            zones = zones.map(zone => {
+                                const thatZone = installations.find(device => {
+                                    if (device.acInstallationInformation)
+                                        return device.acInstallationInformation.createdZone.id == zone.id
+                                    else
+                                        return false
+                                })
+                                if (thatZone) {
+                                    zone.serialNo = thatZone.devices[0].shortSerialNo
+                                    zone.isThermostatic = (thatZone.acInstallationInformation.selectedSetupBranch === "THERMOSTATIC")
+                                } else {
+                                    if (this.debug) this.log('Can\'t find installation for', zone.name, '- Returning random serialNo and NON-THERMOSTATIC mode')
+                                    zone.serialNo = "WR1234567890"
+                                    zone.isThermostatic = false
+                                }
+                                return zone
                             })
-                            if (thatZone) {
-                                zone.serialNo = thatZone.devices[0].shortSerialNo
-                                zone.isThermostatic = (thatZone.acInstallationInformation.selectedSetupBranch === "THERMOSTATIC")
-                            } else {
-                                if (this.debug) this.log('Can\'t find installation for', zone.name, '- Returning random serialNo and NON-THERMOSTATIC mode')
-                                zone.serialNo = "WR1234567890"
-                                zone.isThermostatic = false
+                            if (!this.disableCachedSettings){
+                                this.tadoSettings.zones = zones
+                                storage.setItem("tadoCachedSettings", this.tadoSettings)
                             }
-                            return zone
-                        })
-                        next(null, zones)
-                    }
-                })
+                            next(null, zones)
+                        }
+                    })
+                }
             },
 
             //get Capabilities
             (zones, next) => {
-                if (this.debug) this.log('Getting Zones Capabilities')
-                async.forEach(zones, (zone, nextZone) => {
-                    tadoApi.getZoneCapabilities(this.username, this.password, this.homeId, zone.id, (err, capabilities) => {
-                        if (err) {
-                            this.log('XXX - Error Getting Zone ' + zone.id + ' Capabilities - XXX')
-                            nextZone(err)
-                        } else {
-                            zone.capabilities = capabilities
-                            if (this.debug) this.log('Adding Zone:')
-                            if (this.debug) this.log(JSON.stringify(zone, null, 4))
-                            tadoAccessory = new TadoAccessory(this.log, zone)
-                            myAccessories.push(tadoAccessory)
-                            nextZone()
+                if (this.tadoSettings && this.tadoSettings.zones && this.tadoSettings.zones[0].capabilities){
+                    if (this.debug) this.log('Got zones capabilities from storage')
+                    next(null, zones)
+                } else {
+                    if (this.debug) this.log('Getting Zones Capabilities')
+                    async.forEach(zones, (zone, nextZone) => {
+                        tadoApi.getZoneCapabilities(this.username, this.password, this.homeId, zone.id, (err, capabilities) => {
+                            if (err) {
+                                this.log('XXX - Error Getting Zone ' + zone.id + ' Capabilities - XXX')
+                                nextZone(err)
+                            } else {
+                                if (this.debug) this.log('Got Installations:', JSON.stringify(capabilities, null, 4))
+                                zone.capabilities = capabilities
+                                nextZone()
+                            }
+                        })
+                    }, function (err) {
+                        if (err) next(err)
+                        else {
+                            if (!this.disableCachedSettings){
+                                this.tadoSettings.zones = zones
+                                storage.setItem("tadoCachedSettings", this.tadoSettings)
+                            }
+                            next(null, zones)
                         }
                     })
-                }, function (err) {
-                    if (err) next(err)
-                    else next()
+                }
+            },
+
+
+            // set TadoAccessory
+            (zones, next) => {
+                zones.forEach((zone) => {
+                    if (this.debug) this.log('Adding Zone:')
+                    if (this.debug) this.log(JSON.stringify(zone, null, 4))
+                    tadoAccessory = new TadoAccessory(this.log, zone)
+                    myAccessories.push(tadoAccessory)
                 })
+                next()
             },
 
             // set Outside Temperature Sensor
@@ -237,28 +294,48 @@ TadoACplatform.prototype = {
 
                     this.occupancySensors = []
 
-                    const addUser = (user) => {
-                        const activeDevice = user.mobileDevices.find(device => {
-                            return (device.settings.geoTrackingEnabled)
+                    const addUsers = (users) => {
+                        users.forEach((user) => {
+                            const activeDevice = user.mobileDevices.find(device => {
+                                return (device.settings.geoTrackingEnabled)
+                            })
+    
+                            const occupancyConfig = {
+                                homeId: this.homeId,
+                                username: this.username,
+                                password: this.password,
+                                deviceId: activeDevice.id,
+                                name: user.name,
+                                device: activeDevice.deviceMetadata,
+                                polling: this.occupancyPollingInterval,
+                                debug: this.debug
+                            }
+    
+                            if (this.debug) this.log('Adding Occupancy Sensor:')
+                            if (this.debug) this.log(JSON.stringify(occupancyConfig, null, 4))
+    
+                            TadoOccupancySensor = new occupancySensor(this.log, occupancyConfig, this)
+                            myAccessories.push(TadoOccupancySensor)
+                            this.occupancySensors.push(TadoOccupancySensor)
+
                         })
 
-                        const occupancyConfig = {
-                            homeId: this.homeId,
-                            username: this.username,
-                            password: this.password,
-                            deviceId: activeDevice.id,
-                            name: user.name,
-                            device: activeDevice.deviceMetadata,
-                            polling: this.occupancyPollingInterval,
-                            debug: this.debug
+                        if (this.occupancySensors.length > 0 && this.anyoneSensor) {
+                            const anyoneUser = {
+                                homeId: this.homeId,
+                                username: this.username,
+                                password: this.password,
+                                deviceId: 11111,
+                                name: "Anyone",
+                                device: { platform: "anyone", osVersion: "1.1.1", model: "Tado" },
+                                polling: this.occupancyPollingInterval
+                            }
+                            if (this.debug) this.log('Adding Occupancy Sensor (Anyone):')
+                            if (this.debug) this.log(JSON.stringify(anyoneUser, null, 4))
+
+                            TadoAnyoneSensor = new occupancySensor(this.log, anyoneUser, this)
+                            myAccessories.push(TadoAnyoneSensor)
                         }
-
-                        if (this.debug) this.log('Adding Occupancy Sensor:')
-                        if (this.debug) this.log(JSON.stringify(occupancyConfig, null, 4))
-
-                        TadoOccupancySensor = new occupancySensor(this.log, occupancyConfig, this)
-                        myAccessories.push(TadoOccupancySensor)
-                        this.occupancySensors.push(TadoOccupancySensor)
                     }
 
 
@@ -266,27 +343,19 @@ TadoACplatform.prototype = {
                     tadoApi.getTrackedUsers(this.username, this.password, this.homeId, (err, trackedUsers) => {
                         if (err) {
                             this.log('XXX - Error Getting Connected Users - XXX')
-                            next(err)
-                        }
-                        else {
-                            trackedUsers.forEach(addUser)
-
-                            if (this.occupancySensors.length > 0 && this.anyoneSensor) {
-                                const anyoneUser = {
-                                    homeId: this.homeId,
-                                    username: this.username,
-                                    password: this.password,
-                                    deviceId: 11111,
-                                    name: "Anyone",
-                                    device: { platform: "anyone", osVersion: "1.1.1", model: "Tado" },
-                                    polling: this.occupancyPollingInterval
-                                }
-                                if (this.debug) this.log('Adding Occupancy Sensor (Anyone):')
-                                if (this.debug) this.log(JSON.stringify(anyoneUser, null, 4))
-
-                                TadoAnyoneSensor = new occupancySensor(this.log, anyoneUser, this)
-                                myAccessories.push(TadoAnyoneSensor)
+                            if (this.tadoSettings && this.tadoSettings.trackedUsers){
+                                if (this.debug) this.log('Got zones Connected Users from storage')
+                                addUsers(this.tadoSettings.trackedUsers)
+                                next()
+                            } else
+                                next(err)
+                        } else {
+                            if (this.debug) this.log('Got Connected Users:', JSON.stringify(trackedUsers, null, 4))
+                            if (!this.disableCachedSettings){
+                                this.tadoSettings.trackedUsers = trackedUsers
+                                storage.setItem("tadoCachedSettings", this.tadoSettings)
                             }
+                            addUsers(trackedUsers)
                             next()
                         }
                     })
@@ -298,9 +367,10 @@ TadoACplatform.prototype = {
             if (err) {
                 this.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
                 this.log('Can\'t finish Tado Installation')
-                this.log('Please check you config and restart homebridge')
+                this.log('Please check your internet connection and config and restart homebridge')
                 this.log('If the problem persist, plese open Issue at https://github.com/nitaybz/homebridge-tado-ac/issues')
                 this.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                callback()
             } else {
                 if (this.debug) this.log('Pushing Accessories:')
                 if (this.debug) this.log(myAccessories)
