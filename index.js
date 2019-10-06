@@ -51,7 +51,7 @@ function TadoACplatform(log, config, api) {
         dir: HomebridgeAPI.user.persistPath()
     })
 
-    this.tadoHelpers.storeToken = tadoHelpers.storeToken.bind(this)
+    this.storeToken = tadoHelpers.storeToken.bind(this)
     tadoApi.getToken = tadoApi.getToken.bind(this)
 
     this.tadoSettings = storage.getItem("tadoCachedSettings")
@@ -59,10 +59,10 @@ function TadoACplatform(log, config, api) {
     //Get Token
     if (this.debug) this.log('Getting Token')
 
-    tadoApi.getToken(this.username, this.password, this.tadoHelpers.storeToken)
+    tadoApi.getToken(this.username, this.password, this.storeToken)
     setInterval(() => {
         if (this.debug) this.log('Getting Token')
-        tadoApi.getToken(this.username, this.password, this.tadoHelpers.storeToken)
+        tadoApi.getToken(this.username, this.password, this.storeToken)
     }, 500000)
 }
 
