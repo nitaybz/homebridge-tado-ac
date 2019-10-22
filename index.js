@@ -628,7 +628,7 @@ TadoAccessory.prototype.getServices = function () {
                     minStep: 1
                 })
                 .on('get', this.getCoolingThresholdTemperature.bind(this))
-                .on('set', this.setTargetTemperature.bind(this))
+                .on('set', this.setCoolingThresholdTemperature.bind(this))
         }
 
         if (this.capabilities.HEAT) {
@@ -639,7 +639,7 @@ TadoAccessory.prototype.getServices = function () {
                     minStep: 1
                 })
                 .on('get', this.getHeatingThresholdTemperature.bind(this))
-                .on('set', this.setTargetTemperature.bind(this))
+                .on('set', this.setHeatingThresholdTemperature.bind(this))
 
         }
 
@@ -1091,6 +1091,20 @@ TadoAccessory.prototype.setTargetHeatingCoolingState = function (state, callback
 TadoAccessory.prototype.setTargetTemperature = function (temp, callback) {
     if (this.debug) this.log(this.zoneName + " -> Setting Target Temperature:", 'temp', temp)
     this.setNewState('temp', temp)
+    callback()
+}
+
+// For Thermostat
+TadoAccessory.prototype.setCoolingThresholdTemperature = function (temp, callback) {
+    if (this.debug) this.log(this.zoneName + " -> Setting Cooling Threshold Temperature:", 'temp', temp)
+    this.setNewState('coolTemp', temp)
+    callback()
+}
+
+// For HeaterCooler
+TadoAccessory.prototype.setHeatingThresholdTemperature = function (temp, callback) {
+    if (this.debug) this.log(this.zoneName + " -> Setting Heating Threshold Temperature:", 'temp', temp)
+    this.setNewState('heatTemp', temp)
     callback()
 }
 
