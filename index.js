@@ -1087,14 +1087,14 @@ TadoAccessory.prototype.setTargetHeatingCoolingState = function (state, callback
     callback()
 }
 
-// For HeaterCooler + Thermostat
+// For Thermostat
 TadoAccessory.prototype.setTargetTemperature = function (temp, callback) {
     if (this.debug) this.log(this.zoneName + " -> Setting Target Temperature:", 'temp', temp)
     this.setNewState('temp', temp)
     callback()
 }
 
-// For Thermostat
+// For HeaterCooler
 TadoAccessory.prototype.setCoolingThresholdTemperature = function (temp, callback) {
     if (this.debug) this.log(this.zoneName + " -> Setting Cooling Threshold Temperature:", 'temp', temp)
     this.setNewState('coolTemp', temp)
