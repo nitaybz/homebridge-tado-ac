@@ -1011,7 +1011,7 @@ TadoAccessory.prototype.getFanRotationSpeed = function (callback) {
 
     this.getCurrentStateResponse((state) => {
         if (state.setting.power == "ON" && state.setting.mode == "FAN" && this.capabilities["FAN"].fanSpeeds) {
-            if (this.debug) this.log(this.zoneName + " Fan Rotation Speed is", state.setting.fanSpeed, tadoHelpers.returnFanFanspeedValue(state.setting.fanSpeed, this.fanFanspeedSteps))
+            if (this.debug) this.log(this.zoneName + " Fan Rotation Speed is", state.setting.fanSpeed, tadoHelpers.returnFanspeedValue(state.setting.fanSpeed, this.fanFanspeedSteps))
             callback(null, tadoHelpers.returnFanspeedValue(state.setting.fanSpeed, this.fanFanspeedSteps))
         } else {
             if (this.debug) this.log(this.zoneName + " Fan Rotation Speed - Device is OFF")
