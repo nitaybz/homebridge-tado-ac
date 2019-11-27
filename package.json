@@ -19,9 +19,6 @@
     "type": "git",
     "url": "git://github.com/nitaybz/homebridge-tado-ac.git"
   },
-  "publishConfig": { 
-    "registry": "https://npm.pkg.github.com/" 
-  },
   "dependencies": {
     "node-persist": "0.0.8",
     "async": "*"
