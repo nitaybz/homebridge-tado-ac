@@ -819,7 +819,7 @@ TadoAccessory.prototype.getTargetHeatingCoolingState = function (callback) {
 TadoAccessory.prototype.getTargetTemperature = function (callback) {
     if (this.debug) this.log('Getting Target Temperature State', this.zoneName)
     this.getCurrentStateResponse((state) => {
-        if (state.setting.power == "ON" && state.setting.mode !== "AUTO") {
+        if (state.setting.power == "ON" && state.setting.mode !== "AUTO" && state.setting.mode !== "FAN" && state.setting.mode !== "DRY") {
             if (this.useFahrenheit)
                 this.log(this.zoneName + " Target Temperature is " + state.setting.temperature.fahrenheit + "ºF")
             else
