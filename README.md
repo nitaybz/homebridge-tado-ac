@@ -1,28 +1,26 @@
+<img src="branding/tado_homebridge.png" width="400px">
 
 
-homebridge-tado-ac (v3)
+homebridge-tado-ac
 ========================
+
+[![Downloads](https://img.shields.io/npm/dt/homebridge-tado-ac.svg?color=critical)](https://www.npmjs.com/package/homebridge-tado-ac)
+[![Version](https://img.shields.io/npm/v/homebridge-tado-ac)](https://www.npmjs.com/package/homebridge-tado-ac)<br>
+<!-- [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins) [![Homebridge Discord](https://img.shields.io/discord/432663330281226270?color=728ED5&logo=discord&label=discord)](https://discord.gg/yguuVAX)<br> -->
+[![certified-hoobs-plugin](https://badgen.net/badge/HOOBS/Certified/yellow)](https://plugins.hoobs.org?ref=10876) [![hoobs-support](https://badgen.net/badge/HOOBS/Support/yellow)](https://support.hoobs.org?ref=10876)
 
 Homebridge Plugin for Tado Smart AC Control.
 
-Complies with ```Service.HeaterCooler / Service.Thermostat```
+<img src="branding/product.png" width="400px">
 
-Compatible with ***iOS 11 and above*** -  iOS 10 Home app does not support HeaterCooler service. 
+### Requirements
 
-`min node version required: 6.4`<br>
-`min homebridge version required 4.0`
+<img src="https://img.shields.io/badge/node-%3E%3D10.17-brightgreen"> &nbsp;
+<img src="https://img.shields.io/badge/homebridge-%3E%3D0.4.4-brightgreen"> &nbsp;
+<img src="https://img.shields.io/badge/iOS-%3E%3D11.0.0-brightgreen">
 
-check with:
-`node -v` &`homebridge -V`
-<br>and update if needed
-_________________________________________
-#### Creating and maintaining Homebridge plugins consume a lot of time and effort, if you would like to share your appreciation, feel free to "Star" or donate. 
+check with: `node -v` & `homebridge -V` and update if needed
 
-<a target="blank" href="https://www.paypal.me/nitaybz"><img src="https://img.shields.io/badge/Donate-PayPal-blue.svg"/></a>
-<a target="blank" href="https://blockchain.info/payment_request?address=18uuUZ5GaMFoRH5TrQFJATQgqrpXCtqZRQ"><img src="https://img.shields.io/badge/Donate-Bitcoin-green.svg"/></a>
-
-[Click here](https://github.com/nitaybz?utf8=%E2%9C%93&tab=repositories&q=homebridge) to review more of my plugins.
-_________________________________________
 
 ## Installation
 
@@ -34,8 +32,9 @@ _________________________________________
 
 ## Config file
 
-#### Easy config:
-```
+#### Easy config
+
+``` json
 "platforms": [
     {
         "platform": "TadoAC",
@@ -45,8 +44,9 @@ _________________________________________
 ]
 ```
 
-#### Advanced config:
-```
+#### Advanced config
+
+``` json
 "platforms": [
     {
         "platform": "TadoAC",
@@ -104,6 +104,7 @@ _________________________________________
 
 
 #### * Config Array - ####
+
 some of the config fields allow to set settings for specific devices. this can be achieved by sending the device/zone name or ID. both of them are can be seen when homebridge load and this plugin fetch the zones.
 if you decide to set it for a specific device, it must be in an array, and can be both zone name or ID in the same array.
 examples:
@@ -118,23 +119,25 @@ examples:
 
 `"disableFan": false` (For None)
 
-
 ### State Polling (V3 and newer)
+
  This new options gives a lot more then meets the eye. Setting a state polling interval will fetch the device state every X seconds bringing: relative humidity, room temperature, device full state.
  
  Polling for state gives you the ability to set different automations based on thr changing room temperature or humidity levels. You can even set automations based on different changes of state on your device.
  (Most of those automations can only be achieved with 3rd party apps like EVE)
 
- For Example: 
- - Set The Living Room AC to "Heat" when temperature drops below 20ºC
- - Set the Bedroom Fan to ON when Humidity is Over 70%
- - Turn off Bedroom Lights when Bedroom Tado turns off (that way you can set the Tado device to manually control other devices)
+ For Example:
+
+- Set The Living Room AC to "Heat" when temperature drops below 20ºC
+- Set the Bedroom Fan to ON when Humidity is Over 70%
+- Turn off Bedroom Lights when Bedroom Tado turns off (that way you can set the Tado device to manually control other devices)
 
 To set State Polling add `"statePollingInterval": time_in_seconds` to your config and change the time_in_seconds to your choice, depends on your automations needs (I recommend to set it to something between 5-10).
 
 State Polling is also great to increase the loading speed of your Homebridge accessories. If you felt like it takes a few seconds to load all your accessories in Home app, this should return the status instantly as the status is always fetched from the devices.
 
 ### Thermostatic Control (V3 and newer)
+
 Thermostatic Control is finally supported in Version 3!
 Now, when the plugin recognize that your device is on thermostatic control it will create a thermostat accessory in HomeKit instead of the HeaterCooler(AC) Service, This will disable the fan, fan speed & swing abilities but give you more natural control over the device.
 
@@ -143,8 +146,8 @@ If you're interested in thermostat accessory even in non-thermostatic control, i
 or
 `"forceThermostat": ["Living Room", "Kids Room"]`
 
-
 ### Humidity Sensor (V3 and newer)
+
 In V3,the humidity sensor is part of the main accessory AC/Thermostat and no longer created as a separate sensor. this helps to create a better and clean interface without any unnecessary accessories while maintaining the options to get the state from Siri, set automations and view the humidity state in the device settings. 
 
 If you're interested in getting the extra humidity sensor back, it can be achieved with the new feature "Extra Humidity Sensor", just add `"extraHumiditySensor": true` to your config or set it only for specific devices this way:
@@ -152,8 +155,8 @@ If you're interested in getting the extra humidity sensor back, it can be achiev
 or
 `"extraHumiditySensor": ["Living Room", "Kids Room"]`
 
-
 ### Outside Temperature & Solar Intensity Sensors
+
  Enabling this feature will add 2 new accessories to your home:
 
 ***All data is gathered from Tado API and is related specifically to your homes.***

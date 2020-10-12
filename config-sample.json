@@ -10,26 +10,24 @@
   "platforms": [
     {
         "platform": "TadoAC",
-        "name": "Tado AC",
         "username": "user@name.com",
         "password": "*************",
-        "homeID": 12345,
-        "weatherSensorsEnabled": true,
-        "weatherPollingInterval": 10,
         "occupancySensorsEnabled": true,
         "occupancyPollingInterval": 10,
         "anyoneSensor": true,
+        "weatherSensorsEnabled": true,
+        "weatherPollingInterval": 10,
+        "homeID": 12345,
         "tadoMode": "TIMER",
         "durationInMinutes": 100,
-        "autoFanOnly": false,
-        "manualControlSwitch": true,
-        "disableHumiditySensor": false,
-        "extraHumiditySensor": ["Living Room", 3],
         "disableFan": false,
-        "historyStorage": "fs",
-        "cachedSettingsOnly": false,
+        "disableDry": false,
+        "manualControlSwitch": true,
+        "extraHumiditySensor": ["Living Room", 3],
+        "forceThermostat": false,
         "forceHeaterCooler": false,
-        "disableAcAccessory": false
+        "disableAcAccessory": false,
+        "historyStorage": true
     }
   ],
 

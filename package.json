@@ -1,6 +1,6 @@
 {
   "name": "homebridge-tado-ac",
-  "version": "3.2.6",
+  "version": "4.0.0",
   "description": "Tado Smart AC Control plugin for homebridge: https://github.com/nfarina/homebridge",
   "license": "MIT",
   "keywords": [
@@ -10,28 +10,39 @@
     "tado ac",
     "smart ac"
   ],
-  "engines": {
-    "node": ">=6.4.0",
-    "homebridge": ">=0.4.0"
-  },
-  "author": "nitaybz",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/nitaybz/homebridge-tado-ac.git"
-  },
-  "dependencies": {
-    "node-persist": "0.0.8",
-    "async": "*"
-  },
-  "optionalDependencies": {
-    "fakegato-history": "^0.5.3"
-  },
   "bugs": {
     "url": "https://github.com/nitaybz/homebridge-tado-ac/issues"
   },
   "homepage": "https://github.com/nitaybz/homebridge-tado-ac#readme",
-  "main": "index.js",
+  "engines": {
+    "node": ">=10.17.0",
+    "homebridge": ">=0.4.4"
+  },
+  "dependencies": {
+    "axios": "^0.20.0",
+    "fakegato-history": "^0.5.6",
+    "node-persist": "^3.0.5",
+    "qs": "^6.9.4"
+  },
+  "devDependencies": {
+    "eslint": "^7.1.0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  }
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "funding": [
+    {
+      "type": "paypal",
+      "url": "https://paypal.me/nitaybz"
+    },
+    {
+      "type": "patreon",
+      "url": "https://www.patreon.com/nitaybz"
+    },
+    {
+      "type": "kofi",
+      "url": "https://ko-fi.com/nitaybz"
+    }
+  ]
 }

@@ -1,0 +1,235 @@
+{
+	"pluginAlias": "TadoAC",
+	"pluginType": "platform",
+	"singular": true,
+	"headerDisplay": "Homebridge plugin for Tado - Smart AC Control",
+	"footerDisplay": "Created by @nitaybz",
+	"schema": {
+		"type": "object",
+		"properties": {
+			"username": {
+				"title": "Username",
+				"description": "Your Tado account username",
+				"type": "string",
+				"required": true
+			},
+			"password": {
+				"title": "Password",
+				"description": "Your Tado account password",
+				"type": "string",
+				"required": true
+			},
+			"occupancySensorsEnabled": {
+				"title": "Occupancy Sensors",
+				"description": "Show occupancy sensors for each Tado user connected to your home",
+				"type": "boolean",
+				"default": false,
+				"required": false
+			},
+			"occupancyPollingInterval": {
+				"title": "Occupancy Status Polling Interval in Seconds",
+				"description": "Time in seconds between each status polling of the occupancy sensors",
+				"default": 10,
+				"type": "integer",
+				"minimum": 3,
+				"maximum": 600
+			},
+			"anyoneSensor": {
+				"title": "Anyone Occupancy Sensor",
+				"description": " Adds 1 Occupancy Sensor named \"Anyone\" to represent the state of someone at home",
+				"type": "boolean",
+				"default": false,
+				"required": false
+			},
+			"weatherSensorsEnabled": {
+				"title": "Weather Sensor",
+				"description": "Show weather sensor with outside temperature and solar intensity",
+				"type": "boolean",
+				"default": false,
+				"required": false
+			},
+			"weatherPollingInterval": {
+				"title": "Weather Status Polling Interval in Minutes",
+				"description": "Time in minutes between each status polling of the weather information",
+				"default": 5,
+				"type": "integer",
+				"minimum": 1,
+				"maximum": 60
+			},
+			"homeID": {
+				"title": "Home ID",
+				"description": "If supplied, the plugin will use the attached one and not try to retrieve it",
+				"type": "integer",
+				"required": false
+			},
+			"tadoMode": {
+				"title": "Tado Mode",
+				"type": "string",
+				"default": "MANUAL",
+				"required": true,
+				"oneOf": [
+					{
+						"title": "MANUAL: Manual control until ended by the user",
+						"enum": [
+							"MANUAL"
+						]
+					},
+					{
+						"title": "TADO_MODE: Manual control until next schedule change",
+						"enum": [
+							"TADO_MODE"
+						]
+					},
+					{
+						"title": "TIMER: Manual control until timer ends",
+						"enum": [
+							"TIMER"
+						]
+					}
+				]
+			},
+			"durationInMinutes": {
+				"title": "Timer Duration in Minutes",
+				"description": "Duration in minutes for the \"TIMER\" settings",
+				"default": 90,
+				"type": "integer",
+				"minimum": 5,
+				"maximum": 720
+			},
+			"disableFan": {
+				"title": "Disable Fan Accessory",
+				"description": "Disable FAN mode control - remove extra fan accessory",
+				"type": "boolean",
+				"default": false,
+				"required": false
+			},
+			"disableDry": {
+				"title": "Disable Dry Accessory",
+				"description": "Disable DRY mode control - remove extra dehumidifier accessory",
+				"type": "boolean",
+				"default": false,
+				"required": false
+			},
+			"manualControlSwitch": {
+				"title": "Enable Manual Control Switch",
+				"description": "Adding a switch to set or remove manual control",
+				"type": "boolean",
+				"default": false,
+				"required": false
+			},
+			"historyStorage": {
+				"title": "Enable History Storage",
+				"description": "Records all temperature & humidity measurements history to be viewable in the Eve app",
+				"type": "boolean",
+				"default": false,
+				"required": false
+			},
+			"extraHumiditySensor": {
+				"title": "Enable External Humidity Sensor",
+				"description": "Creates an external sensor outside of the accessory that shows relative humidity",
+				"type": "boolean",
+				"default": false,
+				"required": false
+			},
+			"forceThermostat": {
+				"title": "Force Thermostat Accessory",
+				"description": "When enabled, it will force Homebridge to create Thermostat accessory instead of the default HeaterCooler(AC)",
+				"type": "boolean",
+				"default": false,
+				"required": false
+			},
+			"forceHeaterCooler": {
+				"title": "Force HeaterCooler(AC) Accessory",
+				"description": "When enabled, it will force Homebridge to create HeaterCooler(AC) accessory instead of Thermostat, even when Thermostatic mode is enabled",
+				"type": "boolean",
+				"default": false,
+				"required": false
+			},
+			"disableAcAccessory": {
+				"title": "Disable AC Accessory",
+				"description": "When enabled, it will ignore the main AC devices and will only show occupancy sensors & weather sensors",
+				"type": "boolean",
+				"default": false,
+				"required": false
+			},
+			"debug": {
+				"title": "Enable Debug Logs",
+				"description": "When checked, the plugin will produce extra logs for debugging purposes",
+				"type": "boolean",
+				"default": false,
+				"required": false
+			}
+		}
+	},
+	"layout": [
+		{
+			"key": "username"
+		},
+		{
+			"key": "password"
+		},
+		{
+			"key": "tadoMode"
+		},
+		{
+			"key": "durationInMinutes",
+			"condition": {
+				"functionBody": "return (model.tadoMode === 'TIMER')"
+			}
+		},
+		{
+			"key": "manualControlSwitch"
+		},
+		{
+			"key": "historyStorage"
+		},
+		{
+			"key": "occupancySensorsEnabled"
+		},
+		{
+			"key": "occupancyPollingInterval",
+			"condition": {
+				"functionBody": "return (model.occupancySensorsEnabled && model.occupancySensorsEnabled === true)"
+			}
+		},
+		{
+			"key": "anyoneSensor",
+			"condition": {
+				"functionBody": "return (model.occupancySensorsEnabled && model.occupancySensorsEnabled === true)"
+			}
+		},
+		{
+			"key": "weatherSensorsEnabled"
+		},
+		{
+			"key": "weatherPollingInterval",
+			"condition": {
+				"functionBody": "return (model.weatherPollingInterval && model.occupancySensorsEnabled === true)"
+			}
+		},
+		{
+			"key": "disableFan"
+		},
+		{
+			"key": "disableDry"
+		},
+		{
+			"key": "extraHumiditySensor"
+		},
+		{
+			"key": "debug"
+		},
+		{
+			"type": "fieldset",
+			"expandable": true,
+			"title": "Advanced Settings",
+			"description": "Don't change these, unless you understand what you're doing.",
+			"items": [
+				"homeID",
+				"forceThermostat",
+				"forceHeaterCooler",
+				"disableAcAccessory"
+			]
+		}
+	]
+}
