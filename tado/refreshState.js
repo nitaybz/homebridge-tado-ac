@@ -54,7 +54,7 @@ module.exports = (platform) => {
 			}
 		},
 		
-		weather: () => {
+		weather: async () => {
 			try {
 				platform.weather = await platform.tadoApi.getWeather()
 				
@@ -74,7 +74,7 @@ module.exports = (platform) => {
 
 		},
 
-		occupancy: () => {
+		occupancy: async () => {
 			try {
 				platform.users = await platform.tadoApi.getUsers()
 				

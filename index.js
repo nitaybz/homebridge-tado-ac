@@ -98,6 +98,7 @@ class TadoACPlatform {
 			try {
 				this.tadoApi = await TadoApi(this)
 			} catch(err) {
+				this.log.easyDebug(err)
 				return
 			}
 

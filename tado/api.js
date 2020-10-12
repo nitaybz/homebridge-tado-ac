@@ -16,6 +16,14 @@ module.exports = async function (platform) {
 		settings = {}
 	}
 
+
+	axios.defaults.params = {
+		username: encodeURIComponent(platform.username),
+		password: encodeURIComponent(platform.password)
+	}
+	
+	axios.defaults.baseURL = baseURL
+	
 	if (platform.homeId)
 		homeId = platform.homeId
 	else {
@@ -26,13 +34,6 @@ module.exports = async function (platform) {
 			throw err
 		}
 	}
-
-	axios.defaults.params = {
-		username: encodeURIComponent(platform.username),
-		password: encodeURIComponent(platform.password)
-	}
-	
-	axios.defaults.baseURL = baseURL
 	
 	return {
 	
@@ -68,7 +69,7 @@ module.exports = async function (platform) {
 		},
 	
 		setDeviceState: async (zoneId, overlay) => {
-			const method = overlay ? 'put' : 'delete',
+			const method = overlay ? 'put' : 'delete'
 			const path = `/homes/${homeId}/zones/${zoneId}/overlay`
 			return await setRequest(method, path, overlay)
 		},
@@ -128,13 +129,13 @@ module.exports = async function (platform) {
 function getRequest(url) {
 	return new Promise((resolve, reject) => {
 	
-		log.easyDebug(`Creating ${method.toUpperCase()} request to Tado API --->`)
+		log.easyDebug(`Creating GET request to Tado API --->`)
 		log.easyDebug(baseURL + url)
 
 		axios.get(url)
 			.then(response => {
 				const json = response.data
-				log.easyDebug(`Successful ${method.toUpperCase()} response:`)
+				log.easyDebug(`Successful GET response:`)
 				log.easyDebug(JSON.stringify(json))
 				resolve(json)
 			})
@@ -148,7 +149,7 @@ function getRequest(url) {
 }
 
 function setRequest(method, url, data) {
-	return new Promise((resolve, reject) => {
+	return new Promise(async (resolve, reject) => {
 		
 		let headers
 		try {

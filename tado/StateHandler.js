@@ -1,88 +1,109 @@
 const unified = require('./unified')
 
-module.exports = (device, platform) => {
-
-	const setTimeoutDelay = 1000
-	let setTimer = null
-	let preventTurningOff = false
-	const tadoApi = platform.tadoApi
-
-	const log = platform.log
-	// const state = device.state
-
+module.exports = (platform) => {
 	return {
-		get: (target, prop) => {
-			// check for last update and refresh state if needed
-			if (!platform.setProcessing)
-				platform.refreshState.ac()
+		ac: () => {
+			if (!platform.processingState && !platform.setProcessing) {
+				platform.processingState = true
+				clearTimeout(platform.pollingTimeout)
+				setTimeout(async () => {
 
-			// return a function to update state (multiple properties)
-			if (prop === 'update')
-				return (state) => {
-					if (!platform.setProcessing) {
-						Object.keys(state).forEach(key => { target[key] = state[key] })
-						device.updateHomeKit()
+					try {
+						platform.devices = await platform.tadoApi.getAllDevices()
+						await platform.storage.setItem('devices', platform.devices)
+						
+					} catch(err) {
+						platform.log.easyDebug('<<<< ---- Refresh State FAILED! ---- >>>>')
+						platform.processingState = false
+						if (platform.pollingInterval) {
+							platform.log.easyDebug(`Will try again in ${platform.pollingInterval/1000} seconds...`)
+							platform.pollingTimeout = setTimeout(platform.refreshState.ac, platform.pollingInterval)
+						}
+						return
 					}
-				}
+					if (platform.setProcessing) {
+						platform.processingState = false
+						return
+					}
+					
+					const handledLocations = []
+					platform.devices.forEach(device => {
+						const airConditioner = platform.activeAccessories.find(accessory => accessory.type === 'AirConditioner' && accessory.id === device.id)
+
+						if (airConditioner) {
+							// Update AC state in cache + HomeKit
+							airConditioner.state.update(unified.acState(device))
+						}
+					})
 
 
-			return target[prop]
+
+					// register new devices / unregister removed devices
+					platform.syncHomeKitCache()
+
+					// start timeout for next polling
+					if (platform.pollingInterval)
+						platform.pollingTimeout = setTimeout(platform.refreshState, platform.pollingInterval)
+
+					// block new requests for extra 5 seconds
+					setTimeout(() => {
+						platform.processingState = false
+					}, 5000)
+
+				}, platform.refreshDelay)
+			}
 		},
-	
-		set: (state, prop, value) => {
-			
-			if (prop in state && state[prop] === value)
-				return
-
-			state[prop] = value
-			
-			// Send Reset Filter command and update value
-			if (prop === 'manualControl' && !value) {
-				try {
-					await tadoApi.setDeviceState(device.id, null)
-				} catch(err) {
-					log('Error occurred! -> Climate React state did not change')
-				}
+		
+		weather: async () => {
+			try {
+				platform.weather = await platform.tadoApi.getWeather()
 				
-				if (!platform.setProcessing)
-					platform.refreshState.ac()
+			} catch(err) {
+				platform.log.easyDebug('<<<< ---- Refresh Weather State FAILED! ---- >>>>')
+				platform.log.easyDebug(`Will try again in ${platform.weatherPollingInterval/1000} seconds...`)
 				return
 			}
-	
 
-			platform.setProcessing = true
-
-			// Make sure device is not turning off when setting fanSpeed to 0 (AUTO)
-			if (prop === 'fanSpeed' && value === 0 && device.capabilities[state.mode].autoFanSpeed)
-				preventTurningOff = true
-				
+			await platform.storage.setItem('weather', platform.weather)
+			const weatherSensor = platform.activeAccessories.find(accessory => accessory.type === 'WeatherSensor')
+			if (weatherSensor) {
+				weatherSensor.state = platform.cachedState.weather = unified.weatherState(platform.weather)
+				weatherSensor.updateHomeKit()
+			}
 			
-			clearTimeout(setTimer)
-			setTimer = setTimeout(async function() {
-				// Make sure device is not turning off when setting fanSpeed to 0 (AUTO)
-				if (preventTurningOff && state.active === false) {
-					state.active = true
-					preventTurningOff = false
-				}
-		
-				const tadoOverlay = unified.tadoOverlay(platform, device, state)
-				log(device.name, ' -> Setting New State:')
-				log(JSON.stringify(tadoOverlay, null, 2))
-				
-				try {
-					// send state command to Tado
-					await tadoApi.setDeviceState(device.id, tadoOverlay)
-				} catch(err) {
-					log(`ERROR setting ${prop} to ${value}`)
-					return
-				}
-				
-				device.updateHomeKit()
-				platform.setProcessing = false
 
-			}, setTimeoutDelay)
+		},
 
-			return true;
+		occupancy: async () => {
+			try {
+				platform.users = await platform.tadoApi.getUsers()
+				
+			} catch(err) {
+				platform.log.easyDebug('<<<< ---- Refresh Weather State FAILED! ---- >>>>')
+				platform.log.easyDebug(`Will try again in ${platform.weatherPollingInterval/1000} seconds...`)
+				return
+			}
+
+			await platform.storage.setItem('users', platform.users)
+
+			platform.users.forEach(user => {
+				const occupancySensor = platform.activeAccessories.find(accessory => accessory.type === 'OccupancySensor' && user.id === accessory.id)
+				if (occupancySensor) {
+					occupancySensor.state = platform.cachedState.occupancy[user.id] = unified.occupancyState(user)
+					occupancySensor.updateHomeKit()
+				}
+			})
+			
+			if (platform.anyoneSensor) {
+				const anyoneSensor = platform.activeAccessories.find(accessory => accessory.type === 'OccupancySensor' && accessory.id === 'anyoneSensor')
+				if (anyoneSensor) {
+					anyoneSensor.state = unified.anyoneOccupancyState(platform.cachedState.occupancy)
+					anyoneSensor.updateHomeKit()
+				}
+			}
+
+			platform.syncHomeKitCache()
 		}
 	}
+
 }

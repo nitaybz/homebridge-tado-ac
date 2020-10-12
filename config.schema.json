@@ -204,7 +204,7 @@
 		{
 			"key": "weatherPollingInterval",
 			"condition": {
-				"functionBody": "return (model.weatherPollingInterval && model.occupancySensorsEnabled === true)"
+				"functionBody": "return (model.weatherSensorsEnabled && model.weatherSensorsEnabled === true)"
 			}
 		},
 		{

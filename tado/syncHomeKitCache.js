@@ -73,6 +73,9 @@ module.exports = (platform) => {
 					if (!platform.occupancySensorsEnabled || !platform.users)
 						accessoriesToRemove.push(accessory)
 					else {
+						if (accessory.context.userId === 'anyoneSensor' && platform.anyoneSensor)
+							break
+
 						userExists = platform.users.find(user => user.id === accessory.context.userId)
 						if (!userExists) {
 							accessoriesToRemove.push(accessory)
