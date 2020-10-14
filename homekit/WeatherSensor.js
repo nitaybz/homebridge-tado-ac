@@ -84,8 +84,8 @@ class WeatherSensor {
 
 		this.LightSensorService.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
 			.setProps({
-				minValue: 100,
-				maxValue: 0
+				minValue: 0,
+				maxValue: 100
 			})
 			.on('get', this.stateManager.get.SolarLightLevel)
 	}
