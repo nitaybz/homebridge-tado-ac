@@ -431,7 +431,7 @@ class AirConditioner {
 
 		this.ManualControlService.getCharacteristic(Characteristic.On)
 			.on('get', this.stateManager.get.ManualControl)
-			.on('get', this.stateManager.set.ManualControl)
+			.on('set', this.stateManager.set.ManualControl)
 
 	}
 
