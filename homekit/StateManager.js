@@ -297,12 +297,8 @@ module.exports = (device, platform) => {
 				log.easyDebug(device.name, '(GET) - is:', occupancy)
 				callback(null, Characteristic.OccupancyDetected[occupancy])
 			},
-
-			SolarOn: (callback) => {
-				callback(null, !!device.state.solarIntensity)
-			},
-
-			SolarBrightness: (callback) => {
+			
+			SolarLightLevel: (callback) => {
 				const solarIntensity = device.state.solarIntensity
 				log.easyDebug('Solar Intensity is:', solarIntensity)
 				callback(null, solarIntensity)
@@ -527,23 +523,7 @@ module.exports = (device, platform) => {
 				log.easyDebug(device.name + ' -> Setting Manual Control:', state)
 				device.state.manualControl = state
 				callback()
-			},
-
-			// WEATHER
-			SolarOn: (value, callback) => {
-				callback()
-				setTimeout(() => {
-					device.SolarSensor.getCharacteristic(Characteristic.On).updateValue(!!device.state.solarIntensity)
-				}, 1000)
-			},
-
-			SolarBrightness: (value, callback) => {
-				callback()
-				setTimeout(() => {
-					device.SolarSensor.getCharacteristic(Characteristic.Brightness).updateValue(device.state.solarIntensity)
-				}, 1000)
 			}
-			
 		}
 
 	}

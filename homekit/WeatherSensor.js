@@ -56,7 +56,7 @@ class WeatherSensor {
 			.setCharacteristic(Characteristic.AppMatchingIdentifier, this.appId)
 
 		this.addTemperatureSensor()
-		this.addLightBulb()
+		this.addLightSensor()
 
 	}
 
@@ -76,26 +76,19 @@ class WeatherSensor {
 	}
 
 
-	addLightBulb() {
-		this.log.easyDebug(`Adding Solar Light Bulb Service`)
-		this.SolarSensor = this.accessory.getService(Service.Lightbulb)
-		if (!this.SolarSensor)
-			this.SolarSensor = this.accessory.addService(Service.Lightbulb, 'Solar Intensity', 'SolarSensor')
+	addLightSensor() {
+		this.log.easyDebug(`Adding Solar LightSensor Service`)
+		this.LightSensorService = this.accessory.getService(Service.LightSensor)
+		if (!this.LightSensorService)
+			this.LightSensorService = this.accessory.addService(Service.LightSensor, 'Solar Intensity', 'LightSensor')
 
-		this.SolarSensor.getCharacteristic(Characteristic.On)
-			.on('get', this.stateManager.get.SolarOn)
-			.on('set', this.stateManager.set.SolarOn)
-
-		this.SolarSensor.getCharacteristic(Characteristic.Brightness)
-				.setProps({
-						maxValue: 100,
-						minValue: 0,
-						minStep: 1
-				})
-				.on('get', this.stateManager.get.SolarBrightness)
-				.on('set', this.stateManager.set.SolarBrightness)
+		this.LightSensorService.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
+			.setProps({
+				minValue: 100,
+				maxValue: 0
+			})
+			.on('get', this.stateManager.get.SolarLightLevel)
 	}
-
 
 	updateHomeKit() {
 		// log new state with FakeGato
