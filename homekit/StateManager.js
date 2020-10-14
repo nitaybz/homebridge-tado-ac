@@ -293,11 +293,11 @@ module.exports = (device, platform) => {
 			// WEATHER
 
 			OutsideTemperature: (callback) => {
-				const occupancy = device.state.occupancy
-				log.easyDebug(device.name, '(GET) - is:', occupancy)
-				callback(null, Characteristic.OccupancyDetected[occupancy])
+				const outsideTemperature = device.state.outsideTemperature
+				log.easyDebug('Outside Temperature is:', outsideTemperature)
+				callback(null, outsideTemperature)
 			},
-			
+
 			SolarLightLevel: (callback) => {
 				const solarIntensity = device.state.solarIntensity
 				log.easyDebug('Solar Intensity is:', solarIntensity)
