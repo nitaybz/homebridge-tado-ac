@@ -18,8 +18,8 @@ module.exports = async function (platform) {
 
 
 	axios.defaults.params = {
-		username: encodeURIComponent(platform.username),
-		password: encodeURIComponent(platform.password)
+		username: platform.username,
+		password: platform.password
 	}
 	
 	axios.defaults.baseURL = baseURL
@@ -49,7 +49,9 @@ module.exports = async function (platform) {
 						zoneState = await get.State(zone.id)
 						capabilities = await get.ZoneCapabilities(zone.id)
 					} catch (err) {
+						log(err)
 						log(`COULD NOT get Zone ${zone.id} state and capabilities !! skipping device...`)
+						return null
 					}
 
 					return {
@@ -61,7 +63,8 @@ module.exports = async function (platform) {
 						
 					}
 				})
-				return devices
+				
+				return await Promise.all(devices)
 			} catch(err) {
 				log(`Failed to get devices and states!!`)
 				throw err
@@ -108,7 +111,7 @@ module.exports = async function (platform) {
 
 				settings.users = users
 				log.easyDebug(`Got Users from Tado API  >>>`)
-				log.easyDebug(JSON.stringify(users))
+				// log.easyDebug(JSON.stringify(users))
 				storage.setItem('settings', settings)
 				return users
 			} catch (err) {
@@ -159,7 +162,7 @@ function setRequest(method, url, data) {
 			}
 		} catch (err) {
 			log('The plugin was NOT able to find stored token or acquire one from Tado API ---> it will not be able to set the state !!')
-			throw err
+			reject(err)
 		}
 	
 		log.easyDebug(`Creating ${method.toUpperCase()} request to Tado API --->`)
@@ -299,7 +302,7 @@ const get = {
 			const installations = {}
 			response.forEach(installation => {
 				if (installation.acInstallationInformation) {
-					const zoneId = installation.acInstallationInformation.createZone.id
+					const zoneId = installation.acInstallationInformation.createdZone.id
 					installations[zoneId] = installation.acInstallationInformation.selectedSetupBranch
 				}
 			})
@@ -310,6 +313,7 @@ const get = {
 			storage.setItem('settings', settings)
 			return installations
 		} catch (err) {
+			log(err)
 			log.easyDebug(`The plugin was not able to retrieve Installations from Tado API !!`)
 			if (settings.installations) {
 				log.easyDebug(`Got Installations from storage  >>>`)

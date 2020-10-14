@@ -31,16 +31,13 @@ class AirConditioner {
 			platform.usesFahrenheit = true
 		this.isThermostat = (!this.disableAcAccessory && !this.forceHeaterCooler && (this.forceThermostat || this.installation === 'THERMOSTATIC'))
 
-		this.disableFan = (platform.disableFan === true || platform.disableFan.includes(this.roomName) || this.disableFan.includes(this.id))
-		this.disableDry = (platform.disableDry === true || platform.disableDry.includes(this.roomName) || this.disableDry.includes(this.id))
-		this.extraHumiditySensor = (platform.extraHumiditySensor === true || platform.extraHumiditySensor.includes(this.roomName) || this.extraHumiditySensor.includes(this.id))
-		this.manualControlSwitch = (platform.manualControlSwitch === true || platform.manualControlSwitch.includes(this.roomName) || this.manualControlSwitch.includes(this.id))
-		this.disableAcAccessory = (platform.disableAcAccessory === true || platform.disableAcAccessory.includes(this.roomName) || this.disableAcAccessory.includes(this.id))
-		this.forceHeaterCooler = (platform.forceHeaterCooler === true || platform.forceHeaterCooler.includes(this.roomName) || this.forceHeaterCooler.includes(this.id))
-		this.forceThermostat = (platform.forceThermostat === true || platform.forceThermostat.includes(this.roomName) || this.forceThermostat.includes(this.id))
-
-		if (this.manualControlSwitch) zoneManualControl = (this.manualControlSwitch === true || this.manualControlSwitch.includes(zone.name) || this.manualControlSwitch.includes(zone.id))
-		else zoneManualControl = false
+		this.disableFan = platform.disableFan && (platform.disableFan === true || platform.disableFan.includes(this.roomName) || this.disableFan.includes(this.id))
+		this.disableDry = platform.disableDry && (platform.disableDry === true || platform.disableDry.includes(this.roomName) || this.disableDry.includes(this.id))
+		this.extraHumiditySensor = platform.extraHumiditySensor && (platform.extraHumiditySensor === true || platform.extraHumiditySensor.includes(this.roomName) || this.extraHumiditySensor.includes(this.id))
+		this.manualControlSwitch = platform.manualControlSwitch && (platform.manualControlSwitch === true || platform.manualControlSwitch.includes(this.roomName) || this.manualControlSwitch.includes(this.id))
+		this.disableAcAccessory = platform.disableAcAccessory && (platform.disableAcAccessory === true || platform.disableAcAccessory.includes(this.roomName) || this.disableAcAccessory.includes(this.id))
+		this.forceHeaterCooler = platform.forceHeaterCooler && (platform.forceHeaterCooler === true || platform.forceHeaterCooler.includes(this.roomName) || this.forceHeaterCooler.includes(this.id))
+		this.forceThermostat = platform.forceThermostat && (platform.forceThermostat === true || platform.forceThermostat.includes(this.roomName) || this.forceThermostat.includes(this.id))
 
 		this.filterService = deviceInfo.filterService
 		this.capabilities = unified.capabilities(device)
@@ -52,7 +49,7 @@ class AirConditioner {
 
 		this.stateManager = require('./StateManager')(this, platform)
 
-		this.UUID = this.api.hap.uuid.generate(this.id)
+		this.UUID = this.api.hap.uuid.generate(this.id.toString())
 		this.accessory = platform.cachedAccessories.find(accessory => accessory.UUID === this.UUID)
 
 		if (!this.accessory) {
@@ -480,13 +477,15 @@ class AirConditioner {
 		// if status is OFF, set all services to INACTIVE
 		if (!this.state.active) {
 
-			if (this.ThermostatService)
+			if (this.ThermostatService) {
 				this.updateValue('ThermostatService', 'CurrentHeatingCoolingState', Characteristic.CurrentHeatingCoolingState.OFF)
 				this.updateValue('ThermostatService', 'TargetHeatingCoolingState', Characteristic.TargetHeatingCoolingState.OFF)
+			}
 			
-			if (this.HeaterCoolerService)
+			if (this.HeaterCoolerService) {
 				this.updateValue('HeaterCoolerService', 'Active', 0)
 				this.updateValue('HeaterCoolerService', 'CurrentHeaterCoolerState', Characteristic.CurrentHeaterCoolerState.INACTIVE)
+			}
 
 			if (this.FanService)
 				this.updateValue('FanService', 'Active', 0)
@@ -591,14 +590,16 @@ class AirConditioner {
 				}
 
 				// turn off ThermostatService
-				if (this.ThermostatService)
+				if (this.ThermostatService) {
 					this.updateValue('ThermostatService', 'CurrentHeatingCoolingState', Characteristic.CurrentHeatingCoolingState.OFF)
 					this.updateValue('ThermostatService', 'TargetHeatingCoolingState', Characteristic.TargetHeatingCoolingState.OFF)
-				
+				}
+
 				// turn off HeaterCoolerService
-				if (this.HeaterCoolerService)
+				if (this.HeaterCoolerService) {
 					this.updateValue('HeaterCoolerService', 'Active', 0)
 					this.updateValue('HeaterCoolerService', 'CurrentHeaterCoolerState', Characteristic.CurrentHeaterCoolerState.INACTIVE)
+				}
 
 				// turn off DryService
 				if (this.DryService) {
@@ -624,14 +625,16 @@ class AirConditioner {
 				}
 
 				// turn off ThermostatService
-				if (this.ThermostatService)
+				if (this.ThermostatService) {
 					this.updateValue('ThermostatService', 'CurrentHeatingCoolingState', Characteristic.CurrentHeatingCoolingState.OFF)
 					this.updateValue('ThermostatService', 'TargetHeatingCoolingState', Characteristic.TargetHeatingCoolingState.OFF)
+				}
 				
 				// turn off HeaterCoolerService
-				if (this.HeaterCoolerService)
+				if (this.HeaterCoolerService) {
 					this.updateValue('HeaterCoolerService', 'Active', 0)
 					this.updateValue('HeaterCoolerService', 'CurrentHeaterCoolerState', Characteristic.CurrentHeaterCoolerState.INACTIVE)
+				}
 
 				// turn off FanService
 				if (this.FanService)

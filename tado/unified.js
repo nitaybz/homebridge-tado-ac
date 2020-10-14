@@ -138,10 +138,10 @@ module.exports = {
 
 		const modeCapabilities = device.capabilities[state.mode]
 
-		state.swing = (!modeCapabilities.swing || state.mode === 'OFF' || !device.state.setting.swing || device.state.setting.swing === 'OFF') ?
+		state.swing = (state.mode === 'OFF' || !modeCapabilities.swing || !device.state.setting.swing || device.state.setting.swing === 'OFF') ?
 			'SWING_DISABLED' : 'SWING_ENABLED'
 
-		state.swing = (!modeCapabilities.fanSpeeds || state.mode === 'OFF' || !device.state.setting.fanSpeed) ? 
+		state.swing = (state.mode === 'OFF' || !modeCapabilities.fanSpeeds || !device.state.setting.fanSpeed) ? 
 			0 : fanLevelToHK(device.state.setting.fanSpeed, modeCapabilities.fanSpeeds.reverse())
 
 
@@ -199,17 +199,18 @@ module.exports = {
 
 		// add temperatures to heat and cool
 		if (['HEAT', 'COOL'].includes(state.mode)) {
+			if (!state.targetTemperature)
+				state.targetTemperature = 25
 			overlay.setting.temperature = {
 				fahrenheit: toFahrenheit(state.targetTemperature),
 				celsius: state.targetTemperature
 			}
 		}
-
+		
 		if ('swing' in device.capabilities[state.mode])
 			overlay.setting.swing = state.swing === 'SWING_ENABLED' ? 'ON' : 'OFF'
 
 		if ('fanSpeeds' in device.capabilities[state.mode])
-			overlay.setting.swing = state.swing === 'SWING_ENABLED' ? 'ON' : 'OFF'
 			overlay.setting.fanSpeed = HKToFanLevel(state.fanSpeed, device.capabilities[state.mode].fanSpeeds)
 
 		if (platform.tadoMode == 'TIMER')

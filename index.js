@@ -63,7 +63,7 @@ class TadoACPlatform {
 		this.CELSIUS_UNIT = 'CELSIUS'
 		this.FAHRENHEIT_UNIT = 'FAHRENHEIT'
 		const requestedInterval = config['statePollingInterval'] || false
-		this.refreshDelay = 3000
+		this.refreshDelay = 2000
 		
 		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 

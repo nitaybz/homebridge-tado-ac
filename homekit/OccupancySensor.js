@@ -77,7 +77,7 @@ class OccupancySensor {
 	updateValue (serviceName, characteristicName, newValue) {
 		if (this[serviceName].getCharacteristic(Characteristic[characteristicName]).value !== newValue) {
 			this[serviceName].getCharacteristic(Characteristic[characteristicName]).updateValue(newValue)
-			this.log.easyDebug(`${this.locationName} - Updated '${characteristicName}' for ${serviceName} with NEW VALUE: ${newValue}`)
+			this.log.easyDebug(`${this.name} - Updated '${characteristicName}' for ${serviceName} with NEW VALUE: ${newValue}`)
 		}
 	}
 
