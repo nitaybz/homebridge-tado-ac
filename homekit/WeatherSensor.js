@@ -1,12 +1,11 @@
 const unified = require('../tado/unified')
-let Characteristic, Service, FAHRENHEIT_UNIT
+let Characteristic, Service
 
 class WeatherSensor {
 	constructor(platform) {
 
 		Service = platform.api.hap.Service
 		Characteristic = platform.api.hap.Characteristic
-		FAHRENHEIT_UNIT = platform.FAHRENHEIT_UNIT
 
 		this.log = platform.log
 		this.api = platform.api

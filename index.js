@@ -41,21 +41,21 @@ class TadoACPlatform {
 		}
 		this.homeId = config['homeID'] || false
 		this.tadoMode = config['tadoMode'] || 'MANUAL'
-    this.durationInMinutes = config['durationInMinutes'] || 90
-    this.weatherSensorsEnabled = config['weatherSensorsEnabled'] || false
+		this.durationInMinutes = config['durationInMinutes'] || 90
+		this.weatherSensorsEnabled = config['weatherSensorsEnabled'] || false
 		this.weatherPollingInterval = !isNaN(config['weatherPollingInterval']) ? (config['weatherPollingInterval'] * 60 * 1000) : 300000 // default is 5 minutes
 		if (this.weatherPollingInterval < 30000) this.weatherPollingInterval = 60000 // minimum 1 minute to not overload
-    this.occupancySensorsEnabled = config['occupancySensorsEnabled'] || false
+		this.occupancySensorsEnabled = config['occupancySensorsEnabled'] || false
 		this.occupancyPollingInterval = !isNaN(config['occupancyPollingInterval']) ? (config['occupancyPollingInterval'] * 1000) : 10000 // default is 10 seconds
 		if (this.occupancyPollingInterval < 3000) this.occupancyPollingInterval = 3000 // minimum 3 seconds to not overload
-    this.anyoneSensor = config['anyoneSensor'] === false ? false : true
+		this.anyoneSensor = config['anyoneSensor'] === false ? false : true
 		this.extraHumiditySensor = config['extraHumiditySensor'] || false
 
-    this.manualControlSwitch = config['manualControl'] || config['manualControlSwitch'] || false
-    this.extraHumiditySensor = config['extraHumiditySensor'] || false
-    this.forceThermostat = config['forceThermostat'] || false
-    this.forceHeaterCooler = config['forceHeaterCooler'] || false //new
-    this.disableAcAccessory = config['disableAcAccessory'] || false //new
+		this.manualControlSwitch = config['manualControl'] || config['manualControlSwitch'] || false
+		this.extraHumiditySensor = config['extraHumiditySensor'] || false
+		this.forceThermostat = config['forceThermostat'] || false
+		this.forceHeaterCooler = config['forceHeaterCooler'] || false //new
+		this.disableAcAccessory = config['disableAcAccessory'] || false //new
 
 
 		this.persistPath = path.join(this.api.user.persistPath(), '/../tado-persist')

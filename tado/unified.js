@@ -31,11 +31,6 @@ function toFahrenheit(value) {
 	return Math.round((value * 1.8) + 32)
 }
 
-
-function toCelsius(value) {
-	return (value - 32) / 1.8
-}
-
 module.exports = {
 
 	deviceInformation: device => {
@@ -182,7 +177,7 @@ module.exports = {
 
 		const overlay = {
 			termination: {
-					type: platform.tadoMode
+				type: platform.tadoMode
 			},
 			setting: {
 				type: 'AIR_CONDITIONING',

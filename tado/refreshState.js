@@ -26,7 +26,6 @@ module.exports = (platform) => {
 						return
 					}
 					
-					const handledLocations = []
 					platform.devices.forEach(device => {
 						const airConditioner = platform.activeAccessories.find(accessory => accessory.type === 'AirConditioner' && accessory.id === device.id)
 

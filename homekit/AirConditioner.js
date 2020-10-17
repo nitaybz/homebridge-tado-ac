@@ -39,7 +39,7 @@ class AirConditioner {
 		this.forceThermostat = platform.forceThermostat && (platform.forceThermostat === true || platform.forceThermostat.includes(this.roomName) || this.forceThermostat.includes(this.id))
 
 		this.isThermostat = (!this.disableAcAccessory && !this.forceHeaterCooler && (this.forceThermostat || this.installation === 'THERMOSTATIC'))
-		
+
 		this.filterService = deviceInfo.filterService
 		this.capabilities = unified.capabilities(device)
 
@@ -511,7 +511,7 @@ class AirConditioner {
 
 				if (this.ThermostatService) {
 					// turn on ThermostatService
-				this.updateValue('ThermostatService', 'TargetHeatingCoolingState', Characteristic.TargetHeatingCoolingState[this.state.mode])
+					this.updateValue('ThermostatService', 'TargetHeatingCoolingState', Characteristic.TargetHeatingCoolingState[this.state.mode])
 
 					// update temperatures for ThermostatService
 					this.updateValue('ThermostatService', 'TargetTemperature', this.state.targetTemperature)

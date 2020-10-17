@@ -152,6 +152,7 @@ function getRequest(url) {
 }
 
 function setRequest(method, url, data) {
+	// eslint-disable-next-line no-async-promise-executor
 	return new Promise(async (resolve, reject) => {
 		
 		let headers
