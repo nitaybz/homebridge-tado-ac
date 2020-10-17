@@ -110,7 +110,7 @@ module.exports = async function (platform) {
 				})
 
 				settings.users = users
-				log.easyDebug(`Got Users from Tado API  >>>`)
+				log.easyDebug(`Got Users from Tado API`)
 				// log.easyDebug(JSON.stringify(users))
 				storage.setItem('settings', settings)
 				return users
