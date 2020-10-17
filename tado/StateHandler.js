@@ -2,7 +2,7 @@ const unified = require('./unified')
 
 module.exports = (device, platform) => {
 
-	const setTimeoutDelay = 600
+	const setTimeoutDelay = 500
 	let setTimer = null
 	let preventTurningOff = false
 	const tadoApi = platform.tadoApi
@@ -77,9 +77,10 @@ module.exports = (device, platform) => {
 					platform.setProcessing = false
 					return
 				}
-				
-				device.updateHomeKit()
-				platform.setProcessing = false
+				setTimeout(() => {
+					device.updateHomeKit()
+					platform.setProcessing = false
+				}, 500)
 
 			}, setTimeoutDelay)
 
