@@ -22,7 +22,7 @@ Homebridge Plugin for tado° Smart AC Control.
 check with: `node -v` & `homebridge -V` and update if needed
 
 ## Version 4 - What's new?
-Completely refactored the entired code! that should solve a lot of issues the plugin had before + added a few new features.
+Completely refactored the entire code! that should solve most of the issues the plugin had before + added a few new features.
 
 #### NEW:
 
@@ -55,7 +55,7 @@ This plugin is Homebridge verified and HOOBS certified and can be easily install
 
 If you don't use Homebridge UI or HOOBS, or if you want to know more about the plugin features and options, keep reading...
 
-1. Install homebridge using: `sudo npm install -g homebridge --unasafe-perm`
+1. Install homebridge using: `sudo npm install -g homebridge --unsafe-perm`
 2. Install this plugin using: `sudo npm install -g homebridge-tado-ac`
 3. Update your configuration file. See `sample-config.json` in this repository for a sample.
 
@@ -143,7 +143,7 @@ In practice:
 
 - Minimum and Maximum temperatures are taken from tado° api.
 - Temperature unit (Celsius/Fahrenheit) is taken from tado° api.
-- COOL/HEAT/AUTP modes are available in the AC states in HomeKit only if it is available in tado° app.
+- COOL/HEAT/AUTO modes are available in the AC states in HomeKit only if it is available in tado° app.
 - Modes "FAN" and "DRY" (dehumidifier) will create their own accessories only if you have this ability inside tado° app.
 - Fan Speed ("Rotation Speed" in Home app) And Swing ("Oscillate" in Home app) will show in the accessory settings, but only if you have this capability in tado° app.
 - Installation type Thermostatic/Non-Thermostatic will create the proper accessory Thermostat/Heater-Cooler.
