@@ -1,17 +1,16 @@
-<img src="branding/tado_homebridge.png" width="400px">
+<img src="https://github.com/nitaybz/homebridge-tado-ac/raw/master/branding/tado_homebridge.png" width="400px">
 
 
-homebridge-tado-ac
-========================
+# homebridge-tado-ac
 
 [![Downloads](https://img.shields.io/npm/dt/homebridge-tado-ac.svg?color=critical)](https://www.npmjs.com/package/homebridge-tado-ac)
 [![Version](https://img.shields.io/npm/v/homebridge-tado-ac)](https://www.npmjs.com/package/homebridge-tado-ac)<br>
 <!-- [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins) [![Homebridge Discord](https://img.shields.io/discord/432663330281226270?color=728ED5&logo=discord&label=discord)](https://discord.gg/yguuVAX)<br> -->
 [![certified-hoobs-plugin](https://badgen.net/badge/HOOBS/Certified/yellow)](https://plugins.hoobs.org?ref=10876) [![hoobs-support](https://badgen.net/badge/HOOBS/Support/yellow)](https://support.hoobs.org?ref=10876)
 
-Homebridge Plugin for tado° Smart AC Control.
+[Homebridge](https://github.com/nfarina/homebridge) Plugin for tado° Smart AC Control.
 
-<img src="branding/product.png" width="400px">
+<img src="https://raw.githubusercontent.com/nitaybz/homebridge-tado-ac/master/branding/product.png" width="400px">
 
 ### Requirements
 
