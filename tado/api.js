@@ -78,7 +78,7 @@ module.exports = async function (platform) {
 		},
 
 		getWeather: async () => {
-			log.easyDebug(`Getting Weather Status from Tado API`)
+			log.easyDebug(`Getting Weather Status from tado° API`)
 			const path = `/homes/${homeId}/weather`
 			try {
 				const weather = await getRequest(path)
@@ -87,7 +87,7 @@ module.exports = async function (platform) {
 				storage.setItem('settings', settings)
 				return weather
 			} catch (err) {
-				log.easyDebug(`The plugin was not able to retrieve Weather Status from Tado API !!`)
+				log.easyDebug(`The plugin was not able to retrieve Weather Status from tado° API !!`)
 				if (settings.weather) {
 					log.easyDebug(`Got Weather Status from storage  (NOT TO CRASH HOMEBRIDGE)  >>>`)
 					log.easyDebug(JSON.stringify(settings.weather))
@@ -98,7 +98,7 @@ module.exports = async function (platform) {
 		},
 
 		getUsers: async () => {
-			log.easyDebug(`Getting Users from Tado API`)
+			log.easyDebug(`Getting Users from tado° API`)
 			const path = `/homes/${homeId}/users`
 			try {
 				const response = await getRequest(path)
@@ -110,12 +110,12 @@ module.exports = async function (platform) {
 				})
 
 				settings.users = users
-				log.easyDebug(`>>> Got Users from Tado API`)
+				log.easyDebug(`>>> Got Users from tado° API`)
 				// log.easyDebug(JSON.stringify(users))
 				storage.setItem('settings', settings)
 				return users
 			} catch (err) {
-				log.easyDebug(`The plugin was not able to retrieve Users from Tado API !!`)
+				log.easyDebug(`The plugin was not able to retrieve Users from tado° API !!`)
 				if (settings.users) {
 					log.easyDebug(`Got Users from storage  >>>`)
 					log.easyDebug(JSON.stringify(settings.users))
@@ -132,7 +132,7 @@ module.exports = async function (platform) {
 function getRequest(url) {
 	return new Promise((resolve, reject) => {
 	
-		log.easyDebug(`Creating GET request to Tado API --->`)
+		log.easyDebug(`Creating GET request to tado° API --->`)
 		log.easyDebug(baseURL + url)
 
 		axios.get(url)
@@ -161,11 +161,11 @@ function setRequest(method, url, data) {
 				'Authorization': 'Bearer ' + tokenResponse
 			}
 		} catch (err) {
-			log('The plugin was NOT able to find stored token or acquire one from Tado API ---> it will not be able to set the state !!')
+			log('The plugin was NOT able to find stored token or acquire one from tado° API ---> it will not be able to set the state !!')
 			reject(err)
 		}
 	
-		log.easyDebug(`Creating ${method.toUpperCase()} request to Tado API --->`)
+		log.easyDebug(`Creating ${method.toUpperCase()} request to tado° API --->`)
 		log.easyDebug(baseURL + url)
 		if (data)
 			log.easyDebug('data: ' +JSON.stringify(data))
@@ -212,7 +212,7 @@ function getToken() {
 						key: response.data.access_token,
 						expirationDate: new Date().getTime() + response.data.expires_in*1000
 					}
-					log.easyDebug('Token successfully acquired from Tado API')
+					log.easyDebug('Token successfully acquired from tado° API')
 					// log.easyDebug(token)
 					resolve(token.key)
 				} else {
@@ -236,16 +236,16 @@ const get = {
 			return settings.homeId
 		}
 
-		log.easyDebug(`Getting Home ID from Tado API`)
+		log.easyDebug(`Getting Home ID from tado° API`)
 		const path = '/me'
 		try {
 			const response = await getRequest(path)
 			settings.homeId = response.homes[0].id
-			log.easyDebug(`Got Home ID from Tado API  >>> ${settings.homeId} <<<`)
+			log.easyDebug(`Got Home ID from tado° API  >>> ${settings.homeId} <<<`)
 			storage.setItem('settings', settings)
 			return settings.homeId
 		} catch (err) {
-			log.easyDebug(`The plugin was not able to retrieve Home ID from Tado API !!`)
+			log.easyDebug(`The plugin was not able to retrieve Home ID from tado° API !!`)
 			throw err
 		}
 	},
@@ -257,34 +257,34 @@ const get = {
 			return settings.temperatureUnit
 		}
 			
-		log.easyDebug(`Getting Temperature Unit from Tado API`)
+		log.easyDebug(`Getting Temperature Unit from tado° API`)
 		const path = `/homes/${homeId}`
 		try {
 			const response = await getRequest(path)
 			settings.temperatureUnit = response.temperatureUnit
-			log.easyDebug(`Got Temperature Unit from Tado API  >>> ${settings.temperatureUnit} <<<`)
+			log.easyDebug(`Got Temperature Unit from tado° API  >>> ${settings.temperatureUnit} <<<`)
 			storage.setItem('settings', settings)
 			return settings.temperatureUnit
 		} catch (err) {
-			log.easyDebug(`The plugin was not able to retrieve Temperature Unit from Tado API !! Using Celsius`)
+			log.easyDebug(`The plugin was not able to retrieve Temperature Unit from tado° API !! Using Celsius`)
 			settings.temperatureUnit = 'CELSIUS'
 			return settings.temperatureUnit
 		}
 	},
 
 	Zones: async () => {
-		log.easyDebug(`Getting Zones from Tado API`)
+		log.easyDebug(`Getting Zones from tado° API`)
 		const path = `/homes/${homeId}/zones`
 		try {
 			const response = await getRequest(path)
 			const zones = response.filter(zone => zone.type === 'AIR_CONDITIONING')
 			settings.zones = zones
-			log.easyDebug(`>>> Got Zones from Tado API`)
+			log.easyDebug(`>>> Got Zones from tado° API`)
 			// log.easyDebug(JSON.stringify(zones))
 			storage.setItem('settings', settings)
 			return zones
 		} catch (err) {
-			log.easyDebug(`The plugin was not able to retrieve Zones from Tado API !!`)
+			log.easyDebug(`The plugin was not able to retrieve Zones from tado° API !!`)
 			if (settings.zones) {
 				log.easyDebug(`Got Zones from storage  >>>`)
 				log.easyDebug(JSON.stringify(settings.zones))
@@ -295,7 +295,7 @@ const get = {
 	},
 
 	Installations: async () => {
-		log.easyDebug(`Getting Installations from Tado API`)
+		log.easyDebug(`Getting Installations from tado° API`)
 		const path = `/homes/${homeId}/installations`
 		try {
 			const response = await getRequest(path)
@@ -308,13 +308,13 @@ const get = {
 			})
 
 			settings.installations = installations
-			log.easyDebug(`Got Installations from Tado API  >>>`)
+			log.easyDebug(`Got Installations from tado° API  >>>`)
 			log.easyDebug(JSON.stringify(installations))
 			storage.setItem('settings', settings)
 			return installations
 		} catch (err) {
 			log(err)
-			log.easyDebug(`The plugin was not able to retrieve Installations from Tado API !!`)
+			log.easyDebug(`The plugin was not able to retrieve Installations from tado° API !!`)
 			if (settings.installations) {
 				log.easyDebug(`Got Installations from storage  >>>`)
 				log.easyDebug(JSON.stringify(settings.installations))
@@ -326,11 +326,11 @@ const get = {
 
 
 	ZoneCapabilities: async (zoneId) => {
-		log.easyDebug(`Getting Zone Capabilities from Tado API`)
+		log.easyDebug(`Getting Zone Capabilities from tado° API`)
 		const path = `/homes/${homeId}/zones/${zoneId}/capabilities`
 		try {
 			const capabilities = await getRequest(path)
-			log.easyDebug(`>>> Got Zone ${zoneId} Capabilities from Tado API`)
+			log.easyDebug(`>>> Got Zone ${zoneId} Capabilities from tado° API`)
 			// log.easyDebug(JSON.stringify(capabilities))
 
 			if (!settings.capabilities)
@@ -340,7 +340,7 @@ const get = {
 			storage.setItem('settings', settings)
 			return capabilities
 		} catch (err) {
-			log.easyDebug(`The plugin was not able to retrieve Zone ${zoneId} Capabilities from Tado API !!`)
+			log.easyDebug(`The plugin was not able to retrieve Zone ${zoneId} Capabilities from tado° API !!`)
 			if (settings.capabilities && settings.capabilities[zoneId]) {
 				log.easyDebug(`Got Zone ${zoneId} Capabilities from storage  >>>`)
 				log.easyDebug(JSON.stringify(settings.capabilities[zoneId]))
@@ -351,11 +351,11 @@ const get = {
 	},
 
 	State: async (zoneId) => {
-		log.easyDebug(`Getting Zone state from Tado API`)
+		log.easyDebug(`Getting Zone state from tado° API`)
 		const path = `/homes/${homeId}/zones/${zoneId}/state`
 		try {
 			const state = await getRequest(path)
-			log.easyDebug(`>>> Got Zone ${zoneId} state from Tado API  >>>`)
+			log.easyDebug(`>>> Got Zone ${zoneId} state from tado° API  >>>`)
 			// log.easyDebug(JSON.stringify(state))
 
 			if (!settings.states)
@@ -365,7 +365,7 @@ const get = {
 			storage.setItem('settings', settings)
 			return state
 		} catch (err) {
-			log.easyDebug(`The plugin was not able to retrieve Zone ${zoneId} state from Tado API !!`)
+			log.easyDebug(`The plugin was not able to retrieve Zone ${zoneId} state from tado° API !!`)
 			if (settings.states && settings.states[zoneId]) {
 				log.easyDebug(`Got Zone ${zoneId} state from storage  (NOT TO CRASH HOMEBRIDGE) >>>`)
 				log.easyDebug(JSON.stringify(settings.states[zoneId]))

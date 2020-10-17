@@ -70,7 +70,7 @@ module.exports = (device, platform) => {
 				log(JSON.stringify(tadoOverlay, null, 2))
 				
 				try {
-					// send state command to Tado
+					// send state command to tado°
 					await tadoApi.setDeviceState(device.id, tadoOverlay)
 				} catch(err) {
 					log(`ERROR setting ${prop} to ${value}`)

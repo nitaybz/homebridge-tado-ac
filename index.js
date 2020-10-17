@@ -28,7 +28,7 @@ class TadoACPlatform {
 		this.PLUGIN_NAME = PLUGIN_NAME
 		this.PLATFORM_NAME = PLATFORM_NAME
 
-		// ~~~~~~~~~~~~~~~~~~~~~ Tado Specials ~~~~~~~~~~~~~~~~~~~~~ //
+		// ~~~~~~~~~~~~~~~~~~~~~ tado° Specials ~~~~~~~~~~~~~~~~~~~~~ //
 		
 		this.username = config['username']
 		this.password = config['password']

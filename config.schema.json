@@ -2,26 +2,26 @@
 	"pluginAlias": "TadoAC",
 	"pluginType": "platform",
 	"singular": true,
-	"headerDisplay": "Homebridge plugin for Tado - Smart AC Control",
+	"headerDisplay": "Homebridge plugin for tado° - Smart AC Control",
 	"footerDisplay": "Created by @nitaybz",
 	"schema": {
 		"type": "object",
 		"properties": {
 			"username": {
 				"title": "Username",
-				"description": "Your Tado account username",
+				"description": "Your tado° account username",
 				"type": "string",
 				"required": true
 			},
 			"password": {
 				"title": "Password",
-				"description": "Your Tado account password",
+				"description": "Your tado° account password",
 				"type": "string",
 				"required": true
 			},
 			"occupancySensorsEnabled": {
 				"title": "Occupancy Sensors",
-				"description": "Show occupancy sensors for each Tado user connected to your home",
+				"description": "Show occupancy sensors for each tado° user connected to your home",
 				"type": "boolean",
 				"default": false,
 				"required": false
@@ -63,7 +63,7 @@
 				"required": false
 			},
 			"tadoMode": {
-				"title": "Tado Mode",
+				"title": "tado° Mode",
 				"type": "string",
 				"default": "MANUAL",
 				"required": true,
