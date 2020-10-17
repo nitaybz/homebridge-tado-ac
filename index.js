@@ -62,7 +62,7 @@ class TadoACPlatform {
 		this.emptyState = {devices:{}, weather:{} ,occupancy: {}}
 		this.CELSIUS_UNIT = 'CELSIUS'
 		this.FAHRENHEIT_UNIT = 'FAHRENHEIT'
-		const requestedInterval = config['statePollingInterval'] || 30 // default polling time is 30 seconds
+		const requestedInterval = config['statePollingInterval'] === 0 ? 0 : (config['statePollingInterval'] || 30) // default polling time is 30 seconds
 		this.refreshDelay = 2000
 		
 		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
