@@ -29,7 +29,6 @@ class AirConditioner {
 		this.usesFahrenheit = this.temperatureUnit === FAHRENHEIT_UNIT
 		if (this.usesFahrenheit)
 			platform.usesFahrenheit = true
-		this.isThermostat = (!this.disableAcAccessory && !this.forceHeaterCooler && (this.forceThermostat || this.installation === 'THERMOSTATIC'))
 
 		this.disableFan = platform.disableFan && (platform.disableFan === true || platform.disableFan.includes(this.roomName) || this.disableFan.includes(this.id))
 		this.disableDry = platform.disableDry && (platform.disableDry === true || platform.disableDry.includes(this.roomName) || this.disableDry.includes(this.id))
@@ -39,6 +38,8 @@ class AirConditioner {
 		this.forceHeaterCooler = platform.forceHeaterCooler && (platform.forceHeaterCooler === true || platform.forceHeaterCooler.includes(this.roomName) || this.forceHeaterCooler.includes(this.id))
 		this.forceThermostat = platform.forceThermostat && (platform.forceThermostat === true || platform.forceThermostat.includes(this.roomName) || this.forceThermostat.includes(this.id))
 
+		this.isThermostat = (!this.disableAcAccessory && !this.forceHeaterCooler && (this.forceThermostat || this.installation === 'THERMOSTATIC'))
+		
 		this.filterService = deviceInfo.filterService
 		this.capabilities = unified.capabilities(device)
 
