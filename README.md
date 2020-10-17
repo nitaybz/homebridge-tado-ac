@@ -24,11 +24,15 @@ check with: `node -v` & `homebridge -V` and update if needed
 
 ## Installation
 
-1. Install homebridge using: `sudo npm install -g homebridge`
+This plugin is Homebridge verified and HOOBS certified and can be easily installed and configured through their UI.
+
+If you don't use Homebridge UI or HOOBS, or if you want to know more about the plugin features and options, keep reading...
+
+1. Install homebridge using: `sudo npm install -g homebridge --unasafe-perm`
 2. Install this plugin using: `sudo npm install -g homebridge-tado-ac`
 3. Update your configuration file. See `sample-config.json` in this repository for a sample.
 
-**install from git (latest version): `sudo npm install -g https://github.com/nitaybz/homebridge-tado-ac.git`
+\* install from git: `sudo npm install -g git+https://github.com/nitaybz/homebridge-sensibo-ac.git`
 
 ## Config file
 
@@ -50,24 +54,24 @@ check with: `node -v` & `homebridge -V` and update if needed
 "platforms": [
     {
         "platform": "TadoAC",
-        "name": "Tado AC",
         "username": "user@name.com",
         "password": "*************",
-        "homeID": 12345,
-        "weatherSensorsEnabled": true,
-        "weatherPollingInterval": 10,
+        "tadoMode": "TIMER",
+        "durationInMinutes": 100,
+        "manualControlSwitch": true,
+        "historyStorage": true,
         "occupancySensorsEnabled": true,
         "occupancyPollingInterval": 10,
         "anyoneSensor": true,
-        "tadoMode": "TIMER",
-        "durationInMinutes": 100,
-        "autoFanOnly": ["Kids Room"],
-        "manualControlSwitch": true,
-        "disableHumiditySensor": false,
-        "extraHumiditySensor": ["Living Room", 3],
-        "disableFan": true,
-        "historyStorage": "fs",
-        "cachedSettingsOnly": false,
+        "weatherSensorsEnabled": true,
+        "weatherPollingInterval": 5,
+        "disableFan": false,
+        "disableDry": false,
+        "extraHumiditySensor": true,
+        "debug": false,
+        "statePollingInterval": 30,
+        "homeID": 12345,
+        "forceThermostat": false,
         "forceHeaterCooler": false,
         "disableAcAccessory": false
     }
@@ -79,35 +83,35 @@ check with: `node -v` & `homebridge -V` and update if needed
 |             Parameter            |                       Description                       | Required |  Default  |  type  |
 | -------------------------------- | ------------------------------------------------------- |:--------:|:---------:|:---------:|
 | `platform`                       | always "TadoAC".                                         |     ✓    |      -    |  String  |
-| `name`                           | name of the platform - for logs only.                    |          |      -    |  String  |
 | `username`                       | your tado account username (something@something.com).    |     ✓    |      -    |  String  |
 | `password`                       | your tado account password.                              |     ✓    |      -    |  String  |
-| `homeID`                       | if not used, the plugin will automatically search for your home ID and store it locally |       |      auto Fetch    |  Number  |
 | `tadoMode`                       | default mode for the commands to be sent with. can be "MANUAL" for manual control until ended by the user, "TADO_MODE" for manual control until next schedule change in tado app OR "TIMER" for manual control until timer ends (duration can be set).        |             |  "MANUAL" |
 | `durationInMinutes`              |   duration in Minutes for the "TIMER" settings       |            |  90 |
-| `statePollingInterval` ***new          | Enable and set interval (in seconds) for polling state from the device  -*more details below*      |             |  `false` |  `false` /  Number |
-| `weatherSensorsEnabled`          | Enable **Outside Temperature** sensor and **Solar Intensity** light bulb.  -*more details below*      |             |  `false` |  Boolean  |
-| `weatherPollingInterval`         |  Time in **Minutes** to check for changes in weather. Default is `false` for no polling.       |             |  `false` |  `false` / Number  |
-| `occupancySensorsEnabled`        |  Enable **Occupancy Sensors**.  -*more details below*     |             |  `false` |  Boolean  |
-| `occupancyPollingInterval`       |  Time in **Seconds** to check for changes in occupancy. Default is `10` for polling every 10 seconds. *it can't be set to `false`!*     |             |  10 |  Number  |
-| `anyoneSensor`       |  Adds 1 **Occupancy Sensor** named "Anyone" to represent the state of someone at home.     |             |  `true` |  Boolean  |
 | `manualControlSwitch`       |  Adds switch for getting Manual control status and turn OFF manual control from HomeKit (turn ON is done by sending any command).  |             |  `false` |  Boolean / Array*  |
-| `autoFanOnly`       |  When set to `true`, all commands will be sent with "AUTO" fan speed if possible .   |             |  `false` |   Boolean / Array*  |
-| `disableHumiditySensor`       |  When set to `true`, it will disable the attached humidity sensor.   |             |  `false` |   Boolean / Array*  |
-| `disableFan`       |  When set to `true`, it will disable the fan accessory   |             |  `false` |   Boolean / Array*  |
-| `extraHumiditySensor`     |  When set to `true`, it will add extra separate humidity sensor.  |             |  `false` |   Boolean / Array*  |
+| `historyStorage` ***new          |  When set to `true`, all measurements (temperature & humidity) will be saved and viewable from the Eve app  |             |  `false`  |   Boolean  |
+| `occupancySensorsEnabled`        |  Enable **Occupancy Sensors**.  -*more details below*     |             |  `false` |  Boolean  |
+| `occupancyPollingInterval`       |  Time in **Seconds** to check for changes in occupancy. Default is `10` for polling every 10 seconds. minimum is `3`, *it can't be set to `false`!*     |             |  `10` |  Number  |
+| `anyoneSensor`       |  Adds 1 **Occupancy Sensor** named "Anyone" to represent the state of someone at home.     |             |  `true` |  Boolean  |
+| `weatherSensorsEnabled`          | Enable **Outside Temperature** sensor and **Solar Intensity** light Sensor.  -*more details below*      |             |  `false` |  Boolean  |
+| `weatherPollingInterval`         |  Time in **Minutes** to check for changes in weather. Default is `5` for polling every 5 minutes. minimum is `1`, *it can't be set to `false`!*       |             |  `5` |  Number  |
+| `disableFan`               |  When set to `true`, it will disable the FAN accessory        |          |  `false` |  Boolean |
+| `disableDry`               |  When set to `true`, it will disable the DRY accessory        |          |  `false` |  Boolean |
+| `extraHumiditySensor`     |  When set to `true`, it will add extra separate humidity sensor.  |           |  `false` |   Boolean  |
+| `debug`       |  When set to `true`, the plugin will produce extra logs for debugging purposes        |          |  `false` |  Boolean  |
+| `statePollingInterval`          | Time in seconds between each status polling of the tado devices (set to 0 for no polling)      |             |  `false` |  `false` /  Number |
+| `homeID`                       | if not used, the plugin will automatically search for your home ID and store it locally |       |    auto Fetch    |  Number  |
 | `forceThermostat`     |  When set to `true`, it will force Homebridge to create Thermostat accessory instead of the HeaterCooler(AC)  |             |  `false` |   Boolean / Array*  |
-| `forceHeaterCooler` ***new    |  When set to `true`, it will force Homebridge to create HeaterCooler(AC) accessory instead of Thermostat  |             |  `false` |   Boolean / Array*  |
-| `disableAcAccessory` ***new    |  When set to `true`, it will ignore the main AC devices and will only show other options like occupancy sensors/extra humidity sensor/weather sensors   |             |  `false` |   Boolean / Array*  |
-| `historyStorage` ***new          |  When set to `fs`, the `fakegato-history` library will log every datapoint to a file  |             |  - |   String*  |
-| `cachedSettingsOnly` ***new          |  When set `to` true, the plugin will not try to retrieve devices settings from Tado but only used thew one save in storage - faster loading time but not updating with new settings if changed in Tado app|             |  `false` |   String*  |
+| `forceHeaterCooler`   |  When set to `true`, it will force Homebridge to create HeaterCooler(AC) accessory instead of Thermostat  |             |  `false` |   Boolean / Array*  |
+| `disableAcAccessory`   |  When set to `true`, it will ignore the main AC devices and will only show other options like occupancy sensors/extra humidity sensor/weather sensors   |             |  `false` |   Boolean / Array*  |
 
 
-#### * Config Array - ####
+### * Specific Device Custom Settings - ###
 
-some of the config fields allow to set settings for specific devices. this can be achieved by sending the device/zone name or ID. both of them are can be seen when homebridge load and this plugin fetch the zones.
-if you decide to set it for a specific device, it must be in an array, and can be both zone name or ID in the same array.
-examples:
+Some of the config fields allow to set settings for specific devices.
+
+This can be achieved in the config settings ONLY and not through the UI (using the UI plugin settings will erase the custom configurations).
+
+To customize specific device, you'll need to add the device/zone ID or name to the desired config field in an **array**, see the following examples:
 
 `"disableFan": ["Living Room"]` (Single zone with name)
 
@@ -118,6 +122,17 @@ examples:
 `"disableFan": true` (For All)
 
 `"disableFan": false` (For None)
+
+Supported fields: 
+
+- `manualControlSwitch`
+- `disableFan`
+- `disableDry`
+- `extraHumiditySensor`
+- `forceThermostat`
+- `forceHeaterCooler`
+- `disableAcAccessory`
+
 
 ### State Polling (V3 and newer)
 
@@ -186,9 +201,6 @@ Since version 3.2 the plugin will auto cache the settings/capabilites of your Ta
 Using the feature **cachedSettingsOnly** will allow you to you lock the current settings so the plugin will not even try to get new settings once he has it. this will result in faster homebridge loading time but will prevent homebridge from getting new configurations from Tado (new users, thermostatic/non-thermostatic change, change of AC capabilites).
 
 if you're using this method, make sure to change the `cachedSettingsOnly` option to `false` if you made any change in Tado app and want it to be applied in HomeKit
-
-### History
-If you install the optinal dependency `fakegato-history`, then temperature (tado and outside weather if enabled) and humidity (only tado) will be stored and made available via homekit using Elgato Eve compatible services and characteristics. In combination with the Eve App you can then access the historic values on your iOS device.
 
 
 ## Updates
@@ -267,3 +279,30 @@ To use old version feel free to install from [GitHub](https://github.com/nitaybz
 
 I tried my best to make this version flawless, but expect some issues since each user has his own different setup.
 Once a new issue is noticed, please submit to [Issues](https://github.com/nitaybz/homebridge-tado-ac/issues)
+
+
+
+### History Storage
+Enabling this feature will keep all measurements of temperature and humidity and will store them. Then, all the historic data will be viewable in Eve app under the accessory in a nice graph.
+
+**To enable the history storage feature**, add 
+`"enableHistoryStorage": true` to your config.
+
+### Fan speeds & "AUTO" speed
+Fan speed steps are determined by the steps you have available in the Sensibo app. Since HomeKit control over fan speed is with a slider between 0-100, the plugin converts the steps you have in the Sensibo app to values between 1 to 100, when 100 is highest and 1 is lowest. if "AUTO" speed is available in your setup, setting the fan speed to 0, should actually set it to "AUTO" speed.
+
+### Issues & Debug
+If you experience any issues with the plugins please refer to the [Issues](https://github.com/nitaybz/homebridge-sensibo-ac/issues) tab or [Sensibo-AC Discord channel](https://discord.gg/yguuVAX) and check if your issue is already described there, if it doesn't, please create a new issue with as much detailed information as you can give (logs are crucial).<br>
+
+if you want to even speed up the process, you can add `"debug": true` to your config, which will give me more details on the logs and speed up fixing the issue.
+
+<br><br>
+
+## Support homebridge-tado-ac
+
+**homebridge-tado-ac** is a free plugin under the MIT license. it was developed as a contribution to the homebridge/hoobs community with lots of love and thoughts.
+Creating and maintaining Homebridge plugins consume a lot of time and effort and if you would like to share your appreciation, feel free to "Star" or donate. 
+
+<a target="blank" href="https://www.paypal.me/nitaybz"><img src="https://img.shields.io/badge/PayPal-Donate-blue.svg?logo=paypal"/></a><br>
+<a target="blank" href="https://www.patreon.com/nitaybz"><img src="https://img.shields.io/badge/PATREON-Become a patron-red.svg?logo=patreon"/></a><br>
+<a target="blank" href="https://ko-fi.com/nitaybz"><img src="https://img.shields.io/badge/Ko--Fi-Buy%20me%20a%20coffee-29abe0.svg?logo=ko-fi"/></a>

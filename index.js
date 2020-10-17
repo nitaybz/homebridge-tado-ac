@@ -48,7 +48,7 @@ class TadoACPlatform {
     this.occupancySensorsEnabled = config['occupancySensorsEnabled'] || false
 		this.occupancyPollingInterval = !isNaN(config['occupancyPollingInterval']) ? (config['occupancyPollingInterval'] * 1000) : 10000 // default is 10 seconds
 		if (this.occupancyPollingInterval < 3000) this.occupancyPollingInterval = 3000 // minimum 3 seconds to not overload
-    this.anyoneSensor = config['anyoneSensor'] || false
+    this.anyoneSensor = config['anyoneSensor'] === false ? false : true
 		this.extraHumiditySensor = config['extraHumiditySensor'] || false
 
     this.manualControlSwitch = config['manualControl'] || config['manualControlSwitch'] || false
@@ -62,7 +62,7 @@ class TadoACPlatform {
 		this.emptyState = {devices:{}, weather:{} ,occupancy: {}}
 		this.CELSIUS_UNIT = 'CELSIUS'
 		this.FAHRENHEIT_UNIT = 'FAHRENHEIT'
-		const requestedInterval = config['statePollingInterval'] || false
+		const requestedInterval = config['statePollingInterval'] || 30 // default polling time is 30 seconds
 		this.refreshDelay = 2000
 		
 		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //

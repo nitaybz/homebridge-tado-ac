@@ -152,6 +152,14 @@
 				"default": false,
 				"required": false
 			},
+			"statePollingInterval": {
+				"title": "AC Device Status Polling Interval in Seconds",
+				"description": "Time in seconds between each status polling of the tado devices (set to 0 for no polling)",
+				"default": 30,
+				"type": "integer",
+				"minimum": 0,
+				"maximum": 600
+			},
 			"debug": {
 				"title": "Enable Debug Logs",
 				"description": "When checked, the plugin will produce extra logs for debugging purposes",
@@ -225,6 +233,7 @@
 			"title": "Advanced Settings",
 			"description": "Don't change these, unless you understand what you're doing.",
 			"items": [
+				"statePollingInterval",
 				"homeID",
 				"forceThermostat",
 				"forceHeaterCooler",
