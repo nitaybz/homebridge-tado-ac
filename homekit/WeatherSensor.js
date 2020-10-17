@@ -100,8 +100,8 @@ class WeatherSensor {
 		}
 		
 		this.updateValue('TemperatureSensorService', 'CurrentTemperature', this.state.outsideTemperature)
-		this.updateValue('SolarSensor', 'On', !!this.state.solarIntensity)
-		this.updateValue('SolarSensor', 'Brightness', this.state.solarIntensity)
+		this.updateValue('LightSensorService', 'On', !!this.state.solarIntensity)
+		this.updateValue('LightSensorService', 'Brightness', this.state.solarIntensity)
 
 		// cache last state to storage
 		this.storage.setItem('state', this.cachedState)
