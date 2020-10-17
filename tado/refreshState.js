@@ -10,7 +10,7 @@ module.exports = (platform) => {
 
 					try {
 						platform.devices = await platform.tadoApi.getAllDevices()
-						await platform.storage.setItem('devices', platform.devices)
+						await platform.storage.setItem('tado-devices', platform.devices)
 						
 					} catch(err) {
 						platform.log.easyDebug('<<<< ---- Refresh State FAILED! ---- >>>>')

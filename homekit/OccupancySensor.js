@@ -72,6 +72,10 @@ class OccupancySensor {
 	updateHomeKit() {
 		// update measurements
 		this.updateValue('OccupancySensorService', 'OccupancyDetected', Characteristic.OccupancyDetected[this.state.occupancy])
+
+
+		// cache last state to storage
+		this.storage.setItem('state', this.cachedState)
 	}
 
 	updateValue (serviceName, characteristicName, newValue) {

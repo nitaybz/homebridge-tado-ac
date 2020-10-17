@@ -110,7 +110,7 @@ module.exports = async function (platform) {
 				})
 
 				settings.users = users
-				log.easyDebug(`Got Users from Tado API`)
+				log.easyDebug(`>>> Got Users from Tado API`)
 				// log.easyDebug(JSON.stringify(users))
 				storage.setItem('settings', settings)
 				return users
@@ -279,8 +279,8 @@ const get = {
 			const response = await getRequest(path)
 			const zones = response.filter(zone => zone.type === 'AIR_CONDITIONING')
 			settings.zones = zones
-			log.easyDebug(`Got Zones from Tado API  >>>`)
-			log.easyDebug(JSON.stringify(zones))
+			log.easyDebug(`>>> Got Zones from Tado API`)
+			// log.easyDebug(JSON.stringify(zones))
 			storage.setItem('settings', settings)
 			return zones
 		} catch (err) {
@@ -330,8 +330,8 @@ const get = {
 		const path = `/homes/${homeId}/zones/${zoneId}/capabilities`
 		try {
 			const capabilities = await getRequest(path)
-			log.easyDebug(`Got Zone ${zoneId} Capabilities from Tado API  >>>`)
-			log.easyDebug(JSON.stringify(capabilities))
+			log.easyDebug(`>>> Got Zone ${zoneId} Capabilities from Tado API`)
+			// log.easyDebug(JSON.stringify(capabilities))
 
 			if (!settings.capabilities)
 				settings.capabilities = {}
@@ -355,8 +355,8 @@ const get = {
 		const path = `/homes/${homeId}/zones/${zoneId}/state`
 		try {
 			const state = await getRequest(path)
-			log.easyDebug(`Got Zone ${zoneId} state from Tado API  >>>`)
-			log.easyDebug(JSON.stringify(state))
+			log.easyDebug(`>>> Got Zone ${zoneId} state from Tado API  >>>`)
+			// log.easyDebug(JSON.stringify(state))
 
 			if (!settings.states)
 				settings.states = {}

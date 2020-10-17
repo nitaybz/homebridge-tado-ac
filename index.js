@@ -104,9 +104,9 @@ class TadoACPlatform {
 
 			try {
 				this.devices = await this.tadoApi.getAllDevices()
-				await this.storage.setItem('devices', this.devices)
+				await this.storage.setItem('tado-devices', this.devices)
 			} catch(err) {
-				this.devices = await this.storage.getItem('devices') || []
+				this.devices = await this.storage.getItem('tado-devices') || []
 			}
 
 			if (this.weatherSensorsEnabled) {
