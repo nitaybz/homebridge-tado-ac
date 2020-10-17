@@ -436,7 +436,7 @@ class AirConditioner {
 	}
 
 	removeManualControlService() {
-		let ManualControlService = this.accessory.getService(this.name + ' Sync')
+		let ManualControlService = this.accessory.getService(this.name + ' Manual')
 		if (ManualControlService) {
 			// remove service
 			this.log.easyDebug(`Removing Manual Control Switch Service from the ${this.roomName}`)
