@@ -54,7 +54,15 @@ module.exports = (platform) => {
 			if (!accessory.context.type) {
 				accessoriesToRemove.push(accessory)
 				platform.log.easyDebug('removing old cached accessory')
+				return
 			}
+
+			if (accessory.services && accessory.services.length === 1) {
+				accessoriesToRemove.push(accessory)
+				platform.log.easyDebug('removing service only with information service')
+				return
+			}
+
 
 			let deviceExists, userExists
 			switch(accessory.context.type) {

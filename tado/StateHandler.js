@@ -74,7 +74,10 @@ module.exports = (device, platform) => {
 					await tadoApi.setDeviceState(device.id, tadoOverlay)
 				} catch(err) {
 					log(`ERROR setting ${prop} to ${value}`)
-					platform.setProcessing = false
+					setTimeout(() => {
+						platform.setProcessing = false
+						platform.refreshState()
+					}, 1000)
 					return
 				}
 				setTimeout(() => {
