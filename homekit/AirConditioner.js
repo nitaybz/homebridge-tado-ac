@@ -30,13 +30,13 @@ class AirConditioner {
 		if (this.usesFahrenheit)
 			platform.usesFahrenheit = true
 
-		this.disableFan = platform.disableFan && (platform.disableFan === true || platform.disableFan.includes(this.roomName) || this.disableFan.includes(this.id))
-		this.disableDry = platform.disableDry && (platform.disableDry === true || platform.disableDry.includes(this.roomName) || this.disableDry.includes(this.id))
-		this.extraHumiditySensor = platform.extraHumiditySensor && (platform.extraHumiditySensor === true || platform.extraHumiditySensor.includes(this.roomName) || this.extraHumiditySensor.includes(this.id))
-		this.manualControlSwitch = platform.manualControlSwitch && (platform.manualControlSwitch === true || platform.manualControlSwitch.includes(this.roomName) || this.manualControlSwitch.includes(this.id))
-		this.disableAcAccessory = platform.disableAcAccessory && (platform.disableAcAccessory === true || platform.disableAcAccessory.includes(this.roomName) || this.disableAcAccessory.includes(this.id))
-		this.forceHeaterCooler = platform.forceHeaterCooler && (platform.forceHeaterCooler === true || platform.forceHeaterCooler.includes(this.roomName) || this.forceHeaterCooler.includes(this.id))
-		this.forceThermostat = platform.forceThermostat && (platform.forceThermostat === true || platform.forceThermostat.includes(this.roomName) || this.forceThermostat.includes(this.id))
+		this.disableFan = platform.disableFan && (platform.disableFan === true || platform.disableFan.includes(this.roomName) || platform.disableFan.includes(this.id))
+		this.disableDry = platform.disableDry && (platform.disableDry === true || platform.disableDry.includes(this.roomName) || platform.disableDry.includes(this.id))
+		this.extraHumiditySensor = platform.extraHumiditySensor && (platform.extraHumiditySensor === true || platform.extraHumiditySensor.includes(this.roomName) || platform.extraHumiditySensor.includes(this.id))
+		this.manualControlSwitch = platform.manualControlSwitch && (platform.manualControlSwitch === true || platform.manualControlSwitch.includes(this.roomName) || platform.manualControlSwitch.includes(this.id))
+		this.disableAcAccessory = platform.disableAcAccessory && (platform.disableAcAccessory === true || platform.disableAcAccessory.includes(this.roomName) || platform.disableAcAccessory.includes(this.id))
+		this.forceHeaterCooler = platform.forceHeaterCooler && (platform.forceHeaterCooler === true || platform.forceHeaterCooler.includes(this.roomName) || platform.forceHeaterCooler.includes(this.id))
+		this.forceThermostat = platform.forceThermostat && (platform.forceThermostat === true || platform.forceThermostat.includes(this.roomName) || platform.forceThermostat.includes(this.id))
 
 		this.isThermostat = (!this.disableAcAccessory && !this.forceHeaterCooler && (this.forceThermostat || this.installation === 'THERMOSTATIC'))
 
