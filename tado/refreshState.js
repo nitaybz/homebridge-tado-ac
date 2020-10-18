@@ -29,7 +29,7 @@ module.exports = (platform) => {
 					platform.devices.forEach(device => {
 						const airConditioner = platform.activeAccessories.find(accessory => accessory.type === 'AirConditioner' && accessory.id === device.id)
 
-						if (airConditioner) {
+						if (airConditioner && airConditioner.state) {
 							// Update AC state in cache + HomeKit
 							airConditioner.state.update(unified.acState(device))
 						}
