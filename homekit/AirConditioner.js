@@ -46,6 +46,9 @@ class AirConditioner {
 
 		const noAccessory = !this.isThermostat && this.disableAcAccessory && (!this.capabilities.DRY || this.disableDry) && (!this.capabilities.FAN || this.disableFan) && !this.manualControlSwitch && !this.extraHumiditySensor
 
+		this.UUID = this.api.hap.uuid.generate(this.id.toString())
+		this.accessory = platform.cachedAccessories.find(accessory => accessory.UUID === this.UUID)
+
 		if (!noAccessory) {
 
 			this.state = this.cachedState.devices[this.id] = unified.acState(device)
@@ -55,8 +58,6 @@ class AirConditioner {
 	
 			this.stateManager = require('./StateManager')(this, platform)
 	
-			this.UUID = this.api.hap.uuid.generate(this.id.toString())
-			this.accessory = platform.cachedAccessories.find(accessory => accessory.UUID === this.UUID)
 	
 			if (!this.accessory) {
 				this.log(`Creating New ${platform.PLATFORM_NAME} ${this.type} Accessory in the ${this.roomName}`)
@@ -89,40 +90,39 @@ class AirConditioner {
 				.setCharacteristic(Characteristic.AppMatchingIdentifier, this.appId)
 		}
 
-			
-			
-		if (this.isThermostat) {
-			this.addThermostatService()
-			this.removeHeaterCoolerService()
-		} else if (!this.disableAcAccessory) {
-			this.addHeaterCoolerService()
-			this.removeThermostatService()
-		} else {
-			this.removeThermostatService()
-			this.removeHeaterCoolerService()
-		}
-
-		if (this.capabilities.FAN && !this.disableFan)
-			this.addFanService()
-		else
-			this.removeFanService()
-
-
-		if (this.capabilities.DRY && !this.disableDry)
-			this.addDryService()
-		else
-			this.removeDryService()
-
-		if (this.extraHumiditySensor)
-			this.addHumidityService()
-		else
-			this.removeHumidityService()
-
-		if (this.manualControlSwitch)
-			this.addManualControlService()
-		else
-			this.removeManualControlService()
-
+		if (this.accessory) {
+			if (this.isThermostat) {
+				this.addThermostatService()
+				this.removeHeaterCoolerService()
+			} else if (!this.disableAcAccessory) {
+				this.addHeaterCoolerService()
+				this.removeThermostatService()
+			} else {
+				this.removeThermostatService()
+				this.removeHeaterCoolerService()
+			}
+	
+			if (this.capabilities.FAN && !this.disableFan)
+				this.addFanService()
+			else
+				this.removeFanService()
+	
+	
+			if (this.capabilities.DRY && !this.disableDry)
+				this.addDryService()
+			else
+				this.removeDryService()
+	
+			if (this.extraHumiditySensor)
+				this.addHumidityService()
+			else
+				this.removeHumidityService()
+	
+			if (this.manualControlSwitch)
+				this.addManualControlService()
+			else
+				this.removeManualControlService()
+		}	
 	}
 
 	addHeaterCoolerService() {
