@@ -45,5 +45,9 @@
       "type": "kofi",
       "url": "https://ko-fi.com/nitaybz"
     }
-  ]
+  ],
+  "np": {
+      "releaseDraft": true
+  }
+
 }
