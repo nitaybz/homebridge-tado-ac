@@ -43,45 +43,52 @@ class AirConditioner {
 		this.filterService = deviceInfo.filterService
 		this.capabilities = unified.capabilities(device)
 
-		this.state = this.cachedState.devices[this.id] = unified.acState(device)
+
+		const noAccessory = !this.isThermostat && this.disableAcAccessory && (!this.capabilities.DRY || this.disableDry) && (!this.capabilities.FAN || this.disableFan) && !this.manualControlSwitch && !this.extraHumiditySensor
+
+		if (!noAccessory) {
+
+			this.state = this.cachedState.devices[this.id] = unified.acState(device)
 		
-		const StateHandler = require('../tado/StateHandler')(this, platform)
-		this.state = new Proxy(this.state, StateHandler)
-
-		this.stateManager = require('./StateManager')(this, platform)
-
-		this.UUID = this.api.hap.uuid.generate(this.id.toString())
-		this.accessory = platform.cachedAccessories.find(accessory => accessory.UUID === this.UUID)
-
-		if (!this.accessory) {
-			this.log(`Creating New ${platform.PLATFORM_NAME} ${this.type} Accessory in the ${this.roomName}`)
-			this.accessory = new this.api.platformAccessory(this.name, this.UUID)
-			this.accessory.context.type = this.type
-			this.accessory.context.deviceId = this.id
-			this.accessory.context.lastMode = 'COOL'
-
-			platform.cachedAccessories.push(this.accessory)
-			// register the accessory
-			this.api.registerPlatformAccessories(platform.PLUGIN_NAME, platform.PLATFORM_NAME, [this.accessory])
+			const StateHandler = require('../tado/StateHandler')(this, platform)
+			this.state = new Proxy(this.state, StateHandler)
+	
+			this.stateManager = require('./StateManager')(this, platform)
+	
+			this.UUID = this.api.hap.uuid.generate(this.id.toString())
+			this.accessory = platform.cachedAccessories.find(accessory => accessory.UUID === this.UUID)
+	
+			if (!this.accessory) {
+				this.log(`Creating New ${platform.PLATFORM_NAME} ${this.type} Accessory in the ${this.roomName}`)
+				this.accessory = new this.api.platformAccessory(this.name, this.UUID)
+				this.accessory.context.type = this.type
+				this.accessory.context.deviceId = this.id
+				this.accessory.context.lastMode = 'COOL'
+	
+				platform.cachedAccessories.push(this.accessory)
+				// register the accessory
+				this.api.registerPlatformAccessories(platform.PLUGIN_NAME, platform.PLATFORM_NAME, [this.accessory])
+			}
+	
+			if (platform.enableHistoryStorage) {
+				const FakeGatoHistoryService = require('fakegato-history')(this.api)
+				this.loggingService = new FakeGatoHistoryService('weather', this.accessory, { storage: 'fs', path: platform.persistPath })
+			}
+	
+			this.accessory.context.roomName = this.roomName
+	
+			let informationService = this.accessory.getService(Service.AccessoryInformation)
+	
+			if (!informationService)
+				informationService = this.accessory.addService(Service.AccessoryInformation)
+	
+			informationService
+				.setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
+				.setCharacteristic(Characteristic.Model, this.model)
+				.setCharacteristic(Characteristic.SerialNumber, this.serial)
+				.setCharacteristic(Characteristic.AppMatchingIdentifier, this.appId)
 		}
 
-		if (platform.enableHistoryStorage) {
-			const FakeGatoHistoryService = require('fakegato-history')(this.api)
-			this.loggingService = new FakeGatoHistoryService('weather', this.accessory, { storage: 'fs', path: platform.persistPath })
-		}
-
-		this.accessory.context.roomName = this.roomName
-
-		let informationService = this.accessory.getService(Service.AccessoryInformation)
-
-		if (!informationService)
-			informationService = this.accessory.addService(Service.AccessoryInformation)
-
-		informationService
-			.setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
-			.setCharacteristic(Characteristic.Model, this.model)
-			.setCharacteristic(Characteristic.SerialNumber, this.serial)
-			.setCharacteristic(Characteristic.AppMatchingIdentifier, this.appId)
 			
 			
 		if (this.isThermostat) {
