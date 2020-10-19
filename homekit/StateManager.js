@@ -15,6 +15,12 @@ function characteristicToMode(characteristic) {
 			return 'HEAT'
 		case Characteristic.TargetHeaterCoolerState.AUTO:
 			return 'AUTO'
+	}
+
+}
+
+function ThermostatCharacteristicToMode(characteristic) {
+	switch (characteristic) {
 		case Characteristic.TargetHeatingCoolingState.COOL:
 			return 'COOL'
 		case Characteristic.TargetHeatingCoolingState.HEAT:
@@ -336,8 +342,8 @@ module.exports = (device, platform) => {
 
 			TargetHeatingCoolingState: (state, callback) => {
 				
-				const mode = characteristicToMode(state)
-				log.easyDebug(device.name + ' -> Setting Target HeaterCooler State:', mode)
+				const mode = ThermostatCharacteristicToMode(state)
+				log.easyDebug(device.name + ' -> Setting Target HeatingCooling State:', mode)
 				device.state.mode = mode
 				device.state.active = (mode !== 'OFF')
 
