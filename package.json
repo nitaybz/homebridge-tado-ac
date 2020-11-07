@@ -1,6 +1,6 @@
 {
   "name": "homebridge-tado-ac",
-  "version": "4.0.10",
+  "version": "4.0.11",
   "description": "tado° Smart AC Control plugin for homebridge: https://github.com/nfarina/homebridge",
   "license": "MIT",
   "keywords": [
