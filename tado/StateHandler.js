@@ -79,7 +79,7 @@ module.exports = (device, platform) => {
 					log(`ERROR setting ${prop} to ${value}`)
 					setTimeout(() => {
 						platform.setProcessing = false
-						platform.refreshState()
+						platform.refreshState.ac()
 					}, 1000)
 					return
 				}
