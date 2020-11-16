@@ -37,7 +37,7 @@ module.exports = {
 		return {
 			id: device.id,
 			model: device.devices[0].deviceType,
-			serial: device.devices[0].serialNo,
+			serial: device.devices[0].serialNo.toString(),
 			manufacturer: 'tado GmbH',
 			appId: 'com.tado.tadoapp',
 			roomName: device.name,
@@ -63,7 +63,7 @@ module.exports = {
 			id: user.id,
 			name: user.name,
 			model: mobileDevice.name,
-			serial: mobileDevice.id,
+			serial: mobileDevice.id.toString(),
 			manufacturer: 'tado GmbH',
 			appId: 'com.tado.tadoapp'
 		}
