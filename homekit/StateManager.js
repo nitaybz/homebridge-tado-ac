@@ -137,7 +137,7 @@ module.exports = (device, platform) => {
 				else
 					log.easyDebug(device.name, '(GET) - Target Cooling Temperature is:', targetTemp + 'ºC')
 
-				callback(null, targetTemp)
+				callback(null, targetTemp || device.state.currentTemperature)
 			},
 			
 			HeatingThresholdTemperature: (callback) => {
@@ -148,7 +148,7 @@ module.exports = (device, platform) => {
 				else
 					log.easyDebug(device.name, '(GET) - Target Heating Temperature is:', targetTemp + 'ºC')
 
-				callback(null, targetTemp)
+				callback(null, targetTemp || device.state.currentTemperature)
 			},
 
 
@@ -160,7 +160,7 @@ module.exports = (device, platform) => {
 				else
 					log.easyDebug(device.name, '(GET) - Target Heating Temperature is:', targetTemp + 'ºC')
 
-				callback(null, targetTemp)
+				callback(null, targetTemp || device.state.currentTemperature)
 			},
 
 			TemperatureDisplayUnits: (callback) => {
