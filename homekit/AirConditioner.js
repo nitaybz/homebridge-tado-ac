@@ -87,7 +87,6 @@ class AirConditioner {
 				.setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
 				.setCharacteristic(Characteristic.Model, this.model)
 				.setCharacteristic(Characteristic.SerialNumber, this.serial)
-				.setCharacteristic(Characteristic.AppMatchingIdentifier, this.appId)
 		}
 
 		if (this.accessory) {
