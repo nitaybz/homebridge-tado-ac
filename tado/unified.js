@@ -185,6 +185,10 @@ module.exports = {
 			}
 		}
 
+
+		if (platform.tadoMode === 'TIMER')
+			overlay.termination.durationInSeconds = platform.durationInMinutes * 60
+
 		// returning off state
 		if (!state.active)
 			return overlay
@@ -208,8 +212,6 @@ module.exports = {
 		if ('fanSpeeds' in device.capabilities[state.mode])
 			overlay.setting.fanSpeed = HKToFanLevel(state.fanSpeed, device.capabilities[state.mode].fanSpeeds)
 
-		if (platform.tadoMode == 'TIMER')
-			overlay.termination.durationInSeconds = platform.durationInMinutes * 60
 
 		return overlay
 	}
