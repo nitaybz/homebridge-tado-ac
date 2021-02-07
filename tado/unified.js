@@ -136,8 +136,8 @@ module.exports = {
 		state.swing = (state.mode === 'OFF' || !modeCapabilities.swing || !device.state.setting.swing || device.state.setting.swing === 'OFF') ?
 			'SWING_DISABLED' : 'SWING_ENABLED'
 
-		state.fanSpeed = (state.mode === 'OFF' || !modeCapabilities.fanSpeeds || !device.state.setting.fanSpeed) ? 
-			0 : fanLevelToHK(device.state.setting.fanSpeed, modeCapabilities.fanSpeeds.reverse())
+		state.fanSpeed = (state.mode === 'OFF' || !modeCapabilities.fanSpeeds || !device.state.setting.fanSpeed) ?
+			0 : fanLevelToHK(device.state.setting.fanSpeed, modeCapabilities.fanSpeeds)
 
 
 		return state
