@@ -155,9 +155,9 @@ module.exports = {
 	},
 
 	occupancyState: user => {
-		const mobileDevice = user.mobileDevices.find(device => device.settings.geoTrackingEnabled)
+		const mobileDevice = user.mobileDevices.find(device => device.settings.geoTrackingEnabled && device.location)
 		const state = {
-			occupancy: (mobileDevice && mobileDevice.location.atHome) ? 'OCCUPANCY_DETECTED' : 'OCCUPANCY_NOT_DETECTED'
+			occupancy: (mobileDevice && mobileDevice.location && mobileDevice.location.atHome) ? 'OCCUPANCY_DETECTED' : 'OCCUPANCY_NOT_DETECTED'
 		}
 
 		return state

@@ -23,8 +23,11 @@ module.exports = (platform) => {
 			platform.users.forEach(user => {
 				const userExists = platform.activeAccessories.find(accessory => accessory.type === 'OccupancySensor' && accessory.id === user.id)
 				if (!userExists) {
-					const occupancySensor = new OccupancySensor(user, platform)
-					platform.activeAccessories.push(occupancySensor)
+					const geoTrackingEnabled = user.mobileDevices.find(device => device.settings.geoTrackingEnabled && device.location)
+					if (geoTrackingEnabled) {
+						const occupancySensor = new OccupancySensor(user, platform)
+						platform.activeAccessories.push(occupancySensor)
+					}
 				}
 			})
 
