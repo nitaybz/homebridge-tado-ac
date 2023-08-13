@@ -110,7 +110,7 @@ module.exports = {
 			}
 
 			// set swing
-			if (modeCapabilities.swings) {
+			if (modeCapabilities.verticalSwing) {
 				capabilities[mode].swing = true
 			}
 
@@ -196,14 +196,11 @@ module.exports = {
 		
 		overlay.setting.mode = state.mode
 
-		// add temperatures to heat and cool
-		if (['HEAT', 'COOL'].includes(state.mode)) {
-			if (!state.targetTemperature)
-				state.targetTemperature = 25
-			overlay.setting.temperature = {
-				fahrenheit: toFahrenheit(state.targetTemperature),
-				celsius: state.targetTemperature
-			}
+		if (!state.targetTemperature)
+			state.targetTemperature = 25
+		overlay.setting.temperature = {
+			fahrenheit: toFahrenheit(state.targetTemperature),
+			celsius: state.targetTemperature
 		}
 		
 		if ('swing' in device.capabilities[state.mode])
