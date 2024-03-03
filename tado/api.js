@@ -19,7 +19,7 @@ module.exports = async function (platform) {
 
 	// make available for getToken
 	username = platform.username
-	password = platform.username
+	password = platform.password
 	
 	axios.defaults.baseURL = baseURL
 	
