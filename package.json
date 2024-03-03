@@ -1,6 +1,6 @@
 {
   "name": "homebridge-tado-ac",
-  "version": "4.1.1",
+  "version": "4.1.2",
   "repository": {
     "type": "git",
     "url": "git://github.com/nitaybz/homebridge-tado-ac.git"
