@@ -3,7 +3,7 @@ let axios = axiosLib.create();
 const qs = require('qs')
 
 const baseURL = 'https://my.tado.com/api/v2'
-let log, storage, token, settings, homeId
+let log, storage, token, settings, homeId, username, password
 
 module.exports = async function (platform) {
 	log = platform.log
@@ -17,11 +17,9 @@ module.exports = async function (platform) {
 		settings = {}
 	}
 
-
-	axios.defaults.params = {
-		username: platform.username,
-		password: platform.password
-	}
+	// make available for getToken
+	username = platform.username
+	password = platform.username
 	
 	axios.defaults.baseURL = baseURL
 	
@@ -131,12 +129,23 @@ module.exports = async function (platform) {
 
 
 function getRequest(url) {
-	return new Promise((resolve, reject) => {
+	return new Promise(async (resolve, reject) => {
+
+		let headers
+		try {
+			const tokenResponse = await getToken()
+			headers = {
+				'Authorization': 'Bearer ' + tokenResponse
+			}
+		} catch (err) {
+			log('[GET] The plugin was NOT able to find stored token or acquire one from tado° API')
+			reject(err)
+		}		
 	
 		log.easyDebug(`Creating GET request to tado° API --->`)
 		log.easyDebug(baseURL + url)
 
-		axios.get(url)
+		axios.get(url, { headers })
 			.then(response => {
 				const json = response.data
 				log.easyDebug(`Successful GET response:`)
@@ -163,7 +172,7 @@ function setRequest(method, url, data) {
 				'Authorization': 'Bearer ' + tokenResponse
 			}
 		} catch (err) {
-			log('The plugin was NOT able to find stored token or acquire one from tado° API ---> it will not be able to set the state !!')
+			log('[SET] The plugin was NOT able to find stored token or acquire one from tado° API ---> it will not be able to set the state !!')
 			reject(err)
 		}
 	
@@ -202,6 +211,8 @@ function getToken() {
 			grant_type: 'password',
 			client_id: 'tado-web-app',
 			client_secret: 'wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc',
+			username: username,
+			password: password,
 			scope: 'home.user'
 		}
 		data = qs.stringify(data, { encode: false })
